@@ -1,0 +1,4 @@
+<resources>
+    <string name="accessibility_service_label">NamaPopUp</string>
+    <string name="accessibility_service_description">NamaPopup will help you type Japanese dialects</string>
+</resources>
