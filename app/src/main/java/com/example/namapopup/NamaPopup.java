@@ -1,86 +1,62 @@
 package com.example.namapopup;
 
-import static android.media.AudioManager.ADJUST_RAISE;
-
-import android.accessibilityservice.AccessibilityButtonController;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.media.AudioManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Handler;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.Toast;
 
-import java.util.logging.Logger;
+import java.util.Random;
 
 public class NamaPopup extends AccessibilityService {
-    private AudioManager audioManager;
-    private AccessibilityButtonController accessibilityButtonController;
-    private AccessibilityButtonController
-            .AccessibilityButtonCallback accessibilityButtonCallback;
-    private boolean mIsAccessibilityButtonAvailable;
-
+    private WindowManager windowManager;
+    private View floatingButton;
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
         Log.d("NAMA_POPUP", "Service connected");
-        createOverlay();
 
-        // Initialize Accessibility Button Controller
-        accessibilityButtonController = getAccessibilityButtonController();
-
-        if (accessibilityButtonController == null) {
-            Log.e("NAMA_POPUP", "AccessibilityButtonController is null");
-            return;
-        }
-
-        // Update AccessibilityServiceInfo with the button flag
+        // Configure the AccessibilityServiceInfo to listen for text changes
         AccessibilityServiceInfo serviceInfo = getServiceInfo();
-        serviceInfo.flags |= AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON;
+        serviceInfo.eventTypes = AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
+        serviceInfo.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
+        serviceInfo.flags |= AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+        serviceInfo.packageNames = null; // Listen to text changes in all apps
+
+        createFloatingButton();
+
         setServiceInfo(serviceInfo);
+    }
 
-        // Set up Accessibility Button Callback
-        accessibilityButtonCallback = new AccessibilityButtonController.AccessibilityButtonCallback() {
-            @Override
-            public void onClicked(AccessibilityButtonController controller) {
-                Log.d("NAMA_POPUP", "Accessibility button clicked!");
-                increaseVolume();
-                // Add custom logic for the button press here
-            }
+    @Override
+    public void onAccessibilityEvent(AccessibilityEvent event) {
+        // Log and process the text whenever it changes
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+            CharSequence text = event.getText().toString();
+            Log.d("NAMA_POPUP", "Text changed: " + text);
 
-            @Override
-            public void onAvailabilityChanged(AccessibilityButtonController controller, boolean available) {
-                mIsAccessibilityButtonAvailable = available;
-                Log.d("NAMA_POPUP", "Accessibility button availability changed: " + available);
-            }
-        };
-
-        // Register the callback immediately
-        try {
-            Log.d("NAMA_POPUP", "Attempting to register callback");
-            accessibilityButtonController.registerAccessibilityButtonCallback(accessibilityButtonCallback);
-            Log.d("NAMA_POPUP", "Callback registered successfully");
-        } catch (NullPointerException e) {
-            Log.e("NAMA_POPUP", "Failed to register callback: " + e.getMessage());
+            // Change the button's color to a random color
+            View button = floatingButton.findViewById(R.id.accessibility_button);
+            int randomColor = getRandomColor();
+            button.setBackgroundColor(randomColor);
+            Log.d("NAMA_POPUP", "Color set to: " + Integer.toString(randomColor));
         }
+    }
 
-        // Check button availability
-        mIsAccessibilityButtonAvailable = accessibilityButtonController.isAccessibilityButtonAvailable();
-        Log.d("NAMA_POPUP", "Initial accessibility button availability: " + mIsAccessibilityButtonAvailable);
-    }    private void createOverlay() {
-        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+    private void createFloatingButton() {
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+
+        // Inflate the floating button layout
+        floatingButton = LayoutInflater.from(this).inflate(R.layout.accessibility_button_layout, null);
+
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
@@ -88,61 +64,58 @@ public class NamaPopup extends AccessibilityService {
                 PixelFormat.TRANSLUCENT);
 
         params.gravity = Gravity.TOP | Gravity.LEFT;
-        params.x = 0;
+        params.x = 100;
         params.y = 100;
 
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View overlayView = inflater.inflate(R.layout.overlay_layout, null);
-
-        // Add a touch listener to the overlay view
-        overlayView.setOnClickListener(new View.OnClickListener() {
+        // Enable dragging
+        floatingButton.setOnTouchListener(new View.OnTouchListener() {
+            private int initialX, initialY;
+            private float initialTouchX, initialTouchY;
 
             @Override
-            public void onClick(View v) {
-                Log.d("ARIQ", "TAPPED");
-                increaseVolume();
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        initialX = params.x;
+                        initialY = params.y;
+                        initialTouchX = event.getRawX();
+                        initialTouchY = event.getRawY();
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        params.x = initialX + (int) (event.getRawX() - initialTouchX);
+                        params.y = initialY + (int) (event.getRawY() - initialTouchY);
+                        windowManager.updateViewLayout(floatingButton, params);
+                        return true;
+                }
+                return false;
             }
         });
 
-        wm.addView(overlayView, params);
-    }
+        // Set an action when the button is clicked
+        floatingButton.setOnClickListener(v -> {
+            Log.d("NAMA_POPUP", "Floating button clicked");
+            // Trigger your accessibility functionality here
+        });
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d("NAMA_POPUP", "Service onCreate called");
-        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-        // Re-check the permission when the service starts
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (Settings.canDrawOverlays(this)) {
-                createOverlay();
-            }
-        } else {
-            createOverlay();
-        }
-    }
-    @Override
-    public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
-        Log.d("ARQI", accessibilityEvent.toString());
-    }
-
-    private void increaseVolume() {
-        Log.d("INCREASE VOLUME",  "clicked");
-        if (audioManager != null) {
-            // Adjust the volume for the STREAM_ACCESSIBILITY
-            audioManager.adjustStreamVolume(
-                    AudioManager.STREAM_ACCESSIBILITY,  // The stream type to adjust
-                    ADJUST_RAISE,                          // Direction: ADJUST_RAISE, ADJUST_LOWER, or ADJUST_SAME
-                    AudioManager.FLAG_SHOW_UI // Enable accessibility volume stream
-            );
-        }
+        // Add the floating button to the window
+        windowManager.addView(floatingButton, params);
     }
 
     @Override
     public void onInterrupt() {
-        // Handle interruptions
+        // Handle any cleanup or interruptions here
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (floatingButton != null) {
+            windowManager.removeView(floatingButton);
+        }
+    }
 
-
+    private int getRandomColor() {
+        Random random = new Random();
+        return Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+    }
 }
