@@ -1,11 +1,14 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:id="@+id/accessibility_button"
+    android:layout_height="wrap_content"
+    android:background="@android:color/holo_blue_bright">
 
-    <View
-        android:id="@+id/accessibility_button"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@android:color/holo_blue_light"
-        android:layout_centerInParent="true"/>
-</RelativeLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/accessibility_text"
+        android:text="な"
+        android:textSize="24sp"
+        android:padding="10dp"
+        android:layout_height="wrap_content"/>
+</FrameLayout>

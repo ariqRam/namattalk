@@ -2,8 +2,8 @@ package com.example.namapopup;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -11,12 +11,17 @@ import android.view.View;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.inputmethod.InputConnection;
+import android.widget.TextView;
 
 import java.util.Random;
 
 public class NamaPopup extends AccessibilityService {
     private WindowManager windowManager;
     private View floatingButton;
+    private TextView textView;
+    CharSequence composingText;
 
     @Override
     protected void onServiceConnected() {
@@ -37,17 +42,24 @@ public class NamaPopup extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        // Log and process the text whenever it changes
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-            CharSequence text = event.getText().toString();
-            Log.d("NAMA_POPUP", "Text changed: " + text);
+        String TAG = "onAccessibilityEvent";
 
-            // Change the button's color to a random color
-            View button = floatingButton.findViewById(R.id.accessibility_button);
-            int randomColor = getRandomColor();
-            button.setBackgroundColor(randomColor);
-            Log.d("NAMA_POPUP", "Color set to: " + Integer.toString(randomColor));
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+            // Check if the event source is an editable text field
+            AccessibilityNodeInfo source = event.getSource();
+            if (source != null && source.isEditable()) {
+                // Get the text from the event
+                String preText = event.getText().toString();
+                String text = preText.substring(1, preText.length() - 1);
+                Log.d(TAG, "isEditable " + text);
+
+                // Extract the composing text
+                Log.d(TAG, "Setting composingText to " + text);
+                composingText = text;
+                if(composingText.equals("ほうげん")) textView.setText("方言");
+            }
         }
+
     }
 
     private void createFloatingButton() {
@@ -55,6 +67,7 @@ public class NamaPopup extends AccessibilityService {
 
         // Inflate the floating button layout
         floatingButton = LayoutInflater.from(this).inflate(R.layout.accessibility_button_layout, null);
+        textView = floatingButton.findViewById(R.id.accessibility_text);
 
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -66,20 +79,39 @@ public class NamaPopup extends AccessibilityService {
         params.gravity = Gravity.TOP | Gravity.LEFT;
         params.x = 100;
         params.y = 100;
+        floatingButton.setClickable(true);
 
         // Enable dragging
         floatingButton.setOnTouchListener(new View.OnTouchListener() {
             private int initialX, initialY;
             private float initialTouchX, initialTouchY;
+            private long touchStartTime;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
                 switch (event.getAction()) {
+                    case MotionEvent.ACTION_UP:
+                        long touchDuration = System.currentTimeMillis() - touchStartTime;
+                        // Consider it a click if the touch was short and the movement was minimal
+                        if (touchDuration < 200 &&
+                                Math.abs(event.getRawX() - initialTouchX) < 10 &&
+                                Math.abs(event.getRawY() - initialTouchY) < 10) {
+                            Log.d("onTouch", "Floating button clicked");
+                            // Handle the click action
+                            if (composingText != null && composingText.equals("ほうげん")) {
+                                Log.d("onTouch", "Setting textView to " + composingText);
+                                textView.setText("方言");
+                            }
+                        }
+                        handleButtonClick();
+                        return true;
                     case MotionEvent.ACTION_DOWN:
                         initialX = params.x;
                         initialY = params.y;
                         initialTouchX = event.getRawX();
                         initialTouchY = event.getRawY();
+                        touchStartTime = System.currentTimeMillis();
                         return true;
                     case MotionEvent.ACTION_MOVE:
                         params.x = initialX + (int) (event.getRawX() - initialTouchX);
@@ -89,13 +121,26 @@ public class NamaPopup extends AccessibilityService {
                 }
                 return false;
             }
+
+            private void handleButtonClick() {
+                Log.d("handleButtonClick", "Button clicked");
+                if (composingText != null && composingText.toString().equals("ほうげん")) {
+                    Log.d("handleButtonClick", "Setting composing text to 方言");
+
+                    // Attempt to modify the text in the focused edit field
+                    AccessibilityNodeInfo focusedNode = getRootInActiveWindow().findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+                    if (focusedNode != null && focusedNode.isEditable()) {
+                        Bundle arguments = new Bundle();
+                        arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "方言");
+                        focusedNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+                        focusedNode.recycle();
+                        composingText = "";
+                        textView.setText("な");
+                    }
+                }
+            }
         });
 
-        // Set an action when the button is clicked
-        floatingButton.setOnClickListener(v -> {
-            Log.d("NAMA_POPUP", "Floating button clicked");
-            // Trigger your accessibility functionality here
-        });
 
         // Add the floating button to the window
         windowManager.addView(floatingButton, params);
@@ -114,8 +159,4 @@ public class NamaPopup extends AccessibilityService {
         }
     }
 
-    private int getRandomColor() {
-        Random random = new Random();
-        return Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256));
-    }
 }
