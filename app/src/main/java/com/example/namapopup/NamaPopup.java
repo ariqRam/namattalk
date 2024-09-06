@@ -2,6 +2,7 @@ package com.example.namapopup;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +23,7 @@ public class NamaPopup extends AccessibilityService {
     private View floatingButton;
     private TextView textView;
     CharSequence composingText;
+    private static final long LONG_PRESS_THRESHOLD = 500;
 
     @Override
     protected void onServiceConnected() {
@@ -86,25 +88,30 @@ public class NamaPopup extends AccessibilityService {
             private int initialX, initialY;
             private float initialTouchX, initialTouchY;
             private long touchStartTime;
+            private boolean isLongPress = false;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_UP:
+                        v.removeCallbacks(longPressRunnable);
                         long touchDuration = System.currentTimeMillis() - touchStartTime;
                         // Consider it a click if the touch was short and the movement was minimal
-                        if (touchDuration < 200 &&
-                                Math.abs(event.getRawX() - initialTouchX) < 10 &&
-                                Math.abs(event.getRawY() - initialTouchY) < 10) {
-                            Log.d("onTouch", "Floating button clicked");
-                            // Handle the click action
-                            if (composingText != null && composingText.equals("ほうげん")) {
-                                Log.d("onTouch", "Setting textView to " + composingText);
-                                textView.setText("方言");
-                            }
+                        if (!isLongPress && touchDuration < LONG_PRESS_THRESHOLD) {
+                            handleButtonClick();
                         }
-                        handleButtonClick();
+//                        if (touchDuration < 200 &&
+//                                Math.abs(event.getRawX() - initialTouchX) < 10 &&
+//                                Math.abs(event.getRawY() - initialTouchY) < 10) {
+//                            Log.d("onTouch", "Floating button clicked");
+//                            // Handle the click action
+//                            if (composingText != null && composingText.equals("ほうげん")) {
+//                                Log.d("onTouch", "Setting textView to " + composingText);
+//                                textView.setText("方言");
+//                            }
+//                        }
+//                        handleButtonClick();
                         return true;
                     case MotionEvent.ACTION_DOWN:
                         initialX = params.x;
@@ -112,15 +119,29 @@ public class NamaPopup extends AccessibilityService {
                         initialTouchX = event.getRawX();
                         initialTouchY = event.getRawY();
                         touchStartTime = System.currentTimeMillis();
+                        isLongPress = false;
+                        v.postDelayed(longPressRunnable, LONG_PRESS_THRESHOLD);
                         return true;
                     case MotionEvent.ACTION_MOVE:
-                        params.x = initialX + (int) (event.getRawX() - initialTouchX);
-                        params.y = initialY + (int) (event.getRawY() - initialTouchY);
-                        windowManager.updateViewLayout(floatingButton, params);
+                        if (!isLongPress) {
+                            params.x = initialX + (int) (event.getRawX() - initialTouchX);
+                            params.y = initialY + (int) (event.getRawY() - initialTouchY);
+                            windowManager.updateViewLayout(floatingButton, params);
+                        }
+
                         return true;
                 }
+
                 return false;
             }
+
+            private Runnable longPressRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    isLongPress = true;
+                    launchMainActivity();
+                }
+            };
 
             private void handleButtonClick() {
                 Log.d("handleButtonClick", "Button clicked");
@@ -157,6 +178,14 @@ public class NamaPopup extends AccessibilityService {
         if (floatingButton != null) {
             windowManager.removeView(floatingButton);
         }
+    }
+
+    private void launchMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // Pass the current text of the popup button
+        intent.putExtra("POPUP_TEXT", textView.getText().toString());
+        startActivity(intent);
     }
 
 }
