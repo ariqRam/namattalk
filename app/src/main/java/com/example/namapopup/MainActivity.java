@@ -1,10 +1,14 @@
 package com.example.namapopup;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -12,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView inputWordTextView = findViewById(R.id.inputWord);
         TextView inputMeaningTextView = findViewById(R.id.inputMeaning);
+
 
         // Get the text passed from the NamaPopup service
         String popupText = getIntent().getStringExtra("POPUP_TEXT");
@@ -28,5 +33,25 @@ public class MainActivity extends AppCompatActivity {
             inputWordTextView.setText("入力して");
             inputMeaningTextView.setText("なし");
         }
+
+        ImageView settingsButton = findViewById(R.id.settingsButton);
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Start the SettingsActivity when the settings button is clicked
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+        ImageView closeButton = findViewById(R.id.closeButton);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish(); // This will close the current activity
+                System.exit(0); // This will ensure the app fully closes
+            }
+        });
     }
 }
