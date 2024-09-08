@@ -21,6 +21,14 @@ public class SettingsActivity extends AppCompatActivity {
                 Log.d("SettingsActivity", "Menu button clicked");
             }
         });
+
+        ImageView backToMainButton = findViewById(R.id.backToMainButton);
+        backToMainButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();  // This will close the SettingsActivity and return to MainActivity
+            }
+        });
     }
 }
 
