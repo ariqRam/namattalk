@@ -3,6 +3,9 @@ package com.example.namapopup;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +19,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Random;
 
 public class NamaPopup extends AccessibilityService {
@@ -24,11 +29,16 @@ public class NamaPopup extends AccessibilityService {
     private TextView textView;
     CharSequence composingText;
     private static final long LONG_PRESS_THRESHOLD = 500;
+    private DatabaseHelper dbHelper;
+    private SQLiteDatabase database;
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
         Log.d("NAMA_POPUP", "Service connected");
+
+        // Initialize DatabaseHelper
+        dbHelper = new DatabaseHelper(this);
 
         // Configure the AccessibilityServiceInfo to listen for text changes
         AccessibilityServiceInfo serviceInfo = getServiceInfo();
@@ -47,21 +57,33 @@ public class NamaPopup extends AccessibilityService {
         String TAG = "onAccessibilityEvent";
 
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-            // Check if the event source is an editable text field
             AccessibilityNodeInfo source = event.getSource();
             if (source != null && source.isEditable()) {
-                // Get the text from the event
-                String preText = event.getText().toString();
-                String text = preText.substring(1, preText.length() - 1);
-                Log.d(TAG, "isEditable " + text);
+                List<CharSequence> textList = event.getText();
+                String text = textList.isEmpty() ? "" : textList.get(0).toString();
+                Log.d("NAMA_POPUP", "Searching for: " + text);
 
-                // Extract the composing text
-                Log.d(TAG, "Setting composingText to " + text);
                 composingText = text;
-                if(composingText.equals("ほうげん")) textView.setText("方言");
+
+                Cursor cursor = dbHelper.searchHougen(text);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int hougenIndex = cursor.getColumnIndex("hougen");
+                    int definitionIndex = cursor.getColumnIndex("definition");
+                    if (hougenIndex != -1 && definitionIndex != -1) {
+                        String hougen = cursor.getString(hougenIndex);
+                        String definition = cursor.getString(definitionIndex);
+                        textView.setText(hougen + ": " + definition);
+                    } else {
+                        textView.setText("な");
+                    }
+                } else {
+                    textView.setText("な");
+                }
+                if (cursor != null) {
+                    cursor.close();
+                }
             }
         }
-
     }
 
     private void createFloatingButton() {
@@ -145,18 +167,26 @@ public class NamaPopup extends AccessibilityService {
 
             private void handleButtonClick() {
                 Log.d("handleButtonClick", "Button clicked");
-                if (composingText != null && composingText.toString().equals("ほうげん")) {
-                    Log.d("handleButtonClick", "Setting composing text to 方言");
+                if (composingText != null) {
+                    Cursor cursor = dbHelper.searchHougen(composingText.toString());
+                    if (cursor != null && cursor.moveToFirst()) {
+                        int hougenIndex = cursor.getColumnIndex("hougen");
+                        if (hougenIndex != -1) {
+                            String hougen = cursor.getString(hougenIndex);
 
-                    // Attempt to modify the text in the focused edit field
-                    AccessibilityNodeInfo focusedNode = getRootInActiveWindow().findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
-                    if (focusedNode != null && focusedNode.isEditable()) {
-                        Bundle arguments = new Bundle();
-                        arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "方言");
-                        focusedNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
-                        focusedNode.recycle();
-                        composingText = "";
-                        textView.setText("な");
+                            AccessibilityNodeInfo focusedNode = getRootInActiveWindow().findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+                            if (focusedNode != null && focusedNode.isEditable()) {
+                                Bundle arguments = new Bundle();
+                                arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, hougen);
+                                focusedNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+                                focusedNode.recycle();
+                                composingText = "";
+                                textView.setText("な");
+                            }
+                        }
+                    }
+                    if (cursor != null) {
+                        cursor.close();
                     }
                 }
             }
@@ -177,6 +207,9 @@ public class NamaPopup extends AccessibilityService {
         super.onDestroy();
         if (floatingButton != null) {
             windowManager.removeView(floatingButton);
+        }
+        if (dbHelper != null) {
+            dbHelper.close();
         }
     }
 
