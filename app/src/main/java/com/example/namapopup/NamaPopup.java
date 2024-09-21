@@ -16,6 +16,11 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 public class NamaPopup extends AccessibilityService {
     private WindowManager windowManager;
     private View floatingButton;
@@ -25,11 +30,24 @@ public class NamaPopup extends AccessibilityService {
     private static final long LONG_PRESS_THRESHOLD = 500;
     private DBHelper databaseHelper;
     private String searchResult = "";
+    private String normalText = "";
     private String convertCandidate = "";
     private int mushiThreshold = 1;
     private int charNumAfterFound = 0;
     private int mushiStartIndex = 0;
     private boolean FOUND = false;
+    private List<CharacterPosition> characterPositions = new ArrayList<>();
+
+    // Custom class to store word and its position
+    public class CharacterPosition {
+        char character;
+        int position;
+
+        CharacterPosition(char character, int position) {
+            this.character = character;
+            this.position = position;
+        }
+    }
 
     @Override
     public void onCreate() {
@@ -59,19 +77,23 @@ public class NamaPopup extends AccessibilityService {
             if (source != null && source.isEditable()) {
                 // Get the current text from the editable field
                 CharSequence currentText = event.getText() != null && !event.getText().isEmpty() ? event.getText().get(0) : null;
+                int positionStart = event.getFromIndex();
+                int positionEnd = positionStart + event.getAddedCount();
+
                 if (currentText != null) {
                     String fullText = currentText.toString();
 
                     Log.d("composingText", "Full Text: " + fullText);
+                    Log.d("composingText", "Full Text Position: " + positionStart + " to " + positionEnd);
 
                     // Show suggestions for the new composing text
-                    showDialectSuggestions(fullText);
+                    showDialectSuggestions(fullText, positionStart, positionEnd);
                 }
             }
         }
     }
 
-    private void showDialectSuggestions(String fullText) {
+    private void showDialectSuggestions(String fullText, int positionStart, int positionEnd) {
         String TAG = "showDialectSuggestions";
         int startIndex = 0;
         int endIndex = 0;
@@ -80,6 +102,7 @@ public class NamaPopup extends AccessibilityService {
         while (endIndex < fullText.length()) {
             String queryText = fullText.substring(startIndex, endIndex + 1);
             Cursor cursor = databaseHelper.searchWord(queryText);
+
 
             if (cursor != null && cursor.getCount() > 0) {
                 cursor.moveToFirst();
@@ -91,7 +114,17 @@ public class NamaPopup extends AccessibilityService {
                     if (hougen != null && hougen.equals(queryText)) {
                         // Exact match found
                         searchResult = hougen;
-                        Log.d(TAG, "Found exact match in database: " + searchResult);
+                        Log.d(TAG, "Found exact match in database: " + searchResult + " at " + startIndex + "-" + endIndex);
+
+                        characterPositions.clear();
+                        int position = startIndex;
+                        for (char c : searchResult.toCharArray()) {
+                            characterPositions.add(new CharacterPosition(c, position));
+                            position++;
+                        }
+
+                        seperateNormalText(fullText, startIndex, endIndex);
+                        Log.d(TAG, "characterPosition" + characterPositions);
                     } else {
                         Log.d(TAG, "Found partial match in database");
                     }
@@ -152,15 +185,53 @@ public class NamaPopup extends AccessibilityService {
 
         Log.d(TAG, "Final result: " + (searchResult.isEmpty() ? "な" : searchResult));
     }
+
+    //this method can search the text that cannot be converted from fullText
+    private void seperateNormalText(String fullText, int startIndex, int endIndex) {
+        int position = 0;
+        Log.d("array", "characterPosition_before" + characterPositions);
+
+        for (char f : fullText.toCharArray()) {
+            Log.d("DebugLoop", "Iteration: " + position + ", Char: " + f);
+            if (position < startIndex || position > endIndex) {
+                characterPositions.add(new CharacterPosition(f, position));
+                Log.d("CharacterPositions", "Added: " + f + " at position " + position);
+                normalText += f;
+            }
+            position++;
+        }
+        Log.d("normalText", "The text that cannot be converted: " + normalText);
+        Log.d("array", "characterPosition_after" + characterPositions);
+    }
+
     // Call this method when the user performs conversion
-    private void onConvertText(String convertedWord) {
-        // Add the converted word to the converted text
-        convertedText += convertedWord;
+    private void onConvertText() {
+        // Sort character positions by their start index
+        if (characterPositions != null && !characterPositions.isEmpty()) {
+            Collections.sort(characterPositions, new Comparator<CharacterPosition>() {
+                @Override
+                public int compare(CharacterPosition cp1, CharacterPosition cp2) {
+                    return Integer.compare(cp1.position, cp2.position);
+                }
+            });
+        }
+
+        StringBuilder combinedWord = new StringBuilder();
+
+        for (CharacterPosition cp : characterPositions) {
+            combinedWord.append(cp.character);
+        }
+
+        convertedText = combinedWord.toString();
+
+        Log.d("onConvertText", "Converted word: " + convertedText);
 
         // Clear the editable text and set it to the converted text
         // Assuming you have a method to clear and set the text
-        setEditableText(convertedWord);
+        setEditableText(convertedText);
         searchResult = "";
+        convertedText = "";
+        characterPositions.clear();
     }
 
     private void setEditableText(String text) {
@@ -255,15 +326,15 @@ public class NamaPopup extends AccessibilityService {
             private void handleButtonClick() {
                 Log.d("handleButtonClick", "Button clicked");
                 if (!searchResult.equals("")) {
-                    Log.d("handleButtonClick", "Setting composing text to " + searchResult);
+                    Log.d("handleButtonClick", "Setting composing text to " + convertedText);
 
                     // Attempt to modify the text in the focused edit field
                     AccessibilityNodeInfo focusedNode = getRootInActiveWindow().findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
                     if (focusedNode != null && focusedNode.isEditable()) {
                         Bundle arguments = new Bundle();
-                        arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, searchResult);
+                        arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, convertedText);
                         focusedNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
-                        onConvertText(searchResult);
+                        onConvertText();
                         focusedNode.recycle();
                         composingText = "";
                         Log.d("ComposingText", "Resetting composingText " + composingText);
