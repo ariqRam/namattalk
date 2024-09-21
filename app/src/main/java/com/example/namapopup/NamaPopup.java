@@ -282,17 +282,7 @@ public class NamaPopup extends AccessibilityService {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-
                 switch (event.getAction()) {
-                    case MotionEvent.ACTION_UP:
-                        v.removeCallbacks(longPressRunnable);
-                        long touchDuration = System.currentTimeMillis() - touchStartTime;
-                        // Consider it a click if the touch was short and the movement was minimal
-                        if (!isLongPress && touchDuration < LONG_PRESS_THRESHOLD) {
-                            handleButtonClick();
-                        }
-
-                        return true;
                     case MotionEvent.ACTION_DOWN:
                         initialX = params.x;
                         initialY = params.y;
@@ -302,19 +292,33 @@ public class NamaPopup extends AccessibilityService {
                         isLongPress = false;
                         v.postDelayed(longPressRunnable, LONG_PRESS_THRESHOLD);
                         return true;
+
                     case MotionEvent.ACTION_MOVE:
-                        if (!isLongPress) {
-                            params.x = initialX + (int) (event.getRawX() - initialTouchX);
-                            params.y = initialY + (int) (event.getRawY() - initialTouchY);
-                            windowManager.updateViewLayout(floatingButton, params);
+                        float deltaX = event.getRawX() - initialTouchX;
+                        float deltaY = event.getRawY() - initialTouchY;
+                        float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                        // If the movement is beyond a certain threshold, cancel the long press
+                        if (distance > 10) { // You can adjust this threshold as needed
+                            v.removeCallbacks(longPressRunnable);
                         }
 
+                        params.x = initialX + (int) deltaX;
+                        params.y = initialY + (int) deltaY;
+                        windowManager.updateViewLayout(floatingButton, params);
+                        return true;
+
+                    case MotionEvent.ACTION_UP:
+                        v.removeCallbacks(longPressRunnable);
+                        long touchDuration = System.currentTimeMillis() - touchStartTime;
+                        if (!isLongPress && touchDuration < LONG_PRESS_THRESHOLD) {
+                            handleButtonClick();
+                        }
                         return true;
                 }
 
                 return false;
             }
-
             private Runnable longPressRunnable = new Runnable() {
                 @Override
                 public void run() {
@@ -348,6 +352,8 @@ public class NamaPopup extends AccessibilityService {
         // Add the floating button to the window
         windowManager.addView(floatingButton, params);
     }
+
+
 
     @Override
     public void onInterrupt() {
