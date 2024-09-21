@@ -269,8 +269,8 @@ public class NamaPopup extends AccessibilityService {
                 PixelFormat.TRANSLUCENT);
 
         params.gravity = Gravity.TOP | Gravity.LEFT;
-        params.x = 100;
-        params.y = 100;
+        params.x = 50;
+        params.y = 300;
         floatingButton.setClickable(true);
 
         // Enable dragging
