@@ -3,6 +3,7 @@ package com.example.namapopup;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,7 +24,12 @@ public class NamaPopup extends AccessibilityService {
     private String convertedText = "";
     private static final long LONG_PRESS_THRESHOLD = 500;
     private DBHelper databaseHelper;
-    private String searchResult;
+    private String searchResult = "";
+    private String convertCandidate = "";
+    private int mushiThreshold = 1;
+    private int charNumAfterFound = 0;
+    private int mushiStartIndex = 0;
+    private boolean FOUND = false;
 
     @Override
     public void onCreate() {
@@ -34,8 +40,6 @@ public class NamaPopup extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
-        String testWord = databaseHelper.searchWord("おる");
-        Log.d("NAMA_POPUP", "Service connected. testWord = " + testWord);
 
         // Configure the AccessibilityServiceInfo to listen for text changes
         AccessibilityServiceInfo serviceInfo = getServiceInfo();
@@ -51,7 +55,6 @@ public class NamaPopup extends AccessibilityService {
 
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-            Log.d("TYPE_VIEW_TEXT_CHANGED", "triggerd");
             AccessibilityNodeInfo source = event.getSource();
             if (source != null && source.isEditable()) {
                 // Get the current text from the editable field
@@ -59,16 +62,96 @@ public class NamaPopup extends AccessibilityService {
                 if (currentText != null) {
                     String fullText = currentText.toString();
 
-                    // Calculate the new text that is being composed
-                    String composingText = fullText.substring(convertedText.length());
+                    Log.d("composingText", "Full Text: " + fullText);
 
                     // Show suggestions for the new composing text
-                    showDialectSuggestions(composingText);
+                    showDialectSuggestions(fullText);
                 }
             }
         }
     }
 
+    private void showDialectSuggestions(String fullText) {
+        String TAG = "showDialectSuggestions";
+        int startIndex = 0;
+        int endIndex = 0;
+        int consecutiveNonMatchingChars = 0;
+
+        while (endIndex < fullText.length()) {
+            String queryText = fullText.substring(startIndex, endIndex + 1);
+            Cursor cursor = databaseHelper.searchWord(queryText);
+
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                int hougenColumnIndex = cursor.getColumnIndex("hougen");
+
+                if (hougenColumnIndex != -1) {
+                    String hougen = cursor.getString(hougenColumnIndex);
+
+                    if (hougen != null && hougen.equals(queryText)) {
+                        // Exact match found
+                        searchResult = hougen;
+                        Log.d(TAG, "Found exact match in database: " + searchResult);
+                    } else {
+                        Log.d(TAG, "Found partial match in database");
+                    }
+                }
+
+                // Check the next character
+                if (endIndex + 1 < fullText.length()) {
+                    String nextQueryText = fullText.substring(startIndex, endIndex + 2);
+                    Log.d(TAG, "nextQueryText: " + nextQueryText);
+                    Cursor nextCursor = databaseHelper.searchWord(nextQueryText);
+
+                    if (nextCursor == null || nextCursor.getCount() == 0) {
+                        // Next character doesn't form a valid prefix, move start index
+                        startIndex = endIndex + 1;
+                        endIndex = startIndex;
+                        searchResult = "";
+                        consecutiveNonMatchingChars = 0;
+                    } else {
+                        // Both current and next character form a valid prefix
+                        consecutiveNonMatchingChars = 0;
+                        endIndex++;
+                    }
+
+                    if (nextCursor != null) {
+                        nextCursor.close();
+                    }
+                } else {
+                    // At the last character, we've already checked for exact match
+                    break;
+                }
+            } else {
+                // No match found
+                if (endIndex == startIndex) {
+                    // Move to next character if no match at current position
+                    startIndex++;
+                    endIndex++;
+                } else {
+                    // No match for longer string, keep last matching result
+                    consecutiveNonMatchingChars++;
+                    if (consecutiveNonMatchingChars > 2) {
+                        // User has typed 2 chars after last match, stop searching
+                        break;
+                    }
+                    endIndex++;
+                }
+            }
+
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        if (!searchResult.isEmpty()) {
+            textView.setText(searchResult);
+        } else {
+            textView.setText("な");
+        }
+
+        Log.d(TAG, "Final result: " + (searchResult.isEmpty() ? "な" : searchResult));
+    }
     // Call this method when the user performs conversion
     private void onConvertText(String convertedWord) {
         // Add the converted word to the converted text
@@ -76,7 +159,8 @@ public class NamaPopup extends AccessibilityService {
 
         // Clear the editable text and set it to the converted text
         // Assuming you have a method to clear and set the text
-        setEditableText(convertedText);
+        setEditableText(convertedWord);
+        searchResult = "";
     }
 
     private void setEditableText(String text) {
@@ -94,9 +178,9 @@ public class NamaPopup extends AccessibilityService {
     }
 
 
-    private void showDialectSuggestions(String text) {
-        searchResult = databaseHelper.searchWord(text);
-        if(!searchResult.equals("")) textView.setText(searchResult);
+
+    private boolean isHiragana(char ch) {
+        return (ch >= '\u3040' && ch <= '\u309F');
     }
 
     private void createFloatingButton() {

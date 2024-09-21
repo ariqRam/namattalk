@@ -74,20 +74,15 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // Add methods to query your dictionary here
-    public String searchWord(String word) {
+    public Cursor searchWord(String word) {
         SQLiteDatabase db = this.getReadableDatabase();
         String TABLE_NAME = "hougen_hida";
         String COLUMN_NAME = "hougen";
 
         String queryString = "SELECT hougen, def FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = ?";
 
-        Cursor cursor = db.rawQuery(queryString, new String[]{word});
-        String def = "";
-        if (cursor.moveToFirst()) {
-            def = cursor.getString(cursor.getColumnIndex("hougen"));
-        }
-        cursor.close();
-        Log.d("DBHelper", "Definition is " + def);
-        return def;
+        Cursor cursor = db.rawQuery("SELECT hougen FROM hougen_hida WHERE hougen LIKE ?", new String[]{ word + "%" });
+
+        return cursor;
     }
 }
