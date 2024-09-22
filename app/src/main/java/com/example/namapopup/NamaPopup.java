@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.os.Parcelable;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -16,6 +16,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
+import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +59,17 @@ public class NamaPopup extends AccessibilityService {
     public void onCreate() {
         super.onCreate();
         databaseHelper = new DBHelper(this);
+
+        // Check for the SYSTEM_ALERT_WINDOW permission
+        if (!Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } else {
+            // Permission is granted, create the floating button
+            createFloatingButton();
+        }
     }
 
     @Override
@@ -294,6 +306,17 @@ public class NamaPopup extends AccessibilityService {
     }
 
     private void createFloatingButton() {
+        if (!Settings.canDrawOverlays(this)) {
+            Log.e("NamaPopup", "Permission to draw over other apps is not granted");
+            return;
+        }
+
+        // Check if the floating button is already created
+        if (floatingButton != null && floatingButton.isShown()) {
+            Log.d("NamaPopup", "Floating button is already displayed");
+            return;
+        }
+
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
         // Inflate the floating button layout
@@ -364,7 +387,7 @@ public class NamaPopup extends AccessibilityService {
                 @Override
                 public void run() {
                     isLongPress = true;
-                    launchMainActivity();
+                    launchInfoActivity();
                 }
             };
 
@@ -391,7 +414,11 @@ public class NamaPopup extends AccessibilityService {
 
 
         // Add the floating button to the window
-        windowManager.addView(floatingButton, params);
+        try {
+            windowManager.addView(floatingButton, params);
+        } catch (Exception e) {
+            Log.e("NamaPopup", "Error adding view to WindowManager", e);
+        }
     }
 
 
@@ -409,34 +436,8 @@ public class NamaPopup extends AccessibilityService {
         }
     }
 
-    public void updateFloatingPopupVisibility() {
-        if (GlobalVariable.isMainActivityRunning) {
-            hideFloatingPopup(); // Your method to hide the popup
-        } else {
-            showFloatingPopup(); // Your method to show the popup
-        }
-    }
-
-    public void hideFloatingPopup() {
-        if (floatingButton != null && floatingButton.getVisibility() != View.GONE) {
-            floatingButton.setVisibility(View.GONE); // Hide the popup view
-        }
-    }
-
-    public void showFloatingPopup() {
-        if (floatingButton != null && floatingButton.getVisibility() != View.VISIBLE) {
-            windowManager.addView(floatingButton, new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                    PixelFormat.TRANSLUCENT
-            ));
-        }
-    }
-
-    private void launchMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
+    private void launchInfoActivity() {
+        Intent intent = new Intent(this, HougenInfoActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("hougen", hougenInformation.hougen);
         intent.putExtra("hougenchihou", hougenInformation.hougenchihou);
@@ -444,7 +445,7 @@ public class NamaPopup extends AccessibilityService {
         intent.putExtra("area", hougenInformation.area);
         intent.putExtra("def", hougenInformation.def);
         intent.putExtra("example", hougenInformation.example);
-        startActivity(intent);
+        startService(intent);
     }
 
 }

@@ -6,8 +6,6 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 public class GlobalVariable {
-    public static boolean isMainActivityRunning = false;
-
     public static class HougenInformation {
         String hougen;
         String hougenchihou;

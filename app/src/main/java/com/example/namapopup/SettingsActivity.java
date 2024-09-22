@@ -26,7 +26,10 @@ public class SettingsActivity extends AppCompatActivity {
         backToMainButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();  // This will close the SettingsActivity and return to MainActivity
+                Intent intent = new Intent(SettingsActivity.this, HougenInfoActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // Only needed if starting from non-activity context
+                startService(intent); // Start the service if it's not running
+                finish(); // Close SettingsActivity
             }
         });
     }

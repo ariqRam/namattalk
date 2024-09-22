@@ -4,22 +4,19 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#EAE1B0">
-    <include layout="@layout/main_titlebar_layout" />
+    <include layout="@layout/hougeninfo_titlebar_layout" />
 
     <TextView
         android:id="@+id/inputWord"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="入力して"
-        android:textSize="60sp"
+        android:textSize="40sp"
         android:textColor="#3E3E3E"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_marginTop="30dp"/>
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"/>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -29,15 +26,15 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
                 android:orientation="vertical"
-                android:padding="5dp">
+                android:padding="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
+                    android:layout_marginBottom="4dp"
                     android:background="#C3B4A6"
                     android:orientation="horizontal">
 
@@ -45,9 +42,10 @@
                         android:layout_width="53dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
-                        android:padding="5dp"
+                        android:padding="4dp"
                         android:text="方言"
-                        android:textSize="28dp" />
+                        android:textColor="#3E3E3E"
+                        android:textSize="24dp" />
 
                     <View
                         android:layout_width="4dp"
@@ -59,15 +57,16 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="7"
-                        android:padding="5dp"
+                        android:padding="4dp"
                         android:text="富山弁"
-                        android:textSize="28dp" />
+                        android:textColor="#3E3E3E"
+                        android:textSize="24dp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
+                    android:layout_marginBottom="4dp"
                     android:background="#C3B4A6"
                     android:orientation="horizontal">
 
@@ -75,9 +74,10 @@
                         android:layout_width="53dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
-                        android:padding="5dp"
+                        android:padding="4dp"
                         android:text="都道府県"
-                        android:textSize="28dp" />
+                        android:textColor="#3E3E3E"
+                        android:textSize="24dp" />
 
                     <View
                         android:layout_width="4dp"
@@ -89,15 +89,16 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="7"
-                        android:padding="5dp"
+                        android:padding="4dp"
                         android:text="富山県"
-                        android:textSize="28dp" />
+                        android:textColor="#3E3E3E"
+                        android:textSize="24dp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
+                    android:layout_marginBottom="4dp"
                     android:background="#C3B4A6"
                     android:orientation="horizontal">
 
@@ -105,9 +106,10 @@
                         android:layout_width="53dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
-                        android:padding="5dp"
+                        android:padding="4dp"
                         android:text="地域"
-                        android:textSize="28dp" />
+                        android:textColor="#3E3E3E"
+                        android:textSize="24dp" />
 
                     <View
                         android:layout_width="4dp"
@@ -119,9 +121,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="7"
-                        android:padding="5dp"
+                        android:padding="4dp"
                         android:text="市区町村など"
-                        android:textSize="28dp" />
+                        android:textColor="#3E3E3E"
+                        android:textSize="24dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -135,9 +138,10 @@
                         android:layout_width="53dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
-                        android:padding="5dp"
+                        android:padding="4dp"
                         android:text="意味"
-                        android:textSize="28dp" />
+                        android:textColor="#3E3E3E"
+                        android:textSize="24dp" />
 
                     <View
                         android:layout_width="4dp"
@@ -149,25 +153,36 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="7"
-                        android:padding="5dp"
+                        android:padding="4dp"
                         android:text="なし"
-                        android:textSize="28dp" />
+                        android:textColor="#3E3E3E"
+                        android:textSize="24dp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#C3B4A6"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="3"
+                        android:padding="4dp"
+                        android:text="例文"
+                        android:textColor="#3E3E3E"
+                        android:textSize="24dp" />
 
                     <TextView
                         android:id="@+id/inputExample"
-                        android:layout_width="0dp"
-                        android:layout_height="221dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_weight="3"
-                        android:padding="5dp"
-                        android:text="例文"
-                        android:textSize="28dp" />
+                        android:padding="4dp"
+                        android:text="なし"
+                        android:textColor="#3E3E3E"
+                        android:textSize="24dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -177,14 +192,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="30dp"
                 android:gravity="end"
-                android:padding="5dp"
+                android:paddingHorizontal="4dp"
+                android:paddingBottom="4dp"
                 android:text="出典: 著作者またはライセンシング"
-                android:textSize="12sp" />
+                android:textColor="#3E3E3E"
+                android:textSize="10sp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
+                android:layout_marginLeft="16dp"
                 android:layout_marginTop="60dp"
                 android:gravity="bottom"
                 android:orientation="vertical">
@@ -207,6 +224,6 @@
 
         </LinearLayout>
 
-    </ScrollView>
+
 
 </LinearLayout>
