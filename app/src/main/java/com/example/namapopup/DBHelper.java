@@ -11,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -18,6 +20,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private final Context context;
     private SQLiteDatabase database;
+
+
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -79,9 +83,9 @@ public class DBHelper extends SQLiteOpenHelper {
         String TABLE_NAME = "hougen_hida";
         String COLUMN_NAME = "hougen";
 
-        String queryString = "SELECT hougen, def FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = ?";
+        String queryString = "SELECT hougen, pref, area, def, example FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " LIKE ?";
 
-        Cursor cursor = db.rawQuery("SELECT hougen FROM hougen_hida WHERE hougen LIKE ?", new String[]{ word + "%" });
+        Cursor cursor = db.rawQuery(queryString, new String[]{ word + "%" });
 
         return cursor;
     }

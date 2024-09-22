@@ -2,12 +2,15 @@ package com.example.namapopup;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
+    NamaPopup namaPopup = new NamaPopup();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,24 +18,27 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.main_activity_layout);
 
         TextView inputWordTextView = findViewById(R.id.inputWord);
+        TextView inputHougenchihouTextView = findViewById(R.id.inputHougenchihou);
+        TextView inputPrefTextView = findViewById(R.id.inputPref);
+        TextView inputAreaTextView = findViewById(R.id.inputArea);
         TextView inputMeaningTextView = findViewById(R.id.inputMeaning);
+        TextView inputExampleTextView = findViewById(R.id.inputExample);
 
+        String hougen = getIntent().getStringExtra("hougen");
+        String hougenchihou = getIntent().getStringExtra("hougenchihou");
+        String pref = getIntent().getStringExtra("pref");
+        String area = getIntent().getStringExtra("area");
+        String def = getIntent().getStringExtra("def");
+        String example = getIntent().getStringExtra("example");
 
-        // Get the text passed from the NamaPopup service
-        String popupText = getIntent().getStringExtra("POPUP_TEXT");
-
-        if (popupText != null && !popupText.isEmpty()) {
-            inputWordTextView.setText(popupText);
-            if (popupText.equals("方言")) {
-                inputMeaningTextView.setText("ほうげん");
-            } else {
-                inputMeaningTextView.setText("なし");
-            }
-        } else {
-            // Default text if no text was passed
-            inputWordTextView.setText("入力して");
-            inputMeaningTextView.setText("なし");
-        }
+        //setText in TextView
+        inputWordTextView.setText(hougen);
+        inputHougenchihouTextView.setText(hougenchihou);
+        inputPrefTextView.setText(pref);
+        inputAreaTextView.setText(area);
+        inputMeaningTextView.setText(def);
+        inputExampleTextView.setText(example);
+        Log.d("MainActivity", "hougen: " + hougen);
 
         ImageView settingsButton = findViewById(R.id.settingsButton);
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -50,8 +56,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 finish(); // This will close the current activity
-                System.exit(0); // This will ensure the app fully closes
+//                GlobalVariable.isMainActivityRunning = false;
+                namaPopup.updateFloatingPopupVisibility();
             }
         });
     }
 }
+

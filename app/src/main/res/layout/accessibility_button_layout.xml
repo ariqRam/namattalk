@@ -4,11 +4,34 @@
     android:layout_height="wrap_content"
     android:background="@android:color/holo_blue_bright">
 
-    <TextView
+
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:id="@+id/accessibility_text"
-        android:text="な"
-        android:textSize="24sp"
-        android:padding="10dp"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- Top TextView -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/accessibility_text"
+            android:text="な"
+            android:textSize="24sp"
+            android:paddingHorizontal="10dp"
+            android:gravity="center"/>
+
+        <!-- Bottom TextView -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/hougenchihou"
+            android:text="富山弁"
+            android:textSize="14sp"
+            android:gravity="left"
+            android:paddingBottom="5dp"
+            android:paddingHorizontal="5dp"
+            android:visibility="gone"/>
+    </LinearLayout>
+
 </FrameLayout>

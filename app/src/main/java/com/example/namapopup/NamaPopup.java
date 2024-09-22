@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -25,6 +26,7 @@ public class NamaPopup extends AccessibilityService {
     private WindowManager windowManager;
     private View floatingButton;
     private TextView textView;
+    private TextView hougenchihouTextView;
     CharSequence composingText;
     private String convertedText = "";
     private static final long LONG_PRESS_THRESHOLD = 500;
@@ -37,6 +39,7 @@ public class NamaPopup extends AccessibilityService {
     private int mushiStartIndex = 0;
     private boolean FOUND = false;
     private List<CharacterPosition> characterPositions = new ArrayList<>();
+    public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "");;
 
     // Custom class to store word and its position
     public class CharacterPosition {
@@ -48,6 +51,8 @@ public class NamaPopup extends AccessibilityService {
             this.position = position;
         }
     }
+
+
 
     @Override
     public void onCreate() {
@@ -74,6 +79,7 @@ public class NamaPopup extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
             AccessibilityNodeInfo source = event.getSource();
+
             if (source != null && source.isEditable()) {
                 // Get the current text from the editable field
                 CharSequence currentText = event.getText() != null && !event.getText().isEmpty() ? event.getText().get(0) : null;
@@ -82,18 +88,24 @@ public class NamaPopup extends AccessibilityService {
 
                 if (currentText != null) {
                     String fullText = currentText.toString();
-
                     Log.d("composingText", "Full Text: " + fullText);
                     Log.d("composingText", "Full Text Position: " + positionStart + " to " + positionEnd);
 
                     // Show suggestions for the new composing text
-                    showDialectSuggestions(fullText, positionStart, positionEnd);
+                    showDialectSuggestions(fullText);
+
+                    if (positionStart == positionEnd) {
+                        Log.d("composingText", "no text");
+                        resetFloatingButtonText();
+                    }
                 }
             }
+
         }
     }
 
-    private void showDialectSuggestions(String fullText, int positionStart, int positionEnd) {
+
+    private void showDialectSuggestions(String fullText) {
         String TAG = "showDialectSuggestions";
         int startIndex = 0;
         int endIndex = 0;
@@ -107,14 +119,27 @@ public class NamaPopup extends AccessibilityService {
             if (cursor != null && cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 int hougenColumnIndex = cursor.getColumnIndex("hougen");
+                int prefColumnIndex = cursor.getColumnIndex("pref");
+                int areaColumnIndex = cursor.getColumnIndex("area");
+                int defColumnIndex = cursor.getColumnIndex("def");
+                int exampleColumnIndex = cursor.getColumnIndex("example");
 
                 if (hougenColumnIndex != -1) {
                     String hougen = cursor.getString(hougenColumnIndex);
+
 
                     if (hougen != null && hougen.equals(queryText)) {
                         // Exact match found
                         searchResult = hougen;
                         Log.d(TAG, "Found exact match in database: " + searchResult + " at " + startIndex + "-" + endIndex);
+
+                        hougenInformation.hougen = searchResult;
+                        hougenInformation.hougenchihou = "飛騨弁";
+                        hougenInformation.pref = cursor.getString(prefColumnIndex);
+                        hougenInformation.area = cursor.getString(areaColumnIndex);
+                        hougenInformation.def = cursor.getString(defColumnIndex);
+                        hougenInformation.example = cursor.getString(exampleColumnIndex);
+                        Log.d(TAG, "hougenInformation: " + hougenInformation.hougen + ", " + hougenInformation.pref + ", " + hougenInformation.area + ", " + hougenInformation.def + ", " + hougenInformation.example);
 
                         characterPositions.clear();
                         int position = startIndex;
@@ -177,13 +202,27 @@ public class NamaPopup extends AccessibilityService {
             }
         }
 
-        if (!searchResult.isEmpty()) {
-            textView.setText(searchResult);
+        if (!searchResult.isEmpty() && !searchResult.equals("な") && !fullText.isEmpty()) {
+            updateFloatingButtonText();
         } else {
-            textView.setText("な");
+            resetFloatingButtonText();
         }
 
         Log.d(TAG, "Final result: " + (searchResult.isEmpty() ? "な" : searchResult));
+    }
+
+    private void updateFloatingButtonText() {
+        textView.setText(searchResult);
+        hougenchihouTextView.setText(hougenInformation.hougenchihou);
+        hougenchihouTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void resetFloatingButtonText() {
+        textView.setText("な");
+        hougenchihouTextView.setText("");
+        hougenchihouTextView.setVisibility(View.GONE);
+        hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "");
+        hougenInformation.hougenchihou = "";
     }
 
     //this method can search the text that cannot be converted from fullText
@@ -260,6 +299,8 @@ public class NamaPopup extends AccessibilityService {
         // Inflate the floating button layout
         floatingButton = LayoutInflater.from(this).inflate(R.layout.accessibility_button_layout, null);
         textView = floatingButton.findViewById(R.id.accessibility_text);
+        hougenchihouTextView = floatingButton.findViewById(R.id.hougenchihou);
+
 
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -342,7 +383,7 @@ public class NamaPopup extends AccessibilityService {
                         focusedNode.recycle();
                         composingText = "";
                         Log.d("ComposingText", "Resetting composingText " + composingText);
-                        textView.setText("な");
+                        resetFloatingButtonText();
                     }
                 }
             }
@@ -368,11 +409,41 @@ public class NamaPopup extends AccessibilityService {
         }
     }
 
+    public void updateFloatingPopupVisibility() {
+        if (GlobalVariable.isMainActivityRunning) {
+            hideFloatingPopup(); // Your method to hide the popup
+        } else {
+            showFloatingPopup(); // Your method to show the popup
+        }
+    }
+
+    public void hideFloatingPopup() {
+        if (floatingButton != null && floatingButton.getVisibility() != View.GONE) {
+            floatingButton.setVisibility(View.GONE); // Hide the popup view
+        }
+    }
+
+    public void showFloatingPopup() {
+        if (floatingButton != null && floatingButton.getVisibility() != View.VISIBLE) {
+            windowManager.addView(floatingButton, new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT
+            ));
+        }
+    }
+
     private void launchMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // Pass the current text of the popup button
-        intent.putExtra("POPUP_TEXT", textView.getText().toString());
+        intent.putExtra("hougen", hougenInformation.hougen);
+        intent.putExtra("hougenchihou", hougenInformation.hougenchihou);
+        intent.putExtra("pref", hougenInformation.pref);
+        intent.putExtra("area", hougenInformation.area);
+        intent.putExtra("def", hougenInformation.def);
+        intent.putExtra("example", hougenInformation.example);
         startActivity(intent);
     }
 
