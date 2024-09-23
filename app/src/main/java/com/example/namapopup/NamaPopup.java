@@ -3,6 +3,7 @@ package com.example.namapopup;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
@@ -36,25 +37,18 @@ public class NamaPopup extends AccessibilityService {
     private String normalText = "";
     private boolean textViewSet = false;
     private List<CharacterPosition> characterPositions = new ArrayList<>();
+    private SharedPreferences sharedPreferences;
     public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "");;
-
-    // Custom class to store word and its position
-    public class CharacterPosition {
-        char character;
-        int position;
-
-        CharacterPosition(char character, int position) {
-            this.character = character;
-            this.position = position;
-        }
-    }
-
 
 
     @Override
     public void onCreate() {
         super.onCreate();
         databaseHelper = new DBHelper(this);
+        sharedPreferences = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
+        for(String chihou : Constants.CHIHOUS) {
+            Log.d("ONCREATE", "Prefs of " + chihou + " = " + sharedPreferences.getBoolean(chihou, false));
+        }
 
         // Check for the SYSTEM_ALERT_WINDOW permission
         if (!Settings.canDrawOverlays(this)) {
@@ -112,6 +106,16 @@ public class NamaPopup extends AccessibilityService {
         }
     }
 
+    // Custom class to store word and its position
+    public class CharacterPosition {
+        char character;
+        int position;
+
+        CharacterPosition(char character, int position) {
+            this.character = character;
+            this.position = position;
+        }
+    }
 
     private void showDialectSuggestions(String fullText) {
         String TAG = "showDialectSuggestions";

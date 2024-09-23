@@ -1,0 +1,10 @@
+package com.example.namapopup;
+
+public class Constants {
+
+    public static final String[] CHIHOUS = {"hida", "toyama"};
+
+    // You can add other constants here as needed
+    public static final String PREFS_NAME = "Prefs";
+    public static final String PREF_KEY_ENABLED = "accessibility_service_enabled";
+}
