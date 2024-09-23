@@ -21,11 +21,11 @@
             android:paddingHorizontal="10dp"
             android:gravity="center"/>
 
-        <!-- Hougenchihou -->
+        <!-- Chihou -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/hougenchihou"
+            android:id="@+id/chihou"
             android:text="富山弁"
             android:textSize="14sp"
             android:gravity="left"

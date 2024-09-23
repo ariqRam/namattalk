@@ -91,7 +91,7 @@ public class HougenInfoActivity extends Service {
         // Check if the intent is not null and contains the expected data
         if (intent != null) {
             String hougen = intent.getStringExtra("hougen");
-            String hougenchihou = intent.getStringExtra("hougenchihou");
+            String chihou = intent.getStringExtra("chihou");
             String pref = intent.getStringExtra("pref");
             String area = intent.getStringExtra("area");
             String def = intent.getStringExtra("def");
@@ -100,14 +100,14 @@ public class HougenInfoActivity extends Service {
             // Update the floating view TextViews with the received data
             if (mFloatingView != null) {
                 TextView inputWordTextView = mFloatingView.findViewById(R.id.inputWord);
-                TextView inputHougenchihouTextView = mFloatingView.findViewById(R.id.inputHougenchihou);
+                TextView inputChihouTextView = mFloatingView.findViewById(R.id.inputChihou);
                 TextView inputPrefTextView = mFloatingView.findViewById(R.id.inputPref);
                 TextView inputAreaTextView = mFloatingView.findViewById(R.id.inputArea);
                 TextView inputMeaningTextView = mFloatingView.findViewById(R.id.inputMeaning);
                 TextView inputExampleTextView = mFloatingView.findViewById(R.id.inputExample);
 
                 inputWordTextView.setText(hougen);
-                inputHougenchihouTextView.setText(hougenchihou);
+                inputChihouTextView.setText(chihou);
                 inputPrefTextView.setText(pref);
                 inputAreaTextView.setText(area);
                 inputMeaningTextView.setText(def);
