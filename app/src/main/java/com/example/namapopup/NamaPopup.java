@@ -27,18 +27,13 @@ public class NamaPopup extends AccessibilityService {
     private WindowManager windowManager;
     private View floatingButton;
     private TextView textView;
-    private TextView hougenchihouTextView;
+    private TextView chihouTextView;
     CharSequence composingText;
     private String convertedText = "";
     private static final long LONG_PRESS_THRESHOLD = 500;
     private DBHelper databaseHelper;
     private String searchResult = "";
     private String normalText = "";
-    private String convertCandidate = "";
-    private int mushiThreshold = 1;
-    private int charNumAfterFound = 0;
-    private int mushiStartIndex = 0;
-    private boolean FOUND = false;
     private List<CharacterPosition> characterPositions = new ArrayList<>();
     public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "");;
 
@@ -146,7 +141,7 @@ public class NamaPopup extends AccessibilityService {
                         Log.d(TAG, "Found exact match in database: " + searchResult + " at " + startIndex + "-" + endIndex);
 
                         hougenInformation.hougen = searchResult;
-                        hougenInformation.hougenchihou = "飛騨弁";
+                        hougenInformation.chihou = "飛騨弁";
                         hougenInformation.pref = cursor.getString(prefColumnIndex);
                         hougenInformation.area = cursor.getString(areaColumnIndex);
                         hougenInformation.def = cursor.getString(defColumnIndex);
@@ -225,16 +220,16 @@ public class NamaPopup extends AccessibilityService {
 
     private void updateFloatingButtonText() {
         textView.setText(searchResult);
-        hougenchihouTextView.setText(hougenInformation.hougenchihou);
-        hougenchihouTextView.setVisibility(View.VISIBLE);
+        chihouTextView.setText(hougenInformation.chihou);
+        chihouTextView.setVisibility(View.VISIBLE);
     }
 
     private void resetFloatingButtonText() {
         textView.setText("な");
-        hougenchihouTextView.setText("");
-        hougenchihouTextView.setVisibility(View.GONE);
+        chihouTextView.setText("");
+        chihouTextView.setVisibility(View.GONE);
         hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "");
-        hougenInformation.hougenchihou = "";
+        hougenInformation.chihou = "";
     }
 
     //this method can search the text that cannot be converted from fullText
@@ -322,7 +317,7 @@ public class NamaPopup extends AccessibilityService {
         // Inflate the floating button layout
         floatingButton = LayoutInflater.from(this).inflate(R.layout.accessibility_button_layout, null);
         textView = floatingButton.findViewById(R.id.accessibility_text);
-        hougenchihouTextView = floatingButton.findViewById(R.id.hougenchihou);
+        chihouTextView = floatingButton.findViewById(R.id.chihou);
 
 
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
@@ -440,7 +435,7 @@ public class NamaPopup extends AccessibilityService {
         Intent intent = new Intent(this, HougenInfoActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("hougen", hougenInformation.hougen);
-        intent.putExtra("hougenchihou", hougenInformation.hougenchihou);
+        intent.putExtra("chihou", hougenInformation.chihou);
         intent.putExtra("pref", hougenInformation.pref);
         intent.putExtra("area", hougenInformation.area);
         intent.putExtra("def", hougenInformation.def);

@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 public class GlobalVariable {
     public static class HougenInformation {
         String hougen;
-        String hougenchihou;
+        String chihou;
         String pref;
         String area;
         String def;
@@ -16,7 +16,7 @@ public class GlobalVariable {
 
         HougenInformation(String hougen, String hougenchihou, String pref, String area, String def, String example) {
             this.hougen = hougen;
-            this.hougenchihou = hougenchihou;
+            this.chihou = hougenchihou;
             this.pref = pref;
             this.area = area;
             this.def = def;
