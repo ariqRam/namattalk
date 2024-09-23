@@ -34,6 +34,7 @@ public class NamaPopup extends AccessibilityService {
     private DBHelper databaseHelper;
     private String searchResult = "";
     private String normalText = "";
+    private boolean textViewSet = false;
     private List<CharacterPosition> characterPositions = new ArrayList<>();
     public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "");;
 
@@ -219,12 +220,14 @@ public class NamaPopup extends AccessibilityService {
     }
 
     private void updateFloatingButtonText() {
+        textViewSet = true;
         textView.setText(searchResult);
         chihouTextView.setText(hougenInformation.chihou);
         chihouTextView.setVisibility(View.VISIBLE);
     }
 
     private void resetFloatingButtonText() {
+        textViewSet = false;
         textView.setText("な");
         chihouTextView.setText("");
         chihouTextView.setVisibility(View.GONE);
@@ -349,7 +352,7 @@ public class NamaPopup extends AccessibilityService {
                         initialTouchY = event.getRawY();
                         touchStartTime = System.currentTimeMillis();
                         isLongPress = false;
-                        v.postDelayed(longPressRunnable, LONG_PRESS_THRESHOLD);
+                        if (textViewSet) v.postDelayed(longPressRunnable, LONG_PRESS_THRESHOLD);
                         return true;
 
                     case MotionEvent.ACTION_MOVE:
@@ -382,7 +385,7 @@ public class NamaPopup extends AccessibilityService {
                 @Override
                 public void run() {
                     isLongPress = true;
-                    launchInfoActivity();
+                    launchShousaiActivity();
                 }
             };
 
@@ -431,7 +434,7 @@ public class NamaPopup extends AccessibilityService {
         }
     }
 
-    private void launchInfoActivity() {
+    private void launchShousaiActivity() {
         Intent intent = new Intent(this, HougenInfoActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("hougen", hougenInformation.hougen);
