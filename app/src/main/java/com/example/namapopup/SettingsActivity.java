@@ -41,7 +41,7 @@ public class SettingsActivity extends AppCompatActivity {
             newSwitch.setId(View.generateViewId());
             newSwitch.setTextSize(24);
             newSwitch.setText(chihou); // Set the text to the prefecture name
-            layout.addView(newSwitch);
+            layout.addView(newSwitch, 0);
 
             // Load the previous state
             boolean switchValue = sharedPreferences.getBoolean(chihou, false);
