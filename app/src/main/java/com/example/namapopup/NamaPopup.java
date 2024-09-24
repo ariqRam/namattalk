@@ -125,7 +125,7 @@ public class NamaPopup extends AccessibilityService {
         int consecutiveNonMatchingChars = 0;
 
         // List to hold results grouped by chihou (region)
-        List<List<String>> searchResults = new ArrayList<>();
+        searchResults = new ArrayList<>();
 
         while (endIndex < fullText.length()) {
             // Query for substring from startIndex to endIndex
@@ -298,7 +298,7 @@ public class NamaPopup extends AccessibilityService {
 
         // Update floating button text based on search results
         if (!searchResults.isEmpty()) {
-            updateFloatingButtonText(searchResults);
+            updateFloatingButtonText();
         } else {
             resetFloatingButtonText();
         }
@@ -308,7 +308,7 @@ public class NamaPopup extends AccessibilityService {
 
 
 
-    private void updateFloatingButtonText(List<List<String>> searchResults) {
+    private void updateFloatingButtonText() {
         textViewSet = true;
         String TAG = "updateFloatingButtonText";
         if (!searchResults.isEmpty()) {
