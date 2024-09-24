@@ -1,6 +1,9 @@
 package com.example.namapopup;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -16,16 +19,27 @@ import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "hida.db";
+    private static final String DATABASE_NAME = "hougen.db";
     private static final int DATABASE_VERSION = 1;
     private final Context context;
     private SQLiteDatabase database;
+    private SharedPreferences sharedPreferences;
+    private String[] chosenChihous;
 
 
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
+        chosenChihous = new String[Constants.CHIHOUS.length];
+        sharedPreferences = context.getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
+        for(int i = 0; i < Constants.CHIHOUS.length; i++) {
+            if(sharedPreferences.getBoolean(Constants.CHIHOUS[i], false)) {
+                chosenChihous[i] = Constants.CHIHOUS[i];
+            }
+        }
+
+        if(chosenChihous[0].isEmpty()) chosenChihous[0] = "hida";
 
         // Check if the database exists, if not, copy it from assets
         if (!checkDatabase()) {
@@ -80,7 +94,7 @@ public class DBHelper extends SQLiteOpenHelper {
     // Add methods to query your dictionary here
     public Cursor searchWord(String word) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String TABLE_NAME = "hougen_hida";
+        String TABLE_NAME = chosenChihous[0];
         String COLUMN_NAME = "hougen";
 
         String queryString = "SELECT hougen, pref, area, def, example FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " LIKE ?";
