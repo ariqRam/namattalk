@@ -33,7 +33,8 @@ public class SettingsActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
 
 
-        for(String chihou : Constants.CHIHOUS) {
+        for(int i = 0; i < Constants.CHIHOUS.length; i++) {
+            String chihou = Constants.CHIHOUS[i];
             Switch newSwitch = new Switch(this);
             newSwitch.setLayoutParams(new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
@@ -41,7 +42,7 @@ public class SettingsActivity extends AppCompatActivity {
             newSwitch.setId(View.generateViewId());
             newSwitch.setTextSize(24);
             newSwitch.setText(chihou); // Set the text to the prefecture name
-            layout.addView(newSwitch, 0);
+            layout.addView(newSwitch, i);
 
             // Load the previous state
             boolean switchValue = sharedPreferences.getBoolean(chihou, false);

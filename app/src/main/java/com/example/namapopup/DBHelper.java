@@ -39,8 +39,6 @@ public class DBHelper extends SQLiteOpenHelper {
             }
         }
 
-        if(chosenChihous[0].isEmpty()) chosenChihous[0] = "hida";
-
         // Check if the database exists, if not, copy it from assets
         if (!checkDatabase()) {
             try {
@@ -92,15 +90,25 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // Add methods to query your dictionary here
-    public Cursor searchWord(String word) {
+    public Cursor[] searchWord(String word) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String TABLE_NAME = chosenChihous[0];
-        String COLUMN_NAME = "hougen";
+        List<Cursor> allResults = new ArrayList<>();
 
-        String queryString = "SELECT hougen, pref, area, def, example FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " LIKE ?";
+        for (String tableName : chosenChihous) {
+            if (tableName != null && !tableName.isEmpty()) {
+                String queryString = "SELECT hougen, def, example FROM " + tableName + " WHERE hougen LIKE ?";
+                Cursor cursor = db.rawQuery(queryString, new String[]{ word + "%" });
+                Log.d("searchWord", "Searching for [" + word +"] |  count for " + tableName +": " + Integer.toString(cursor.getCount()));
+                if(cursor.getCount() > 0 && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex("hougen");
+                    Log.d("searchWord", "Found in " + tableName + ": " + cursor.getString(index));
+                }
+                allResults.add(cursor);
+            } else {
+                allResults.add(null);
+            }
+        }
 
-        Cursor cursor = db.rawQuery(queryString, new String[]{ word + "%" });
-
-        return cursor;
+        return allResults.toArray(new Cursor[0]);
     }
 }
