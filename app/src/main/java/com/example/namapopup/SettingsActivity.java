@@ -13,7 +13,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SettingsActivity extends AppCompatActivity {
-    private Switch toyamaSwitch;
     private SharedPreferences sharedPreferences;
     private LinearLayout layout;
 
@@ -57,7 +56,19 @@ public class SettingsActivity extends AppCompatActivity {
             });
         }
 
+        // making mode swtich button(true: non-native mode, false: native mode)
+        Switch modeSwitch  =findViewById(R.id.modeSwitch);
 
+        //Load previous State
+        modeSwitch.setChecked(sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false));
+
+        // Listen for changes
+        modeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            Log.d("Chihou Switch Toggled",  Constants.NON_NATIVE_MODE + " pref toggled: " + Boolean.toString(isChecked));
+            editor.putBoolean(Constants.NON_NATIVE_MODE, isChecked);
+            editor.apply();
+        });
 
         ImageView backToMainButton = findViewById(R.id.backToMainButton);
         backToMainButton.setOnClickListener(new View.OnClickListener() {

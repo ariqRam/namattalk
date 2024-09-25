@@ -76,8 +76,8 @@ public class HougenInfoActivity extends Service {
 
             // Specify the initial position of the window
             params.gravity = Gravity.TOP | Gravity.LEFT;
-            params.x = 0; // You can adjust these values as per your requirement
-            params.y = 0; // Set the initial fixed position for the floating window
+            params.x = 0;
+            params.y = 0;
 
             // Add the view to the window
             mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);

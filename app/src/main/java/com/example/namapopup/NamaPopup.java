@@ -39,7 +39,7 @@ public class NamaPopup extends AccessibilityService {
     private boolean textViewSet = false;
     private List<CharacterPosition> characterPositions = new ArrayList<>();
     private SharedPreferences sharedPreferences;
-    public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "");;
+    public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "");;
     private int currentResultIndex = 0; // Tracks which list within searchResults we are currently in
     private int currentItemIndex = 0;   // Tracks the item within the current list
 
@@ -52,6 +52,8 @@ public class NamaPopup extends AccessibilityService {
         for(String chihou : Constants.CHIHOUS) {
             Log.d("ONCREATE", "Prefs of " + chihou + " = " + sharedPreferences.getBoolean(chihou, false));
         }
+
+        Log.d("ONCREATE", "Non-native mode = " + sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false));
 
         // Check for the SYSTEM_ALERT_WINDOW permission
         if (!Settings.canDrawOverlays(this)) {
@@ -140,24 +142,32 @@ public class NamaPopup extends AccessibilityService {
             // Iterate over each cursor (one per chihou/region)
             for (int i = 0; i < cursors.length; i++) {
                 Cursor cursor = cursors[i];
-                Log.d("cursor", "Query: " + queryText + " Cursor: " + cursor.getCount());
+                if (cursor != null) {
+                    Log.d("cursor", "Query: " + queryText + " Cursor: " + cursor.getCount());
+                }
+
                 if (cursor != null && cursor.getCount() > 0) {
 
                     // Move to the first valid row
                     if (cursor.moveToFirst()) {
                         // Get column indexes from the result
                         int hougenColumnIndex = cursor.getColumnIndex("hougen");
+                        int triggerColumnIndex = cursor.getColumnIndex("trigger");
                         int prefColumnIndex = cursor.getColumnIndex("pref");
                         int areaColumnIndex = cursor.getColumnIndex("area");
                         int defColumnIndex = cursor.getColumnIndex("def");
                         int exampleColumnIndex = cursor.getColumnIndex("example");
+                        Log.d("hougenColumnIndex", "hougenColumnIndex: " + hougenColumnIndex);
+                        Log.d("triggerColumnIndex", "triggerColumnIndex: " + triggerColumnIndex);
 
-                        // Check for an exact match of dialect word (hougen)
+                        // Check for an exact match of dialect word (hougen & trigger)
                         if (hougenColumnIndex != -1) {
                             String hougen = cursor.getString(hougenColumnIndex);
-                            Log.d("hougenColumnIndex", "hougen: " + hougen + " Query: " + queryText);
+                            String trigger = (triggerColumnIndex != -1) ? cursor.getString(triggerColumnIndex) : "";
 
-                            if (hougen != null && hougen.equals(queryText)) {
+                            Log.d("hougenColumnIndex", "hougen: " + hougen + " Query: " + queryText + "trigger: " + trigger);
+
+                            if (hougen != null && (hougen.equals(queryText) || trigger.equals(queryText))) {
                                 // Exact match found, store result and update relevant info
                                 currentChihouResults.add(hougen); // Add match to the list for the current `chihou`
                                 Log.d(TAG, "Found exact match: " + hougen + " at " + startIndex + "-" + endIndex);
@@ -222,9 +232,15 @@ public class NamaPopup extends AccessibilityService {
                         // Move to the first row and handle exact match for next query
                         if (nextCursor.moveToFirst()) {
                             int nextHougenColumnIndex = nextCursor.getColumnIndex("hougen");
+                            int nextTriggerColumnIndex = nextCursor.getColumnIndex("trigger");
+                            int nextDefColumnIndex = nextCursor.getColumnIndex("def");
+                            int nextExampleColumnIndex = nextCursor.getColumnIndex("example");
+
                             if (nextHougenColumnIndex != -1) {
                                 String nextHougen = nextCursor.getString(nextHougenColumnIndex);
-                                if (nextHougen != null && nextHougen.equals(nextQueryText)) {
+                                String nextTrigger = (nextTriggerColumnIndex != -1) ? nextCursor.getString(nextTriggerColumnIndex) : "";
+
+                                if (nextHougen != null && (nextHougen.equals(nextQueryText) || nextTrigger.equals(nextQueryText))) {
                                     // Exact match found in next query
                                     nextChihouResults.add(nextHougen); // Add match to the next `chihou` results
 
@@ -233,8 +249,8 @@ public class NamaPopup extends AccessibilityService {
                                     hougenInformation.chihou = Constants.CHIHOUS_JP[j]; // Update this to reflect actual region if needed
                                     hougenInformation.pref = "";
                                     hougenInformation.area = "";
-                                    hougenInformation.def = nextCursor.getString(nextCursor.getColumnIndex("def"));
-                                    hougenInformation.example = nextCursor.getString(nextCursor.getColumnIndex("example"));
+                                    hougenInformation.def = nextCursor.getString(nextDefColumnIndex);
+                                    hougenInformation.example = nextCursor.getString(nextExampleColumnIndex);
 
                                     // Log next hougen information
                                     Log.d(TAG, "Found exact match in next query: " + nextHougen);
@@ -382,7 +398,7 @@ public class NamaPopup extends AccessibilityService {
         textView.setText("な");
         chihouTextView.setText("");
         chihouTextView.setVisibility(View.GONE);
-        hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "");
+        hougenInformation = new GlobalVariable.HougenInformation("","", "", "", "", "", "");
         hougenInformation.chihou = "";
     }
 

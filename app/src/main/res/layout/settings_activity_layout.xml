@@ -15,6 +15,13 @@
         android:layout_marginBottom="30dp"
         android:layout_marginLeft="30dp">
 
+        <Switch
+            android:id="@+id/modeSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="非ネーティブモード"
+            android:textSize="24sp"/>
+
         <ImageView
             android:id="@+id/backToMainButton"
             android:layout_width="65dp"

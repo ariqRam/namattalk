@@ -93,11 +93,21 @@ public class DBHelper extends SQLiteOpenHelper {
     public Cursor[] searchWord(String word) {
         SQLiteDatabase db = this.getReadableDatabase();
         List<Cursor> allResults = new ArrayList<>();
+        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
+        String queryString  ="";
 
         for (String tableName : chosenChihous) {
             if (tableName != null && !tableName.isEmpty()) {
-                String queryString = "SELECT hougen, def, example FROM " + tableName + " WHERE hougen LIKE ?";
-                Cursor cursor = db.rawQuery(queryString, new String[]{ word + "%" });
+                if (sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
+                    Log.d("searchWord", "Non-native mode activated");
+                    queryString = "SELECT hougen, trigger, def, example FROM " + tableName + " WHERE trigger LIKE ?";
+                }
+                else {
+                    Log.d("searchWord", "Native mode activated");
+                    queryString = "SELECT hougen, trigger, def, example FROM " + tableName + " WHERE hougen LIKE ?";
+                }
+
+                Cursor cursor = db.rawQuery(queryString, new String[]{"%" + word + "%"});
                 Log.d("searchWord", "Searching for [" + word +"] |  count for " + tableName +": " + Integer.toString(cursor.getCount()));
                 if(cursor.getCount() > 0 && cursor.moveToFirst()) {
                     int index = cursor.getColumnIndex("hougen");
