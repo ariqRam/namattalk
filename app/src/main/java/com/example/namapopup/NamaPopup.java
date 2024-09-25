@@ -577,6 +577,24 @@ public class NamaPopup extends AccessibilityService {
                 Log.d(TAG, "Swiped left");
 
                 if (!searchResults.isEmpty() && currentResultIndex < searchResults.size()) {
+                    //implement left swiping animation
+                    floatingButton.animate()
+                            .translationXBy(-800)
+                            .alpha(0)
+                            .setDuration(150)
+                            .withEndAction(new Runnable() {
+                                   @Override
+                                   public void run() {
+                                       floatingButton.setTranslationX(800); // Move view to the right of the screen
+                                       floatingButton.animate()
+                                               .translationX(0)  // Slide the new view into position
+                                               .alpha(1)         // Fade in the new view
+                                               .setDuration(200)
+                                               .start();
+                                   }
+                            })
+                            .start();
+
                     if (currentItemIndex < searchResults.get(currentResultIndex).size() - 1) {
                         // Move to the next item in the current sublist
                         currentItemIndex++;
@@ -597,6 +615,24 @@ public class NamaPopup extends AccessibilityService {
                 Log.d(TAG, "Swiped right");
 
                 if (!searchResults.isEmpty()) {
+                    //implement right swiping animation
+                    floatingButton.animate()
+                            .translationXBy(800) // Move the view out of screen to the right
+                            .alpha(0)             // Fade out the current view
+                            .setDuration(100)     // Duration of the animation
+                            .withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    floatingButton.setTranslationX(-800); // Move view to the left of the screen
+                                    floatingButton.animate()
+                                            .translationX(0)  // Slide the new view into position
+                                            .alpha(1)         // Fade in the new view
+                                            .setDuration(150)
+                                            .start();
+                                }
+                            })
+                            .start();
+
                     if (currentItemIndex > 0) {
                         // Move to the previous item in the current sublist
                         currentItemIndex--;
