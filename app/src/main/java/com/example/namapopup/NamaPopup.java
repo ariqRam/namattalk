@@ -5,6 +5,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -27,6 +28,7 @@ import java.util.List;
 public class NamaPopup extends AccessibilityService {
     private WindowManager windowManager;
     private View floatingButton;
+    private TextView indicatorTextView;
     private TextView textView;
     private TextView chihouTextView;
     CharSequence composingText;
@@ -42,6 +44,8 @@ public class NamaPopup extends AccessibilityService {
     public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "");;
     private int currentResultIndex = 0; // Tracks which list within searchResults we are currently in
     private int currentItemIndex = 0;   // Tracks the item within the current list
+    private WindowManager.LayoutParams params;
+    private String indicator = "";
 
 
     @Override
@@ -324,9 +328,10 @@ public class NamaPopup extends AccessibilityService {
         }
     }
 
-
-
-
+    private void updateIndicator() {
+        indicator = (currentResultIndex + 1) + "/" + searchResults.size();
+        indicatorTextView.setText(indicator);
+    }
 
     private void updateFloatingButtonText() {
         textViewSet = true;
@@ -337,6 +342,12 @@ public class NamaPopup extends AccessibilityService {
 
             if (!currentSublist.isEmpty() && currentItemIndex < currentSublist.size()) {
                 String currentItem = currentSublist.get(currentItemIndex);
+
+                if (indicatorTextView == null) {
+                    createIndicator(indicator);
+                    Log.d(TAG, "Created indicator");
+                }
+
                 textView.setText(currentItem);
                 Log.d(TAG, "Showing: " + currentItem + " from searchResults[" + currentResultIndex + "][" + currentItemIndex + "]");
 
@@ -400,6 +411,10 @@ public class NamaPopup extends AccessibilityService {
         chihouTextView.setVisibility(View.GONE);
         hougenInformation = new GlobalVariable.HougenInformation("","", "", "", "", "", "");
         hougenInformation.chihou = "";
+        if (indicatorTextView != null) {
+            windowManager.removeView(indicatorTextView);
+            indicatorTextView = null;
+        }
     }
 
 
@@ -449,6 +464,7 @@ public class NamaPopup extends AccessibilityService {
         searchResult = "";
         convertedText = "";
         characterPositions.clear();
+
     }
 
     private void setEditableText(String text) {
@@ -491,7 +507,7 @@ public class NamaPopup extends AccessibilityService {
         chihouTextView = floatingButton.findViewById(R.id.chihou);
 
 
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+        params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
@@ -601,6 +617,8 @@ public class NamaPopup extends AccessibilityService {
                     } else if (currentResultIndex < searchResults.size() - 1) {
                         // Move to the next sublist if available
                         currentResultIndex++;
+                        updateIndicator();
+                        Log.d("swipeLeft", "Update indicatorTextView to " + indicator);
                         currentItemIndex = 0; // Reset item index for the new sublist
                     }
                 }
@@ -639,6 +657,8 @@ public class NamaPopup extends AccessibilityService {
                     } else if (currentResultIndex > 0) {
                         // Move to the previous sublist if available
                         currentResultIndex--;
+                        updateIndicator();
+                        Log.d("swipeRight", "Update indicatorTextView to " + indicator);
                         currentItemIndex = searchResults.get(currentResultIndex).size() - 1; // Set to last item in the previous sublist
                     }
                 }
@@ -675,6 +695,40 @@ public class NamaPopup extends AccessibilityService {
         } catch (Exception e) {
             Log.e("NamaPopup", "Error adding view to WindowManager", e);
         }
+    }
+
+    private void createIndicator(String indicator) {
+        // Check if indicatorTextView is already created
+        if (indicatorTextView != null && indicatorTextView.isShown()) {
+            Log.d("NamaPopup", "indicatorTextView is already displayed");
+            return;
+        }
+
+        //create indicator textView
+        indicatorTextView = new TextView(this);
+        indicatorTextView.setTextSize(14);
+        indicatorTextView.setTextColor(Color.BLACK);
+        indicatorTextView.setPadding(5, 5, 5, 5);
+
+        updateIndicator();  //update indicatorTextView with current resultsIndex value
+
+        //set layout parameters for indicatorTextView
+        WindowManager.LayoutParams indicatorParams = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT);
+
+        // Position the new TextView below the existing floating layout
+        int indicatorOffset = floatingButton.getHeight() * 23 / 10;
+
+        indicatorParams.gravity = Gravity.TOP | Gravity.LEFT;
+        indicatorParams.x = params.x; // Keep same X position
+        indicatorParams.y = params.y + indicatorOffset; // Position below the floating layout
+
+        // Add the new TextView to the WindowManager
+        windowManager.addView(indicatorTextView, indicatorParams);
     }
 
 
