@@ -104,7 +104,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 StringBuilder queryBuilder = new StringBuilder();
                 if (sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
                     Log.d("searchWord", "Non-native mode activated");
-                    queryBuilder.append("SELECT hougen, trigger, def, example FROM ").append(tableName).append(" WHERE ");
+                    queryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
 
                     // Add dynamic LIKE conditions for each split word in 'trigger' column
                     for (int i = 0; i < splitWords.length; i++) {
@@ -115,7 +115,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     }
                 } else {
                     Log.d("searchWord", "Native mode activated");
-                    queryBuilder.append("SELECT hougen, trigger, def, example FROM ").append(tableName).append(" WHERE ");
+                    queryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
 
                     // Add dynamic LIKE conditions for each split word in 'hougen' column
                     for (int i = 0; i < splitWords.length; i++) {
@@ -138,6 +138,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
                 if (cursor.getCount() > 0 && cursor.moveToFirst()) {
                     int index = cursor.getColumnIndex("hougen");
+
                     Log.d("searchWord", "Found in " + tableName + ": " + cursor.getString(index));
                 }
                 allResults.add(cursor);

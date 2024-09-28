@@ -46,6 +46,7 @@ public class NamaPopup extends AccessibilityService {
     private int currentItemIndex = 0;   // Tracks the item within the current list
     private WindowManager.LayoutParams params;
     private String indicator = "";
+    private boolean isConjugated = false;
 
 
     @Override
@@ -158,11 +159,23 @@ public class NamaPopup extends AccessibilityService {
                         int hougenColumnIndex = cursor.getColumnIndex("hougen");
                         int triggerColumnIndex = cursor.getColumnIndex("trigger");
                         int prefColumnIndex = cursor.getColumnIndex("pref");
+                        int posColumnIndex = cursor.getColumnIndex("pos");
                         int areaColumnIndex = cursor.getColumnIndex("area");
                         int defColumnIndex = cursor.getColumnIndex("def");
                         int exampleColumnIndex = cursor.getColumnIndex("example");
                         Log.d("hougenColumnIndex", "hougenColumnIndex: " + hougenColumnIndex);
                         Log.d("triggerColumnIndex", "triggerColumnIndex: " + triggerColumnIndex);
+
+                        //reconjugation to base form
+                        String pos = cursor.getString(posColumnIndex);
+                        String baseWord = "";
+
+                        if (pos.equals("動詞") && sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
+                            baseWord = VerbConjugator.reconjugateToBase(fullText);
+                            Log.d("reconjugateToBase", "reconjugateToBase: " + baseWord);
+                            isConjugated = true;
+                            queryText = baseWord;
+                        }
 
                         // Check for an exact match of dialect word (hougen & trigger)
                         if (hougenColumnIndex != -1) {
@@ -180,9 +193,16 @@ public class NamaPopup extends AccessibilityService {
                                 }
                             }
 
+
                             Log.d("hougenColumnIndex", "hougen: " + hougen + " Query: " + queryText + "trigger: " + trigger);
 
                             if (hougen != null && (hougen.equals(queryText) || trigger.equals(queryText))) {
+                                if (isConjugated) {
+                                    hougen = VerbConjugator.conjugateFromBase(hougen,VerbConjugator.getVerbForm(fullText));
+                                    Log.d("conjugateFromBase", "conjugateFromBase to : " + hougen);
+                                    isConjugated = false;
+                                }
+
                                 // Exact match found, store result and update relevant info
                                 currentChihouResults.add(hougen); // Add match to the list for the current chihou
                                 Log.d(TAG, "Found exact match: " + hougen + " at " + startIndex + "-" + endIndex);
@@ -250,12 +270,25 @@ public class NamaPopup extends AccessibilityService {
                             int nextTriggerColumnIndex = nextCursor.getColumnIndex("trigger");
                             int nextDefColumnIndex = nextCursor.getColumnIndex("def");
                             int nextExampleColumnIndex = nextCursor.getColumnIndex("example");
+                            int nextPosColumnIndex = nextCursor.getColumnIndex("pos");
+
+                            //reconjugation to base form
+                            String nextPos = nextCursor.getString(nextPosColumnIndex);
+                            String nextBaseWord = "";
+
+                            if (nextPos.equals("動詞") && sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
+                                nextBaseWord = VerbConjugator.reconjugateToBase(fullText);
+                                Log.d("reconjugateToBase", "reconjugateToBase: " + nextBaseWord);
+                                isConjugated = true;
+                                nextQueryText = nextBaseWord;
+                            }
 
                             if (nextHougenColumnIndex != -1) {
                                 String nextHougen = nextCursor.getString(nextHougenColumnIndex);
                                 String nextTriggers = (nextTriggerColumnIndex != -1) ? nextCursor.getString(nextTriggerColumnIndex) : "";
                                 String[] splitNextTriggers = nextTriggers.split("、");
                                 String nextTrigger = "";
+                                String nextConjugatedHougen = "";
 
                                 //split words in Trigger column
                                 for (String nextTrig : splitNextTriggers) {
@@ -266,11 +299,19 @@ public class NamaPopup extends AccessibilityService {
                                     }
                                 }
 
+
+
                                 Log.d("hougenColumnIndex", "hougen: " + nextHougen + " Query: " + nextQueryText + "trigger: " + nextTrigger);
 
 
                                 if (nextHougen != null && (nextHougen.equals(nextQueryText) || nextTrigger.equals(nextQueryText))) {
-                                    // Exact match found in next query
+                                   if (isConjugated) {
+                                       nextHougen = VerbConjugator.conjugateFromBase(nextHougen,VerbConjugator.getVerbForm(fullText));
+                                       Log.d("conjugateFromBase", "conjugateFromBase to : " + nextHougen);
+                                       isConjugated = false;
+                                   }
+
+                                   // Exact match found in next query
                                     nextChihouResults.add(nextHougen); // Add match to the next chihou results
 
                                     // Populate hougenInformation with next query match
@@ -572,7 +613,7 @@ public class NamaPopup extends AccessibilityService {
                         float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
                         // Detect swipe direction if textViewSet is true
-                        if (textViewSet) {
+                        if (textViewSet && searchResults.size() > 1) {
                             // Swiping left
                             if (deltaX < -50 && Math.abs(deltaY) < 50) {
                                 handleSwipeLeft();
@@ -743,7 +784,7 @@ public class NamaPopup extends AccessibilityService {
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
 
         // Position the new TextView below the existing floating layout
