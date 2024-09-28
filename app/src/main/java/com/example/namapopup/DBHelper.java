@@ -150,37 +150,35 @@ public class DBHelper extends SQLiteOpenHelper {
         return allResults.toArray(new Cursor[0]);
     }
 
+    public Cursor[] getVerbs() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<Cursor> allResults = new ArrayList<>();
+        StringBuilder verbQuery = new StringBuilder();
 
+        for (String tableName : chosenChihous) {
+            if (tableName != null && !tableName.isEmpty()) {
+                try {
+                    // Query to get verbs where 'pos' column is '動詞' (verb)
+                    verbQuery.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE pos = ?");
+                    // Execute the query
+                    String[] queryArgs = new String[]{"動詞"};
+                    Cursor cursor = db.rawQuery(verbQuery.toString(), queryArgs);
+                    if (cursor.moveToFirst()) {
+                        Log.d("getVerbs", "Verbs found in the database.");
+                    } else {
+                        Log.d("getVerbs", "No verbs found.");
+                    }
 
-//    public Cursor[] searchWord(String word) {
-//        SQLiteDatabase db = this.getReadableDatabase();
-//        List<Cursor> allResults = new ArrayList<>();
-//        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
-//        String queryString  ="";
-//
-//        for (String tableName : chosenChihous) {
-//            if (tableName != null && !tableName.isEmpty()) {
-//                if (sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
-//                    Log.d("searchWord", "Non-native mode activated");
-//                    queryString = "SELECT hougen, trigger, def, example FROM " + tableName + " WHERE trigger LIKE ?";
-//                }
-//                else {
-//                    Log.d("searchWord", "Native mode activated");
-//                    queryString = "SELECT hougen, trigger, def, example FROM " + tableName + " WHERE hougen LIKE ?";
-//                }
-//
-//                Cursor cursor = db.rawQuery(queryString, new String[]{"%" + word + "%"});
-//                Log.d("searchWord", "Searching for [" + word +"] |  count for " + tableName +": " + Integer.toString(cursor.getCount()));
-//                if(cursor.getCount() > 0 && cursor.moveToFirst()) {
-//                    int index = cursor.getColumnIndex("hougen");
-//                    Log.d("searchWord", "Found in " + tableName + ": " + cursor.getString(index));
-//                }
-//                allResults.add(cursor);
-//            } else {
-//                allResults.add(null);
-//            }
-//        }
-//
-//        return allResults.toArray(new Cursor[0]);
-//    }
+                    allResults.add(cursor);
+                } catch (Exception e) {
+                    Log.e("DBHelper", "Error fetching verbs", e);
+                    allResults.add(null);
+                }
+
+            }
+        }
+
+        return allResults.toArray(new Cursor[0]);
+    }
+    
 }

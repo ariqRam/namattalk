@@ -23,6 +23,7 @@ import android.net.Uri;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 public class NamaPopup extends AccessibilityService {
@@ -46,7 +47,9 @@ public class NamaPopup extends AccessibilityService {
     private int currentItemIndex = 0;   // Tracks the item within the current list
     private WindowManager.LayoutParams params;
     private String indicator = "";
+    private VerbConjugator verbConjugator;
     private boolean isConjugated = false;
+    private HashMap<String, List<String>> verbMap;
 
 
     @Override
@@ -59,6 +62,10 @@ public class NamaPopup extends AccessibilityService {
         }
 
         Log.d("ONCREATE", "Non-native mode = " + sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false));
+
+        //initialize verbConjugator
+        verbConjugator = new VerbConjugator(this);
+        verbMap = verbConjugator.getVerbs();
 
         // Check for the SYSTEM_ALERT_WINDOW permission
         if (!Settings.canDrawOverlays(this)) {
@@ -170,8 +177,8 @@ public class NamaPopup extends AccessibilityService {
                         String pos = cursor.getString(posColumnIndex);
                         String baseWord = "";
 
-                        if (pos.equals("動詞") && sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
-                            baseWord = VerbConjugator.reconjugateToBase(fullText);
+                        if ("動詞".equals(pos) && sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
+                            baseWord = verbConjugator.reconjugate(fullText, verbMap);
                             Log.d("reconjugateToBase", "reconjugateToBase: " + baseWord);
                             isConjugated = true;
                             queryText = baseWord;
@@ -198,7 +205,7 @@ public class NamaPopup extends AccessibilityService {
 
                             if (hougen != null && (hougen.equals(queryText) || trigger.equals(queryText))) {
                                 if (isConjugated) {
-                                    hougen = VerbConjugator.conjugateFromBase(hougen,VerbConjugator.getVerbForm(fullText));
+                                    hougen = verbConjugator.conjugate(hougen, VerbConjugator.getVerbForm(fullText), verbMap);
                                     Log.d("conjugateFromBase", "conjugateFromBase to : " + hougen);
                                     isConjugated = false;
                                 }
@@ -276,8 +283,8 @@ public class NamaPopup extends AccessibilityService {
                             String nextPos = nextCursor.getString(nextPosColumnIndex);
                             String nextBaseWord = "";
 
-                            if (nextPos.equals("動詞") && sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
-                                nextBaseWord = VerbConjugator.reconjugateToBase(fullText);
+                            if ("動詞".equals(nextPos) && sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
+                                nextBaseWord = verbConjugator.reconjugate(fullText, verbMap);
                                 Log.d("reconjugateToBase", "reconjugateToBase: " + nextBaseWord);
                                 isConjugated = true;
                                 nextQueryText = nextBaseWord;
@@ -306,7 +313,7 @@ public class NamaPopup extends AccessibilityService {
 
                                 if (nextHougen != null && (nextHougen.equals(nextQueryText) || nextTrigger.equals(nextQueryText))) {
                                    if (isConjugated) {
-                                       nextHougen = VerbConjugator.conjugateFromBase(nextHougen,VerbConjugator.getVerbForm(fullText));
+                                       nextHougen = verbConjugator.conjugate(nextHougen, VerbConjugator.getVerbForm(fullText), verbMap);
                                        Log.d("conjugateFromBase", "conjugateFromBase to : " + nextHougen);
                                        isConjugated = false;
                                    }
@@ -476,6 +483,7 @@ public class NamaPopup extends AccessibilityService {
         textView.setText("な");
         chihouTextView.setText("");
         chihouTextView.setVisibility(View.GONE);
+        characterPositions.clear();
         hougenInformation = new GlobalVariable.HougenInformation("","", "", "", "", "", "");
         hougenInformation.chihou = "";
         if (indicatorTextView != null) {
