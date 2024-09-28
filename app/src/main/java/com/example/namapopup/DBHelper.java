@@ -90,26 +90,53 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // Add methods to query your dictionary here
+
     public Cursor[] searchWord(String word) {
         SQLiteDatabase db = this.getReadableDatabase();
         List<Cursor> allResults = new ArrayList<>();
         SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
-        String queryString  ="";
+
+        // Split the search word by '、' to handle multiple words
+        String[] splitWords = word.split("、");
 
         for (String tableName : chosenChihous) {
             if (tableName != null && !tableName.isEmpty()) {
+                StringBuilder queryBuilder = new StringBuilder();
                 if (sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
                     Log.d("searchWord", "Non-native mode activated");
-                    queryString = "SELECT hougen, trigger, def, example FROM " + tableName + " WHERE trigger LIKE ?";
-                }
-                else {
+                    queryBuilder.append("SELECT hougen, trigger, def, example FROM ").append(tableName).append(" WHERE ");
+
+                    // Add dynamic LIKE conditions for each split word in 'trigger' column
+                    for (int i = 0; i < splitWords.length; i++) {
+                        queryBuilder.append("trigger LIKE ?");
+                        if (i != splitWords.length - 1) {
+                            queryBuilder.append(" OR ");
+                        }
+                    }
+                } else {
                     Log.d("searchWord", "Native mode activated");
-                    queryString = "SELECT hougen, trigger, def, example FROM " + tableName + " WHERE hougen LIKE ?";
+                    queryBuilder.append("SELECT hougen, trigger, def, example FROM ").append(tableName).append(" WHERE ");
+
+                    // Add dynamic LIKE conditions for each split word in 'hougen' column
+                    for (int i = 0; i < splitWords.length; i++) {
+                        queryBuilder.append("hougen LIKE ?");
+                        if (i != splitWords.length - 1) {
+                            queryBuilder.append(" OR ");
+                        }
+                    }
                 }
 
-                Cursor cursor = db.rawQuery(queryString, new String[]{"%" + word + "%"});
-                Log.d("searchWord", "Searching for [" + word +"] |  count for " + tableName +": " + Integer.toString(cursor.getCount()));
-                if(cursor.getCount() > 0 && cursor.moveToFirst()) {
+                // Prepare query arguments (for each split word, append % to enable partial matching)
+                String[] queryArgs = new String[splitWords.length];
+                for (int i = 0; i < splitWords.length; i++) {
+                    queryArgs[i] = "%" + splitWords[i] + "%"; // Partial matching with LIKE
+                }
+
+                // Execute the raw query
+                Cursor cursor = db.rawQuery(queryBuilder.toString(), queryArgs);
+                Log.d("searchWord", "Searching for [" + word + "] in table " + tableName + " | count: " + cursor.getCount());
+
+                if (cursor.getCount() > 0 && cursor.moveToFirst()) {
                     int index = cursor.getColumnIndex("hougen");
                     Log.d("searchWord", "Found in " + tableName + ": " + cursor.getString(index));
                 }
@@ -121,4 +148,38 @@ public class DBHelper extends SQLiteOpenHelper {
 
         return allResults.toArray(new Cursor[0]);
     }
+
+
+
+//    public Cursor[] searchWord(String word) {
+//        SQLiteDatabase db = this.getReadableDatabase();
+//        List<Cursor> allResults = new ArrayList<>();
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
+//        String queryString  ="";
+//
+//        for (String tableName : chosenChihous) {
+//            if (tableName != null && !tableName.isEmpty()) {
+//                if (sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
+//                    Log.d("searchWord", "Non-native mode activated");
+//                    queryString = "SELECT hougen, trigger, def, example FROM " + tableName + " WHERE trigger LIKE ?";
+//                }
+//                else {
+//                    Log.d("searchWord", "Native mode activated");
+//                    queryString = "SELECT hougen, trigger, def, example FROM " + tableName + " WHERE hougen LIKE ?";
+//                }
+//
+//                Cursor cursor = db.rawQuery(queryString, new String[]{"%" + word + "%"});
+//                Log.d("searchWord", "Searching for [" + word +"] |  count for " + tableName +": " + Integer.toString(cursor.getCount()));
+//                if(cursor.getCount() > 0 && cursor.moveToFirst()) {
+//                    int index = cursor.getColumnIndex("hougen");
+//                    Log.d("searchWord", "Found in " + tableName + ": " + cursor.getString(index));
+//                }
+//                allResults.add(cursor);
+//            } else {
+//                allResults.add(null);
+//            }
+//        }
+//
+//        return allResults.toArray(new Cursor[0]);
+//    }
 }

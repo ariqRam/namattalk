@@ -141,7 +141,7 @@ public class NamaPopup extends AccessibilityService {
             Cursor[] cursors = databaseHelper.searchWord(queryText);
 
             boolean matchFound = false;
-            List<String> currentChihouResults = new ArrayList<>(); // To hold results for the current `chihou`
+            List<String> currentChihouResults = new ArrayList<>(); // To hold results for the current chihou
 
             // Iterate over each cursor (one per chihou/region)
             for (int i = 0; i < cursors.length; i++) {
@@ -167,13 +167,24 @@ public class NamaPopup extends AccessibilityService {
                         // Check for an exact match of dialect word (hougen & trigger)
                         if (hougenColumnIndex != -1) {
                             String hougen = cursor.getString(hougenColumnIndex);
-                            String trigger = (triggerColumnIndex != -1) ? cursor.getString(triggerColumnIndex) : "";
+                            String triggers = (triggerColumnIndex != -1) ? cursor.getString(triggerColumnIndex) : "";
+                            String[] splitTriggers = triggers.split("、");
+                            String trigger = "";
+
+                            //split words in Trigger column
+                            for (String trig : splitTriggers) {
+                                if (trig.equals(queryText)) {
+                                    Log.d(TAG, "Exact match found for trigger: " + trig);
+                                    trigger = trig;
+                                    break; // Stop checking after the first match
+                                }
+                            }
 
                             Log.d("hougenColumnIndex", "hougen: " + hougen + " Query: " + queryText + "trigger: " + trigger);
 
                             if (hougen != null && (hougen.equals(queryText) || trigger.equals(queryText))) {
                                 // Exact match found, store result and update relevant info
-                                currentChihouResults.add(hougen); // Add match to the list for the current `chihou`
+                                currentChihouResults.add(hougen); // Add match to the list for the current chihou
                                 Log.d(TAG, "Found exact match: " + hougen + " at " + startIndex + "-" + endIndex);
 
                                 // Populate hougenInformation with data from cursor
@@ -214,9 +225,9 @@ public class NamaPopup extends AccessibilityService {
                 }
             }
 
-            // Add all matches from the current `chihou` (if any) to the searchResults list
+            // Add all matches from the current chihou (if any) to the searchResults list
             if (!currentChihouResults.isEmpty()) {
-                searchResults.add(currentChihouResults); // Add results for the current `chihou`
+                searchResults.add(currentChihouResults); // Add results for the current chihou
             }
 
             // Handle prefix-forming condition
@@ -242,11 +253,25 @@ public class NamaPopup extends AccessibilityService {
 
                             if (nextHougenColumnIndex != -1) {
                                 String nextHougen = nextCursor.getString(nextHougenColumnIndex);
-                                String nextTrigger = (nextTriggerColumnIndex != -1) ? nextCursor.getString(nextTriggerColumnIndex) : "";
+                                String nextTriggers = (nextTriggerColumnIndex != -1) ? nextCursor.getString(nextTriggerColumnIndex) : "";
+                                String[] splitNextTriggers = nextTriggers.split("、");
+                                String nextTrigger = "";
+
+                                //split words in Trigger column
+                                for (String nextTrig : splitNextTriggers) {
+                                    if (nextTrig.equals(nextQueryText)) {
+                                        Log.d(TAG, "Exact match found for trigger: " + nextTrig);
+                                        nextTrigger = nextTrig;
+                                        break; // Stop checking after the first match
+                                    }
+                                }
+
+                                Log.d("hougenColumnIndex", "hougen: " + nextHougen + " Query: " + nextQueryText + "trigger: " + nextTrigger);
+
 
                                 if (nextHougen != null && (nextHougen.equals(nextQueryText) || nextTrigger.equals(nextQueryText))) {
                                     // Exact match found in next query
-                                    nextChihouResults.add(nextHougen); // Add match to the next `chihou` results
+                                    nextChihouResults.add(nextHougen); // Add match to the next chihou results
 
                                     // Populate hougenInformation with next query match
                                     hougenInformation.hougen = nextHougen;
@@ -327,6 +352,7 @@ public class NamaPopup extends AccessibilityService {
             resetFloatingButtonText();
         }
     }
+
 
     private void updateIndicator() {
         indicator = (currentResultIndex + 1) + "/" + searchResults.size();
