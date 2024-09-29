@@ -197,10 +197,10 @@ public class NewSettingsActivity extends BaseDrawerActivity {
             state.isEnabled = !state.isEnabled;
 
             if (state.isEnabled) {
-                // If toggle is +, revert mode button to 学習 or 母語
-                toggleButton.setText("+");
-                toggleButton.setBackground(createCircleDrawable(colorPlusBg));
-                toggleButton.setTextColor(colorPlusText);
+                // If toggle is -, revert mode button to 学習 or 母語
+                toggleButton.setText("-");
+                toggleButton.setBackground(createCircleDrawable(colorMinusBg));
+                toggleButton.setTextColor(colorMinusText);
 
                 // Restore the original mode background and text
                 modeButton.setText(state.mode);
@@ -213,9 +213,9 @@ public class NewSettingsActivity extends BaseDrawerActivity {
                 }
             } else {
                 // If toggle is -, set mode button to 未使用 with corresponding colors
-                toggleButton.setText("-");
-                toggleButton.setBackground(createCircleDrawable(colorMinusBg));
-                toggleButton.setTextColor(colorMinusText);
+                toggleButton.setText("+");
+                toggleButton.setBackground(createCircleDrawable(colorPlusBg));
+                toggleButton.setTextColor(colorPlusText);
 
                 // Update mode button to "未使用"
                 modeButton.setText("未使用");
