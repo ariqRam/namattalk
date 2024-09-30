@@ -2,6 +2,8 @@ package com.example.namapopup;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import static com.example.namapopup.Helper.getDialectState;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -94,16 +96,22 @@ public class DBHelper extends SQLiteOpenHelper {
     public Cursor[] searchWord(String word) {
         SQLiteDatabase db = this.getReadableDatabase();
         List<Cursor> allResults = new ArrayList<>();
-        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
+
 
         // Split the search word by '、' to handle multiple words
         String[] splitWords = word.split("、");
 
-        for (String tableName : chosenChihous) {
-            if (tableName != null && !tableName.isEmpty()) {
+        for (String chihou : Constants.CHIHOUS) {
+            DialectState dialectState = getDialectState(context, chihou);
+            String tableName = chihou;
+
+            // Only proceed if the dialect is enabled for searching
+            if (dialectState.isEnabled && tableName != null && !tableName.isEmpty()) {
                 StringBuilder queryBuilder = new StringBuilder();
-                if (sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
-                    Log.d("searchWord", "Non-native mode activated");
+
+                // Branch based on the mode ("学習" for non-native, "母語" for native)
+                if ("学習".equals(dialectState.mode)) {
+                    Log.d("searchWord", tableName + " is in non-native mode");
                     queryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
 
                     // Add dynamic LIKE conditions for each split word in 'trigger' column
@@ -113,8 +121,8 @@ public class DBHelper extends SQLiteOpenHelper {
                             queryBuilder.append(" OR ");
                         }
                     }
-                } else {
-                    Log.d("searchWord", "Native mode activated");
+                } else if ("母語".equals(dialectState.mode)) {
+                    Log.d("searchWord", tableName + " is in native mode");
                     queryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
 
                     // Add dynamic LIKE conditions for each split word in 'hougen' column
@@ -124,6 +132,10 @@ public class DBHelper extends SQLiteOpenHelper {
                             queryBuilder.append(" OR ");
                         }
                     }
+                } else {
+                    // If mode is neither "学習" nor "母語", skip to the next dialect
+                    Log.d("searchWord", "Unrecognized mode for " + tableName + ": " + dialectState.mode);
+                    continue;
                 }
 
                 // Prepare query arguments (for each split word, append % to enable partial matching)
@@ -138,7 +150,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
                 if (cursor.getCount() > 0 && cursor.moveToFirst()) {
                     int index = cursor.getColumnIndex("hougen");
-
                     Log.d("searchWord", "Found in " + tableName + ": " + cursor.getString(index));
                 }
                 allResults.add(cursor);
@@ -149,6 +160,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         return allResults.toArray(new Cursor[0]);
     }
+
 
     public Cursor[] getVerbs() {
         SQLiteDatabase db = this.getReadableDatabase();

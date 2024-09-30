@@ -1,5 +1,8 @@
 package com.example.namapopup;
 
+import static com.example.namapopup.Helper.getDialectState;
+import static com.example.namapopup.Helper.isNonNativeMode;
+
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
@@ -57,9 +60,6 @@ public class NamaPopup extends AccessibilityService {
         super.onCreate();
         databaseHelper = new DBHelper(this);
         sharedPreferences = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
-        for(String chihou : Constants.CHIHOUS) {
-            Log.d("ONCREATE", "Prefs of " + chihou + " = " + sharedPreferences.getBoolean(chihou, false));
-        }
 
         Log.d("ONCREATE", "Non-native mode = " + sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false));
 
@@ -177,7 +177,9 @@ public class NamaPopup extends AccessibilityService {
                         String pos = cursor.getString(posColumnIndex);
                         String baseWord = "";
 
-                        if ("動詞".equals(pos) && sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
+                        DialectState dialectState = getDialectState(this, Constants.CHIHOUS[i]);
+
+                        if ("動詞".equals(pos) && isNonNativeMode(dialectState)) {
                             baseWord = verbConjugator.reconjugate(fullText, verbMap);
                             Log.d("reconjugateToBase", "reconjugateToBase: " + baseWord);
                             isConjugated = true;
@@ -185,7 +187,7 @@ public class NamaPopup extends AccessibilityService {
                         }
 
                         // Check for an exact match of dialect word (hougen & trigger)
-                        if (hougenColumnIndex != -1) {
+                        if (hougenColumnIndex != -1 && isNonNativeMode(dialectState) ) {
                             String hougen = cursor.getString(hougenColumnIndex);
                             String triggers = (triggerColumnIndex != -1) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");

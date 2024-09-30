@@ -1,5 +1,7 @@
 package com.example.namapopup;
 
+import static com.example.namapopup.Helper.getDialectState;
+
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
@@ -62,10 +64,10 @@ public class NewSettingsActivity extends BaseDrawerActivity {
         toggleButtonHida = findViewById(R.id.toggle_button_hida);
 
         // Load saved states for dialects
-        DialectState toyamaState = getDialectState("富山弁");
-        DialectState hidaState = getDialectState("飛騨弁");
+        DialectState toyamaState = getDialectState(this, "toyama");
+        DialectState hidaState = getDialectState(this, "hida");
 
-        // Set initial states for 富山弁 buttons
+        // Set initial states for toyama buttons
         if (toyamaState.isEnabled) {
             modeButtonToyama.setText(toyamaState.mode);
             modeButtonToyama.setBackground(createRoundedRectangleDrawable(
@@ -134,26 +136,10 @@ public class NewSettingsActivity extends BaseDrawerActivity {
     }
 
 
-    // Retrieve dialect state from SharedPreferences
-    private DialectState getDialectState(String dialect) {
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
-
-        // Get mode and enabled state, with defaults if not found
-        String mode = sharedPreferences.getString(dialect + "_mode", "学習");
-        boolean isEnabled = sharedPreferences.getBoolean(dialect + "_enabled", false);
-
-        DialectState state = new DialectState();
-        state.mode = mode;
-        state.isEnabled = isEnabled;
-
-        return state;
-    }
-
-
     private void setOnClickListenerForDialectButtons() {
 
-        dialectStates.put("富山弁", new DialectState());
-        dialectStates.put("飛騨弁", new DialectState());
+        dialectStates.put("toyama", new DialectState());
+        dialectStates.put("hida", new DialectState());
 
         // Click listener for mode buttons (rounded rectangle)
         View.OnClickListener modeClickListener = v -> {
@@ -187,9 +173,9 @@ public class NewSettingsActivity extends BaseDrawerActivity {
 
             // Find the corresponding mode button
             Button modeButton;
-            if (dialect.equals("富山弁")) {
+            if (dialect.equals("toyama")) {
                 modeButton = findViewById(R.id.mode_button_toyama);
-            } else { // 飛騨弁
+            } else { // hida
                 modeButton = findViewById(R.id.mode_button_hida);
             }
 
@@ -229,16 +215,16 @@ public class NewSettingsActivity extends BaseDrawerActivity {
 
 
         // Assign tags to buttons and set listeners
-        modeButtonToyama.setTag("富山弁");
+        modeButtonToyama.setTag("toyama");
         modeButtonToyama.setOnClickListener(modeClickListener);
 
-        toggleButtonToyama.setTag("富山弁");
+        toggleButtonToyama.setTag("toyama");
         toggleButtonToyama.setOnClickListener(toggleClickListener);
 
-        modeButtonHida.setTag("飛騨弁");
+        modeButtonHida.setTag("hida");
         modeButtonHida.setOnClickListener(modeClickListener);
 
-        toggleButtonHida.setTag("飛騨弁");
+        toggleButtonHida.setTag("hida");
         toggleButtonHida.setOnClickListener(toggleClickListener);
     }
 
@@ -260,11 +246,5 @@ public class NewSettingsActivity extends BaseDrawerActivity {
         return drawable;
     }
 
-}
-
-// Create a data class to hold the state for each dialect
-class DialectState {
-    String mode = "学習"; // Default mode
-    boolean isEnabled = false; // Default toggle state
 }
 
