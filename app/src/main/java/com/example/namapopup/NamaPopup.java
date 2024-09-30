@@ -241,7 +241,6 @@ public class NamaPopup extends AccessibilityService {
 
                                 // Separate normal text outside of match
                                 seperateNormalText(fullText, startIndex, endIndex);
-                                Log.d(TAG, "characterPosition: " + characterPositions);
 
                                 matchFound = true; // Mark as match found
                             }
@@ -444,11 +443,13 @@ public class NamaPopup extends AccessibilityService {
     // Function to update the hougenInformation based on the current selected item and region index
     private void updateHougenInformation(String currentItem, int regionIndex) {
         // Set hougen and chihou information using the current item and region index
+        String TAG = "updateHougenInfo";
         hougenInformation.hougen = currentItem;
         hougenInformation.chihou = Constants.CHIHOUS_JP[regionIndex]; // Set the region (chihou)
 
         // Fetch more detailed information if available
         Cursor[] cursors = databaseHelper.searchWord(currentItem);  // Use the currentItem to get the relevant data
+        Log.d(TAG, "Cursor length for " + hougenInformation.chihou + Integer.toString(cursors.length));
 
         if (cursors != null && cursors.length > 0) {
             for (Cursor cursor : cursors) {
@@ -467,7 +468,7 @@ public class NamaPopup extends AccessibilityService {
                         hougenInformation.example = cursor.getString(exampleColumnIndex);
                     }
 
-                    Log.d("hougenInformation", "Updated hougenInformation: " + hougenInformation.hougen + ", "
+                    Log.d(TAG, "Updated hougenInformation: " + hougenInformation.hougen + ", "
                             + hougenInformation.chihou + ", "
                             + hougenInformation.def + ", "
                             + hougenInformation.example);
