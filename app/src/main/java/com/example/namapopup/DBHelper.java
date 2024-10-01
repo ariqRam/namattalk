@@ -113,9 +113,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 // Determine the column to search based on the mode ("学習" for non-native, "母語" for native)
                 String searchColumn = "学習".equals(dialectState.mode) ? "trigger" : "hougen";
 
-                // Log the mode
-                Log.d("searchWord", tableName + " is in " + dialectState.mode + " mode");
-
                 // Build the exact match query
                 exactMatchQueryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
                 for (int i = 0; i < splitWords.length; i++) {

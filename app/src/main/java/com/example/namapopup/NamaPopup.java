@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.net.Uri;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -35,7 +36,6 @@ public class NamaPopup extends AccessibilityService {
     private TextView indicatorTextView;
     private TextView textView;
     private TextView chihouTextView;
-    CharSequence composingText;
     private String convertedText = "";
     private static final long LONG_PRESS_THRESHOLD = 500;
     private DBHelper databaseHelper;
@@ -45,7 +45,7 @@ public class NamaPopup extends AccessibilityService {
     private boolean textViewSet = false;
     private List<CharacterPosition> characterPositions = new ArrayList<>();
     private SharedPreferences sharedPreferences;
-    public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "");;
+    public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "");
     private int currentResultIndex = 0; // Tracks which list within searchResults we are currently in
     private int currentItemIndex = 0;   // Tracks the item within the current list
     private WindowManager.LayoutParams params;
@@ -138,272 +138,97 @@ public class NamaPopup extends AccessibilityService {
         String TAG = "showDialectSuggestions";
         int startIndex = 0;
         int endIndex = 0;
-        int consecutiveNonMatchingChars = 0;
 
         // List to hold results grouped by chihou (region)
         searchResults = new ArrayList<>();
 
-        while (endIndex < fullText.length()) {
-            // Query for substring from startIndex to endIndex
-            String queryText = fullText.substring(startIndex, endIndex + 1);
-            Cursor[] cursors = databaseHelper.searchWord(queryText);
-
+        // Scan through the input text
+        while (startIndex < fullText.length()) {
             boolean matchFound = false;
-            List<String> currentChihouResults = new ArrayList<>(); // To hold results for the current chihou
+            endIndex = startIndex; // Reset endIndex for each new startIndex
+            List<String> currentChihouResults = new ArrayList<>();
 
-            // Iterate over each cursor (one per chihou/region)
-            for (int i = 0; i < cursors.length; i++) {
-                Cursor cursor = cursors[i];
-                if (cursor != null) {
-                    Log.d("cursor", "Query: " + queryText + " Cursor: " + cursor.getCount());
-                }
+            while (endIndex < fullText.length()) {
+                String queryText = fullText.substring(startIndex, endIndex + 1);
+                Cursor[] cursors = databaseHelper.searchWord(queryText);
 
-                if (cursor != null && cursor.getCount() > 0) {
+                // Iterate over each region
+                for (int i = 0; i < cursors.length; i++) {
+                    Cursor cursor = cursors[i];
+                    DialectState dialectState = getDialectState(this, Constants.CHIHOUS[i]);
+                    if (cursor != null && cursor.getCount() > 0) {
+                        if (cursor.moveToFirst()) {
+                            int hougenColumnIndex = cursor.getColumnIndex("hougen");
+                            int triggerColumnIndex = cursor.getColumnIndex("trigger");
 
-                    // Move to the first valid row
-                    if (cursor.moveToFirst()) {
-                        // Get column indexes from the result
-                        int hougenColumnIndex = cursor.getColumnIndex("hougen");
-                        int triggerColumnIndex = cursor.getColumnIndex("trigger");
-                        int prefColumnIndex = cursor.getColumnIndex("pref");
-                        int posColumnIndex = cursor.getColumnIndex("pos");
-                        int areaColumnIndex = cursor.getColumnIndex("area");
-                        int defColumnIndex = cursor.getColumnIndex("def");
-                        int exampleColumnIndex = cursor.getColumnIndex("example");
-                        Log.d("hougenColumnIndex", "hougenColumnIndex: " + hougenColumnIndex);
-                        Log.d("triggerColumnIndex", "triggerColumnIndex: " + triggerColumnIndex);
-
-                        //reconjugation to base form
-                        String pos = cursor.getString(posColumnIndex);
-                        String baseWord = "";
-
-                        DialectState dialectState = getDialectState(this, Constants.CHIHOUS[i]);
-
-                        if ("動詞".equals(pos) && isNonNativeMode(dialectState)) {
-                            baseWord = verbConjugator.reconjugate(fullText, verbMap);
-                            Log.d("reconjugateToBase", "reconjugateToBase: " + baseWord);
-                            isConjugated = true;
-                            queryText = baseWord;
-                        }
-
-                        // Check for an exact match of dialect word (hougen & trigger)
-                        if (hougenColumnIndex != -1 && isNonNativeMode(dialectState) ) {
+                            // Check for dialect word match
                             String hougen = cursor.getString(hougenColumnIndex);
-                            String triggers = (triggerColumnIndex != -1) ? cursor.getString(triggerColumnIndex) : "";
+                            String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");
-                            String trigger = "";
+                            boolean isExactMatch = hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText);
 
-                            //split words in Trigger column
-                            for (String trig : splitTriggers) {
-                                if (trig.equals(queryText)) {
-                                    Log.d(TAG, "Exact match found for trigger: " + trig);
-                                    trigger = trig;
-                                    break; // Stop checking after the first match
-                                }
-                            }
+                            if (isExactMatch) {
+                                Log.d(TAG, "Exact match found: " + hougen);
+                                currentChihouResults.add(hougen); // Add the match
 
-                            Log.d("hougenColumnIndex", "hougen: " + hougen + " Query: " + queryText + "trigger: " + trigger);
+                                // Add to character positions, update relevant information
+                                updateHougenInformation(cursor, i);
+                                addCharacterPositions(hougen, startIndex);
+                                separateNormalText(fullText, startIndex, endIndex);
 
-                            if (hougen != null && (hougen.equals(queryText) || trigger.equals(queryText))) {
-                                if (isConjugated) {
-                                    hougen = verbConjugator.conjugate(hougen, VerbConjugator.getVerbForm(fullText), verbMap);
-                                    Log.d("conjugateFromBase", "conjugateFromBase to : " + hougen);
-                                    isConjugated = false;
-                                }
-
-                                // Exact match found, store result and update relevant info
-                                currentChihouResults.add(hougen); // Add match to the list for the current chihou
-                                Log.d(TAG, "Found exact match: " + hougen + " at " + startIndex + "-" + endIndex);
-
-                                // Populate hougenInformation with data from cursor
-                                hougenInformation.hougen = hougen;
-                                hougenInformation.chihou = Constants.CHIHOUS_JP[i];// Region from the cursor
-                                Log.d("checkChihou", "checkChihou: " + hougenInformation.chihou);
-                                hougenInformation.pref = "";
-                                hougenInformation.area = "";
-                                hougenInformation.def = cursor.getString(defColumnIndex);
-                                hougenInformation.example = cursor.getString(exampleColumnIndex);
-
-                                // Log hougen information
-                                Log.d(TAG, "hougenInformation: " + hougenInformation.hougen + ", "
-                                        + hougenInformation.pref + ", "
-                                        + hougenInformation.area + ", "
-                                        + hougenInformation.def + ", "
-                                        + hougenInformation.example);
-
-                                // Clear and update character positions for this result
-                                characterPositions.clear();
-                                int position = startIndex;
-                                for (char c : hougen.toCharArray()) {
-                                    characterPositions.add(new CharacterPosition(c, position));
-                                    position++;
-                                }
-
-                                // Separate normal text outside of match
-                                seperateNormalText(fullText, startIndex, endIndex);
-
-                                matchFound = true; // Mark as match found
+                                matchFound = true;
+                                break; // Stop scanning if exact match found
                             }
                         }
                     }
+                    if (cursor != null) cursor.close();
                 }
 
-                if (cursor != null) {
-                    cursor.close(); // Close cursor after use
-                }
+                if (matchFound) break; // Stop expanding endIndex once a match is found
+                endIndex++;
             }
 
+            // After scanning the entire substring from startIndex
+            addCurrentResultToSearchResults(currentChihouResults);
 
-            // Add all matches from the current chihou (if any) to the searchResults list
-            if (!currentChihouResults.isEmpty() && !searchResults.contains(currentChihouResults)) {
-                searchResults.add(currentChihouResults); // Add results for the current chihou
-            }
-
-            // Handle prefix-forming condition
-            if (endIndex + 1 < fullText.length()) {
-                String nextQueryText = fullText.substring(startIndex, endIndex + 2);
-                Log.d(TAG, "nextQueryText: " + nextQueryText);
-                Cursor[] nextCursors = databaseHelper.searchWord(nextQueryText);
-
-                boolean nextPrefixValid = false;
-                List<String> nextChihouResults = new ArrayList<>(); // To hold results for the next query
-
-                for (int j = 0; j < nextCursors.length; j++) {
-                    Cursor nextCursor = nextCursors[j];
-                    if (nextCursor != null && nextCursor.getCount() > 0) {
-                        nextPrefixValid = true;
-
-                        // Move to the first row and handle exact match for next query
-                        if (nextCursor.moveToFirst()) {
-                            int nextHougenColumnIndex = nextCursor.getColumnIndex("hougen");
-                            int nextTriggerColumnIndex = nextCursor.getColumnIndex("trigger");
-                            int nextDefColumnIndex = nextCursor.getColumnIndex("def");
-                            int nextExampleColumnIndex = nextCursor.getColumnIndex("example");
-                            int nextPosColumnIndex = nextCursor.getColumnIndex("pos");
-
-                            //reconjugation to base form
-                            String nextPos = nextCursor.getString(nextPosColumnIndex);
-                            String nextBaseWord = "";
-
-                            if ("動詞".equals(nextPos) && sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false)) {
-                                nextBaseWord = verbConjugator.reconjugate(fullText, verbMap);
-                                Log.d("reconjugateToBase", "reconjugateToBase: " + nextBaseWord);
-                                isConjugated = true;
-                                nextQueryText = nextBaseWord;
-                            }
-
-                            if (nextHougenColumnIndex != -1) {
-                                String nextHougen = nextCursor.getString(nextHougenColumnIndex);
-                                String nextTriggers = (nextTriggerColumnIndex != -1) ? nextCursor.getString(nextTriggerColumnIndex) : "";
-                                String[] splitNextTriggers = nextTriggers.split("、");
-                                String nextTrigger = "";
-                                String nextConjugatedHougen = "";
-
-                                //split words in Trigger column
-                                for (String nextTrig : splitNextTriggers) {
-                                    if (nextTrig.equals(nextQueryText)) {
-                                        Log.d(TAG, "Exact match found for trigger: " + nextTrig);
-                                        nextTrigger = nextTrig;
-                                        break; // Stop checking after the first match
-                                    }
-                                }
-
-
-
-                                Log.d("hougenColumnIndex", "hougen: " + nextHougen + " Query: " + nextQueryText + "trigger: " + nextTrigger);
-
-
-                                if (nextHougen != null && (nextHougen.equals(nextQueryText) || nextTrigger.equals(nextQueryText))) {
-                                   if (isConjugated) {
-                                       nextHougen = verbConjugator.conjugate(nextHougen, VerbConjugator.getVerbForm(fullText), verbMap);
-                                       Log.d("conjugateFromBase", "conjugateFromBase to : " + nextHougen);
-                                       isConjugated = false;
-                                   }
-
-                                   // Exact match found in next query
-                                    nextChihouResults.add(nextHougen); // Add match to the next chihou results
-
-                                    // Populate hougenInformation with next query match
-                                    hougenInformation.hougen = nextHougen;
-                                    hougenInformation.chihou = Constants.CHIHOUS_JP[j]; // Update this to reflect actual region if needed
-                                    Log.d("checkChihou", "checkChihou: " + hougenInformation.chihou);
-                                    hougenInformation.pref = "";
-                                    hougenInformation.area = "";
-                                    hougenInformation.def = nextCursor.getString(nextDefColumnIndex);
-                                    hougenInformation.example = nextCursor.getString(nextExampleColumnIndex);
-
-                                    // Log next hougen information
-                                    Log.d(TAG, "Found exact match in next query: " + nextHougen);
-
-                                    // Update character positions
-                                    characterPositions.clear();
-                                    int position = startIndex;
-                                    for (char c : nextHougen.toCharArray()) {
-                                        characterPositions.add(new CharacterPosition(c, position));
-                                        position++;
-                                    }
-
-                                    // Separate normal text for next match
-                                    seperateNormalText(fullText, startIndex, endIndex + 1);
-                                    Log.d(TAG, "characterPosition after next query match: " + characterPositions);
-
-                                    matchFound = true; // Mark match found in the next query
-                                }
-                            }
-                        }
-                    }
-                    if (nextCursor != null) {
-                        nextCursor.close();
-                    }
-                }
-
-                // Add next query results to searchResults
-                if (!nextChihouResults.isEmpty() && !searchResults.contains(nextChihouResults)) {
-                    searchResults.add(nextChihouResults);
-                }
-
-                if (!nextPrefixValid) {
-                    // Next character doesn't form a valid prefix, move start index
-                    startIndex = endIndex + 1;
-                    endIndex = startIndex;
-                    consecutiveNonMatchingChars = 0;
-                } else {
-                    // Both current and next character form a valid prefix
-                    consecutiveNonMatchingChars = 0;
-                    endIndex++;
-                }
-            } else {
-                // At the last character, we've already checked for exact match
-                break;
-            }
-
-            // If no match found after checking all cursors, increment indexes
-            if (!matchFound) {
-                if (endIndex == startIndex) {
-                    startIndex++;
-                    endIndex++;
-                } else {
-                    consecutiveNonMatchingChars++;
-                    if (consecutiveNonMatchingChars > 2) {
-                        // Stop searching after 2 non-matching chars
-                        break;
-                    }
-                    endIndex++;
-                }
-            }
+            // Move startIndex to the next position
+            startIndex++;
         }
 
-        // Log the final searchResults structure
-        Log.d(TAG, "Final searchResults: " + searchResults);
+        // Update UI with final results
+        updateSuggestionsUI();
+    }
 
-        // Update floating button text based on search results
+
+    private void addCurrentResultToSearchResults(List<String> currentChihouResults) {
+        // Add all matches from the current chihou (if any) to the searchResults list
+        if (!currentChihouResults.isEmpty() && !searchResults.contains(currentChihouResults)) {
+            searchResults.add(currentChihouResults); // Add results for the current chihou
+        }
+    }
+
+    private void updateSuggestionsUI() {
         if (!searchResults.isEmpty()) {
-            updateFloatingButtonText();
-
+            // Update floating button text or suggestions UI based on search results
+            updateFloatingButtonText(); // Update with the collected results
         } else {
+            // Reset the suggestions UI if no results were found
             resetFloatingButtonText();
         }
     }
+
+
+    private void addCharacterPositions(String matchedWord, int startIndex) {
+        characterPositions.clear(); // Clear existing character positions before adding new ones
+        int position = startIndex;
+
+        // Populate characterPositions with the character and its position
+        for (char c : matchedWord.toCharArray()) {
+            characterPositions.add(new CharacterPosition(c, position));
+            position++;
+        }
+    }
+
 
 
     private void updateIndicator() {
@@ -429,9 +254,6 @@ public class NamaPopup extends AccessibilityService {
                 textView.setText(currentItem);
                 chihouTextView.setText(hougenInformation.chihou);
                 Log.d(TAG, "Showing: " + currentItem + " from searchResults[" + currentResultIndex + "][" + currentItemIndex + "]");
-
-                // Update hougenInformation based on the current item
-//                updateHougenInformation(currentItem, currentResultIndex);
             } else {
                 Log.d(TAG, "Inner list is empty");
             }
@@ -444,44 +266,19 @@ public class NamaPopup extends AccessibilityService {
     }
 
     // Function to update the hougenInformation based on the current selected item and region index
-    private void updateHougenInformation(String currentItem, int regionIndex) {
-        // Set hougen and chihou information using the current item and region index
-        String TAG = "updateHougenInfo";
-        hougenInformation.hougen = currentItem;
-        hougenInformation.chihou = Constants.CHIHOUS_JP[regionIndex]; // Set the region (chihou)
+    private void updateHougenInformation(Cursor cursor, int regionIndex) {
+        int hougenColumnIndex = cursor.getColumnIndex("hougen");
+        int triggerColumnIndex = cursor.getColumnIndex("trigger");
+        int posColumnIndex = cursor.getColumnIndex("pos");
+        int defColumnIndex = cursor.getColumnIndex("def");
+        int exampleColumnIndex = cursor.getColumnIndex("example");
 
-        // Fetch more detailed information if available
-        Cursor[] cursors = databaseHelper.searchWord(currentItem);  // Use the currentItem to get the relevant data
-        Log.d(TAG, "Cursor length for " + hougenInformation.chihou + Integer.toString(cursors.length));
-
-        if (cursors != null && cursors.length > 0) {
-            for (Cursor cursor : cursors) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    int hougenColumnIndex = cursor.getColumnIndex("hougen");
-                    int defColumnIndex = cursor.getColumnIndex("def");
-                    int exampleColumnIndex = cursor.getColumnIndex("example");
-
-                    if (hougenColumnIndex != -1) {
-                        hougenInformation.hougen = cursor.getString(hougenColumnIndex);
-                    }
-                    if (defColumnIndex != -1) {
-                        hougenInformation.def = cursor.getString(defColumnIndex);
-                    }
-                    if (exampleColumnIndex != -1) {
-                        hougenInformation.example = cursor.getString(exampleColumnIndex);
-                    }
-
-                    Log.d(TAG, "Updated hougenInformation: " + hougenInformation.hougen + ", "
-                            + hougenInformation.chihou + ", "
-                            + hougenInformation.def + ", "
-                            + hougenInformation.example);
-                }
-
-                if (cursor != null) {
-                    cursor.close();
-                }
-            }
-        }
+        hougenInformation.hougen = cursor.getString(hougenColumnIndex);
+        hougenInformation.chihou = Constants.CHIHOUS_JP[regionIndex];// Region from the cursor
+        hougenInformation.pref = Constants.PREFS[regionIndex];
+        hougenInformation.area = Constants.AREAS[regionIndex];
+        hougenInformation.def = cursor.getString(defColumnIndex);
+        hougenInformation.example = cursor.getString(exampleColumnIndex);
     }
 
     private void resetFloatingButtonText() {
@@ -500,7 +297,7 @@ public class NamaPopup extends AccessibilityService {
 
 
     //this method can search the text that cannot be converted from fullText
-    private void seperateNormalText(String fullText, int startIndex, int endIndex) {
+    private void separateNormalText(String fullText, int startIndex, int endIndex) {
         int position = 0;
         Log.d("array", "characterPosition_before" + characterPositions);
 
@@ -761,8 +558,6 @@ public class NamaPopup extends AccessibilityService {
                         focusedNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
                         onConvertText();
                         focusedNode.recycle();
-                        composingText = "";
-                        Log.d("ComposingText", "Resetting composingText " + composingText);
                         resetFloatingButtonText();
                     }
                 }
