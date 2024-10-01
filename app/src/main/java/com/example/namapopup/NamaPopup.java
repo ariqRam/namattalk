@@ -752,7 +752,7 @@ public class NamaPopup extends AccessibilityService {
 
             private void handleButtonClick() {
                 Log.d("handleButtonClick", "Button clicked");
-                if (!searchResult.equals("")) {
+                if (!searchResults.get(currentItemIndex).equals("")) {
                     Log.d("handleButtonClick", "Setting composing text to " + convertedText);
 
                     // Attempt to modify the text in the focused edit field
