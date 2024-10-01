@@ -30,6 +30,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
 
+
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
@@ -165,16 +166,15 @@ public class DBHelper extends SQLiteOpenHelper {
     public Cursor[] getVerbs() {
         SQLiteDatabase db = this.getReadableDatabase();
         List<Cursor> allResults = new ArrayList<>();
-        StringBuilder verbQuery = new StringBuilder();
 
         for (String tableName : chosenChihous) {
             if (tableName != null && !tableName.isEmpty()) {
                 try {
                     // Query to get verbs where 'pos' column is '動詞' (verb)
-                    verbQuery.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE pos = ?");
+                    String verbQuery = "SELECT hougen, trigger, pos FROM " + tableName + " WHERE pos = ?";
                     // Execute the query
                     String[] queryArgs = new String[]{"動詞"};
-                    Cursor cursor = db.rawQuery(verbQuery.toString(), queryArgs);
+                    Cursor cursor = db.rawQuery(verbQuery, queryArgs);
                     if (cursor.moveToFirst()) {
                         Log.d("getVerbs", "Verbs found in the database.");
                     } else {

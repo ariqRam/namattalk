@@ -142,6 +142,7 @@ public class NamaPopup extends AccessibilityService {
 
         // List to hold results grouped by chihou (region)
         searchResults = new ArrayList<>();
+        List<String> hougens = new ArrayList<>();
 
         while (endIndex < fullText.length()) {
             // Query for substring from startIndex to endIndex
@@ -202,7 +203,7 @@ public class NamaPopup extends AccessibilityService {
                                 }
                             }
 
-
+                            hougens.add(hougen);
                             Log.d("hougenColumnIndex", "hougen: " + hougen + " Query: " + queryText + "trigger: " + trigger);
 
                             if (hougen != null && (hougen.equals(queryText) || trigger.equals(queryText))) {
@@ -218,7 +219,8 @@ public class NamaPopup extends AccessibilityService {
 
                                 // Populate hougenInformation with data from cursor
                                 hougenInformation.hougen = hougen;
-                                hougenInformation.chihou = Constants.CHIHOUS_JP[i]; // Region from the cursor
+                                hougenInformation.chihou = Constants.CHIHOUS_JP[i];// Region from the cursor
+                                Log.d("checkChihou", "checkChihou: " + hougenInformation.chihou);
                                 hougenInformation.pref = "";
                                 hougenInformation.area = "";
                                 hougenInformation.def = cursor.getString(defColumnIndex);
@@ -252,6 +254,8 @@ public class NamaPopup extends AccessibilityService {
                     cursor.close(); // Close cursor after use
                 }
             }
+
+            Log.d("test", "hougens: " + hougens);
 
             // Add all matches from the current chihou (if any) to the searchResults list
             if (!currentChihouResults.isEmpty()) {
@@ -325,6 +329,7 @@ public class NamaPopup extends AccessibilityService {
                                     // Populate hougenInformation with next query match
                                     hougenInformation.hougen = nextHougen;
                                     hougenInformation.chihou = Constants.CHIHOUS_JP[j]; // Update this to reflect actual region if needed
+                                    Log.d("checkChihou", "checkChihou: " + hougenInformation.chihou);
                                     hougenInformation.pref = "";
                                     hougenInformation.area = "";
                                     hougenInformation.def = nextCursor.getString(nextDefColumnIndex);
@@ -424,6 +429,7 @@ public class NamaPopup extends AccessibilityService {
                 }
 
                 textView.setText(currentItem);
+                chihouTextView.setText(hougenInformation.chihou);
                 Log.d(TAG, "Showing: " + currentItem + " from searchResults[" + currentResultIndex + "][" + currentItemIndex + "]");
 
                 // Update hougenInformation based on the current item
@@ -436,7 +442,6 @@ public class NamaPopup extends AccessibilityService {
         }
 
         // Set the current region (chihou)
-        chihouTextView.setText(hougenInformation.chihou);
         chihouTextView.setVisibility(View.VISIBLE);
     }
 

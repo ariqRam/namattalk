@@ -15,10 +15,10 @@ public class GlobalVariable {
         String def;
         String example;
 
-        HougenInformation(String hougen, String trigger, String hougenchihou, String pref, String area, String def, String example) {
+        HougenInformation(String hougen, String trigger, String chihou, String pref, String area, String def, String example) {
             this.hougen = hougen;
             this.trigger = trigger;
-            this.chihou = hougenchihou;
+            this.chihou = chihou;
             this.pref = pref;
             this.area = area;
             this.def = def;
