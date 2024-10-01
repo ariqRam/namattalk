@@ -142,7 +142,6 @@ public class NamaPopup extends AccessibilityService {
 
         // List to hold results grouped by chihou (region)
         searchResults = new ArrayList<>();
-        List<String> hougens = new ArrayList<>();
 
         while (endIndex < fullText.length()) {
             // Query for substring from startIndex to endIndex
@@ -203,7 +202,6 @@ public class NamaPopup extends AccessibilityService {
                                 }
                             }
 
-                            hougens.add(hougen);
                             Log.d("hougenColumnIndex", "hougen: " + hougen + " Query: " + queryText + "trigger: " + trigger);
 
                             if (hougen != null && (hougen.equals(queryText) || trigger.equals(queryText))) {
@@ -255,10 +253,9 @@ public class NamaPopup extends AccessibilityService {
                 }
             }
 
-            Log.d("test", "hougens: " + hougens);
 
             // Add all matches from the current chihou (if any) to the searchResults list
-            if (!currentChihouResults.isEmpty()) {
+            if (!currentChihouResults.isEmpty() && !searchResults.contains(currentChihouResults)) {
                 searchResults.add(currentChihouResults); // Add results for the current chihou
             }
 
@@ -361,7 +358,7 @@ public class NamaPopup extends AccessibilityService {
                 }
 
                 // Add next query results to searchResults
-                if (!nextChihouResults.isEmpty()) {
+                if (!nextChihouResults.isEmpty() && !searchResults.contains(nextChihouResults)) {
                     searchResults.add(nextChihouResults);
                 }
 
@@ -402,6 +399,7 @@ public class NamaPopup extends AccessibilityService {
         // Update floating button text based on search results
         if (!searchResults.isEmpty()) {
             updateFloatingButtonText();
+
         } else {
             resetFloatingButtonText();
         }
@@ -417,7 +415,7 @@ public class NamaPopup extends AccessibilityService {
         textViewSet = true;
         String TAG = "updateFloatingButtonText";
 
-        if (!searchResults.isEmpty() && currentResultIndex < searchResults.size()) {
+        if (!searchResults.isEmpty() && currentResultIndex <= searchResults.size()) {
             List<String> currentSublist = searchResults.get(currentResultIndex);
 
             if (!currentSublist.isEmpty() && currentItemIndex < currentSublist.size()) {
@@ -433,7 +431,7 @@ public class NamaPopup extends AccessibilityService {
                 Log.d(TAG, "Showing: " + currentItem + " from searchResults[" + currentResultIndex + "][" + currentItemIndex + "]");
 
                 // Update hougenInformation based on the current item
-                updateHougenInformation(currentItem, currentResultIndex);
+//                updateHougenInformation(currentItem, currentResultIndex);
             } else {
                 Log.d(TAG, "Inner list is empty");
             }

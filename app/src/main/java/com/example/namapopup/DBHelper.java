@@ -98,7 +98,6 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         List<Cursor> allResults = new ArrayList<>();
 
-
         // Split the search word by '、' to handle multiple words
         String[] splitWords = word.split("、");
 
@@ -108,51 +107,61 @@ public class DBHelper extends SQLiteOpenHelper {
 
             // Only proceed if the dialect is enabled for searching
             if (dialectState.isEnabled && tableName != null && !tableName.isEmpty()) {
-                StringBuilder queryBuilder = new StringBuilder();
+                StringBuilder exactMatchQueryBuilder = new StringBuilder();
+                StringBuilder partialMatchQueryBuilder = new StringBuilder();
 
-                // Branch based on the mode ("学習" for non-native, "母語" for native)
-                if ("学習".equals(dialectState.mode)) {
-                    Log.d("searchWord", tableName + " is in non-native mode");
-                    queryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
+                // Determine the column to search based on the mode ("学習" for non-native, "母語" for native)
+                String searchColumn = "学習".equals(dialectState.mode) ? "trigger" : "hougen";
 
-                    // Add dynamic LIKE conditions for each split word in 'trigger' column
-                    for (int i = 0; i < splitWords.length; i++) {
-                        queryBuilder.append("trigger LIKE ?");
-                        if (i != splitWords.length - 1) {
-                            queryBuilder.append(" OR ");
-                        }
-                    }
-                } else if ("母語".equals(dialectState.mode)) {
-                    Log.d("searchWord", tableName + " is in native mode");
-                    queryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
+                // Log the mode
+                Log.d("searchWord", tableName + " is in " + dialectState.mode + " mode");
 
-                    // Add dynamic LIKE conditions for each split word in 'hougen' column
-                    for (int i = 0; i < splitWords.length; i++) {
-                        queryBuilder.append("hougen LIKE ?");
-                        if (i != splitWords.length - 1) {
-                            queryBuilder.append(" OR ");
-                        }
-                    }
-                } else {
-                    // If mode is neither "学習" nor "母語", skip to the next dialect
-                    Log.d("searchWord", "Unrecognized mode for " + tableName + ": " + dialectState.mode);
-                    continue;
-                }
-
-                // Prepare query arguments (for each split word, append % to enable partial matching)
-                String[] queryArgs = new String[splitWords.length];
+                // Build the exact match query
+                exactMatchQueryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
                 for (int i = 0; i < splitWords.length; i++) {
-                    queryArgs[i] = "%" + splitWords[i] + "%"; // Partial matching with LIKE
+                    exactMatchQueryBuilder.append(searchColumn).append(" = ?");
+                    if (i != splitWords.length - 1) {
+                        exactMatchQueryBuilder.append(" OR ");
+                    }
                 }
 
-                // Execute the raw query
-                Cursor cursor = db.rawQuery(queryBuilder.toString(), queryArgs);
-                Log.d("searchWord", "Searching for [" + word + "] in table " + tableName + " | count: " + cursor.getCount());
+                // Build the partial match query
+                partialMatchQueryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
+                for (int i = 0; i < splitWords.length; i++) {
+                    partialMatchQueryBuilder.append(searchColumn).append(" LIKE ?");
+                    if (i != splitWords.length - 1) {
+                        partialMatchQueryBuilder.append(" OR ");
+                    }
+                }
 
+                // Prepare query arguments for exact matching
+                String[] exactQueryArgs = splitWords;
+
+                // Prepare query arguments for partial matching (append % for LIKE)
+                String[] partialQueryArgs = new String[splitWords.length];
+                for (int i = 0; i < splitWords.length; i++) {
+                    partialQueryArgs[i] = "%" + splitWords[i] + "%";
+                }
+
+                // Try exact match first
+                Cursor cursor = db.rawQuery(exactMatchQueryBuilder.toString(), exactQueryArgs);
+                Log.d("searchWord", "Exact search for [" + word + "] in table " + tableName + " | count: " + cursor.getCount());
+
+                // If exact match found, return the cursor
                 if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-                    int index = cursor.getColumnIndex("hougen");
-                    Log.d("searchWord", "Found in " + tableName + ": " + cursor.getString(index));
+                    int index = cursor.getColumnIndex(searchColumn);
+                    Log.d("searchWord", "Exact match found in " + tableName + ": " + cursor.getString(index));
+                } else {
+                    // If no exact match, fallback to partial match
+                    cursor = db.rawQuery(partialMatchQueryBuilder.toString(), partialQueryArgs);
+                    Log.d("searchWord", "Partial search for [" + word + "] in table " + tableName + " | count: " + cursor.getCount());
+
+                    if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+                        int index = cursor.getColumnIndex(searchColumn);
+                        Log.d("searchWord", "Partial match found in " + tableName + ": " + cursor.getString(index));
+                    }
                 }
+
                 allResults.add(cursor);
             } else {
                 allResults.add(null);
@@ -161,6 +170,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         return allResults.toArray(new Cursor[0]);
     }
+
 
 
     public Cursor[] getVerbs() {
