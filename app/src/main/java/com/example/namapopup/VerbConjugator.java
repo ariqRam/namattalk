@@ -214,7 +214,7 @@ public class VerbConjugator {
         }
     }
 
-    //Method to reconjugate other forms to base form
+    //Method to reconjugate other forms to base form いない =》 いる
     public String reconjugate(String verb, HashMap<String, List<String>> verbMap) {
         for (Map.Entry<String, List<String>> entry : verbMap.entrySet()) {
             String baseVerb = entry.getKey();
@@ -226,6 +226,7 @@ public class VerbConjugator {
                 }
             }
         }
+
         return verb;
     }
 

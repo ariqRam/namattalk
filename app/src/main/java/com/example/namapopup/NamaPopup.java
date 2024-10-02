@@ -152,18 +152,30 @@ public class NamaPopup extends AccessibilityService {
                 String queryText = fullText.substring(startIndex, endIndex + 1);
                 Cursor[] cursors = databaseHelper.searchWord(queryText);
 
+
                 // Iterate over each region
                 for (int i = 0; i < cursors.length; i++) {
                     Cursor cursor = cursors[i];
+                    String reconjVerb = verbConjugator.reconjugate(queryText, verbMap);
+                    Log.d("RECVERB", "reconjVerb: " + reconjVerb + " queryText: " + queryText);
+                    Cursor conjCursor = databaseHelper.searchWordForDialect(reconjVerb, i);
+                    Log.d(TAG, "conjcursor: " + conjCursor);
+                    Cursor usedCursor = cursor;
+
+                    if (isConjugationExist(conjCursor)) {
+                        usedCursor = conjCursor; // this was never run
+                    }
+
+
                     DialectState dialectState = getDialectState(this, Constants.CHIHOUS[i]);
-                    if (cursor != null && cursor.getCount() > 0) {
-                        if (cursor.moveToFirst()) {
-                            int hougenColumnIndex = cursor.getColumnIndex("hougen");
-                            int triggerColumnIndex = cursor.getColumnIndex("trigger");
+                    if (usedCursor != null && usedCursor.getCount() > 0) {
+                        if (usedCursor.moveToFirst()) {
+                            int hougenColumnIndex = usedCursor.getColumnIndex("hougen");
+                            int triggerColumnIndex = usedCursor.getColumnIndex("trigger");
 
                             // Check for dialect word match
-                            String hougen = cursor.getString(hougenColumnIndex);
-                            String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
+                            String hougen = usedCursor.getString(hougenColumnIndex);
+                            String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? usedCursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");
                             boolean isExactMatch = hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText);
 
@@ -172,7 +184,8 @@ public class NamaPopup extends AccessibilityService {
                                 currentChihouResults.add(hougen); // Add the match
 
                                 // Add to character positions, update relevant information
-                                updateHougenInformation(cursor, i);
+                                updateHougenInformation(usedCursor, i);
+                                Log.d("updateHougenInfo", "QUERYTEXT:" + queryText);
                                 addCharacterPositions(hougen, startIndex);
                                 separateNormalText(fullText, startIndex, endIndex);
 
@@ -181,7 +194,7 @@ public class NamaPopup extends AccessibilityService {
                             }
                         }
                     }
-                    if (cursor != null) cursor.close();
+                    if (usedCursor != null) usedCursor.close();
                 }
 
                 if (matchFound) break; // Stop expanding endIndex once a match is found
@@ -197,6 +210,13 @@ public class NamaPopup extends AccessibilityService {
 
         // Update UI with final results
         updateSuggestionsUI();
+    }
+
+    private boolean isConjugationExist(Cursor cursor) {
+        if(cursor.getCount() <= 0 && cursor != null) return false;
+        int posIdx = cursor.getColumnIndex("pos"); // CURRENLTY cursor is NULL
+        String pos = cursor.getString(posIdx);
+        return ("動詞".equals(pos) && cursor.getCount() > 0);
     }
 
 
@@ -268,10 +288,9 @@ public class NamaPopup extends AccessibilityService {
     // Function to update the hougenInformation based on the current selected item and region index
     private void updateHougenInformation(Cursor cursor, int regionIndex) {
         int hougenColumnIndex = cursor.getColumnIndex("hougen");
-        int triggerColumnIndex = cursor.getColumnIndex("trigger");
-        int posColumnIndex = cursor.getColumnIndex("pos");
         int defColumnIndex = cursor.getColumnIndex("def");
         int exampleColumnIndex = cursor.getColumnIndex("example");
+        int posColumnIndex = cursor.getColumnIndex("pos");
 
         hougenInformation.hougen = cursor.getString(hougenColumnIndex);
         hougenInformation.chihou = Constants.CHIHOUS_JP[regionIndex];// Region from the cursor
