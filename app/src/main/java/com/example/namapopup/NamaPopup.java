@@ -109,13 +109,12 @@ public class NamaPopup extends AccessibilityService {
                     String fullText = currentText.toString();
                     Log.d("composingText", "Full Text: " + fullText);
                     Log.d("composingText", "Full Text Position: " + positionStart + " to " + positionEnd);
-
-                    // Show suggestions for the new composing text
-                    showDialectSuggestions(fullText);
-
                     if (positionStart == positionEnd) {
                         Log.d("composingText", "no text");
                         resetFloatingButtonText();
+                    } else {
+                        // Show suggestions for the new composing text
+                        showDialectSuggestions(fullText);
                     }
                 }
             }
@@ -149,22 +148,24 @@ public class NamaPopup extends AccessibilityService {
             List<String> currentChihouResults = new ArrayList<>();
 
             while (endIndex < fullText.length()) {
-                String queryText = fullText.substring(startIndex, endIndex + 1);
+                String baseText = fullText.substring(startIndex, endIndex + 1);
+                String queryText = verbConjugator.reconjugate(baseText, verbMap);
+                Log.d(TAG, "reconjugated queryText: " + queryText);
                 Cursor[] cursors = databaseHelper.searchWord(queryText);
 
 
                 // Iterate over each region
                 for (int i = 0; i < cursors.length; i++) {
                     Cursor cursor = cursors[i];
-                    String reconjVerb = verbConjugator.reconjugate(queryText, verbMap);
-                    Log.d("RECVERB", "reconjVerb: " + reconjVerb + " queryText: " + queryText);
-                    Cursor conjCursor = databaseHelper.searchWordForDialect(reconjVerb, i);
-                    Log.d(TAG, "conjcursor: " + conjCursor);
+//                    String reconjVerb = verbConjugator.reconjugate(queryText, verbMap);
+//                    Log.d("RECVERB", "reconjVerb: " + reconjVerb + " queryText: " + queryText);
+//                    Cursor conjCursor = databaseHelper.searchWordForDialect(reconjVerb, i);
+//                    Log.d(TAG, "conjcursor: " + conjCursor);
                     Cursor usedCursor = cursor;
 
-                    if (isConjugationExist(conjCursor)) {
-                        usedCursor = conjCursor; // this was never run
-                    }
+//                    if (isConjugationExist(conjCursor)) {
+//                        usedCursor = conjCursor; // this was never run
+//                    }
 
 
                     DialectState dialectState = getDialectState(this, Constants.CHIHOUS[i]);
@@ -179,8 +180,10 @@ public class NamaPopup extends AccessibilityService {
                             String[] splitTriggers = triggers.split("、");
                             boolean isExactMatch = hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText);
 
-                            if (isExactMatch) {
+                            if (isExactMatch && endIndex >= fullText.length() - 1) {
                                 Log.d(TAG, "Exact match found: " + hougen);
+                                hougen = verbConjugator.conjugate(hougen, VerbConjugator.getVerbForm(baseText), verbMap);
+                                Log.d(TAG, "Conjugated hougen: " + hougen + " baseText: " + VerbConjugator.getVerbForm(baseText));
                                 currentChihouResults.add(hougen); // Add the match
 
                                 // Add to character positions, update relevant information

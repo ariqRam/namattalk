@@ -16,10 +16,12 @@ public class VerbConjugator {
 
     private DBHelper dbHelper;
     private SharedPreferences sharedPreferences;
+    private DialectState dialectState;
 
     public VerbConjugator(Context context) {
         dbHelper = new DBHelper(context);
         sharedPreferences = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE);
+        dialectState = Helper.getDialectState(context, Constants.CHIHOUS[0]);
     }
 
     public HashMap<String, List<String>> getVerbs() {
@@ -38,7 +40,7 @@ public class VerbConjugator {
                         String trigger = cursor.getString(triggerIndex);
                         String pos = cursor.getString(posIndex);
 
-                        if ("動詞".equals(pos) && hougen != null && trigger != null) {
+                        if ("動詞".equals(pos) && hougen != null && trigger != null && dialectState.isEnabled ) {
                             if (trigger != null) {
                                 String[] splitTriggers = trigger.split("、");
                                 for (String singleTrigger : splitTriggers) {
@@ -100,7 +102,7 @@ public class VerbConjugator {
     }
 
     public static VerbForm getVerbForm(String verb) {
-        if (verb.endsWith("ない")) {
+        if (verb.endsWith("ない") || verb.endsWith("ん")) {
             return VerbForm.NEGATIVE;
         }
 
