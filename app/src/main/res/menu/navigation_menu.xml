@@ -4,11 +4,11 @@
     tools:ignore="HardcodedText">
 
     <item
-        android:id="@+id/old_settings"
-        android:title="Old Settings" />
-
+        android:id="@+id/settings"
+        android:title="地方設定" />
     <item
-        android:id="@+id/new_settings"
-        android:title="New Settings" />
+        android:id="@+id/dictionary"
+        android:title="辞書" />
+
 
 </menu>

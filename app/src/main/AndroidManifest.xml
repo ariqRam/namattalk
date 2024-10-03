@@ -10,8 +10,8 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <activity
-            android:name=".SettingsActivity"
-            android:label="settings"
+            android:name=".NewSettingsActivity"
+            android:label="地方設定"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
             >
@@ -20,9 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
-            android:name=".NewSettingsActivity"
-            android:label="new settings"
+            android:name=".DictionaryActivity"
+            android:label="辞書"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
             >

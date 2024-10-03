@@ -47,10 +47,10 @@ public abstract class BaseDrawerActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.old_settings) {
-            switchScreen("old settings");
-        } else if (id == R.id.new_settings) {
-            switchScreen("new settings");
+        if (id == R.id.dictionary) {
+            switchScreen("dictionary");
+        } else if (id == R.id.settings) {
+            switchScreen("settings");
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
@@ -61,10 +61,10 @@ public abstract class BaseDrawerActivity extends AppCompatActivity
         Intent intent;
 
         switch (screenType) {
-            case "old settings":
-                intent = new Intent(this, SettingsActivity.class);
+            case "dictionary":
+                intent = new Intent(this, DictionaryActivity.class);
                 break;
-            case "new settings":
+            case "settings":
                 intent = new Intent(this, NewSettingsActivity.class);
                 break;
             default:
