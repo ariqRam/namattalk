@@ -96,12 +96,22 @@ public class DictionaryActivity extends BaseDrawerActivity {
         // TODO : Implement search
         // Implement your search logic here
         // This is just an example:
-        List<String> searchResults = new ArrayList<>();
+        List<HashMap<String,String>> searchResults = new ArrayList<>();
 
         if (!query.isEmpty()) {
             // Replace this with your actual dictionary search logic
-            searchResults.add("Result for: " + query);
-            searchResults.add("Another result for: " + query);
+            // When you have search results:
+            HashMap<String, String> result = new HashMap<>();
+            result.put("text", "おる");
+            result.put("meaning", "いる、います");
+            result.put("region", "飛騨弁");
+
+            HashMap<String, String> result3 = new HashMap<>();
+            result3.put("text", "べらぼう");
+            result3.put("meaning", "とても、非常に");
+            result3.put("region", "江戸弁");
+            searchResults.add(result);
+            searchResults.add(result3);
         }
 
         // Update the RecyclerView with results
@@ -115,7 +125,24 @@ public class DictionaryActivity extends BaseDrawerActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // When you have search results:
-        List<String> searchResults = Arrays.asList("Result 1", "Result 2", "Result 3");
+        HashMap<String, String> result1 = new HashMap<>();
+        result1.put("text", "おる");
+        result1.put("meaning", "いる、います");
+        result1.put("region", "飛騨弁");
+
+        // Result 2
+        HashMap<String, String> result2 = new HashMap<>();
+        result2.put("text", "あかん");
+        result2.put("meaning", "だめ、いけない");
+        result2.put("region", "関西弁");
+
+        // Result 3
+        HashMap<String, String> result3 = new HashMap<>();
+        result3.put("text", "べらぼう");
+        result3.put("meaning", "とても、非常に");
+        result3.put("region", "江戸弁");
+
+        List<HashMap<String, String>> searchResults = Arrays.asList(result1);
         adapter.updateResults(searchResults);
     }
 }
