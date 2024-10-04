@@ -25,7 +25,6 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private final Context context;
     private SQLiteDatabase database;
-    private SharedPreferences sharedPreferences;
     private String[] chosenChihous;
 
 
@@ -35,10 +34,12 @@ public class DBHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
         chosenChihous = new String[Constants.CHIHOUS.length];
-        sharedPreferences = context.getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
         for(int i = 0; i < Constants.CHIHOUS.length; i++) {
-            if(sharedPreferences.getBoolean(Constants.CHIHOUS[i], false)) {
-                chosenChihous[i] = Constants.CHIHOUS[i];
+            String chihou = Constants.CHIHOUS[i];
+            DialectState dialectState = getDialectState(context, chihou);
+            if(dialectState.isEnabled) {
+                chosenChihous[i] = chihou;
+                Log.d("DB", chihou + " is Enabled");
             }
         }
 
@@ -247,6 +248,7 @@ public class DBHelper extends SQLiteOpenHelper {
         List<Cursor> allResults = new ArrayList<>();
 
         for (String tableName : chosenChihous) {
+            Log.d("KEn", tableName);
             if (tableName != null && !tableName.isEmpty()) {
                 try {
                     // Query to get verbs where 'pos' column is '動詞' (verb)
