@@ -1,6 +1,8 @@
 package com.example.namapopup;
 
 
+import static com.example.namapopup.Helper.getDialectState;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -16,12 +18,15 @@ public class VerbConjugator {
 
     private DBHelper dbHelper;
     private SharedPreferences sharedPreferences;
-    private DialectState dialectState;
+    private DialectState toyamaState;
+    private DialectState hidaState;
 
     public VerbConjugator(Context context) {
         dbHelper = new DBHelper(context);
         sharedPreferences = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE);
-        dialectState = Helper.getDialectState(context, Constants.CHIHOUS[0]);
+        // Load saved states for dialects
+        toyamaState = getDialectState(context, "toyama");
+        hidaState = getDialectState(context, "hida");
     }
 
     public HashMap<String, List<String>> getVerbs() {
@@ -40,7 +45,7 @@ public class VerbConjugator {
                         String trigger = cursor.getString(triggerIndex);
                         String pos = cursor.getString(posIndex);
 
-                        if ("動詞".equals(pos) && hougen != null && trigger != null && dialectState.isEnabled ) {
+                        if ("動詞".equals(pos) && hougen != null && trigger != null && toyamaState.isEnabled || hidaState.isEnabled) {
                             if (trigger != null) {
                                 String[] splitTriggers = trigger.split("、");
                                 for (String singleTrigger : splitTriggers) {
