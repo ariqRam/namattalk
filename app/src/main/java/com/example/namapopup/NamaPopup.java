@@ -39,7 +39,8 @@ public class NamaPopup extends AccessibilityService {
     private String convertedText = "";
     private static final long LONG_PRESS_THRESHOLD = 500;
     private DBHelper databaseHelper;
-    private List<List<String>> searchResults = new ArrayList<>();
+    private List<GlobalVariable.HougenInformation> searchResults = new ArrayList<>();
+    private GlobalVariable.HougenInformation currentHougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "");
     private String normalText = "";
     private boolean textViewSet = false;
     private List<CharacterPosition> characterPositions = new ArrayList<>();
@@ -57,6 +58,7 @@ public class NamaPopup extends AccessibilityService {
     public void onCreate() {
         super.onCreate();
         databaseHelper = new DBHelper(this);
+        databaseHelper.deleteRowUsingHougen();
         sharedPreferences = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
 
         Log.d("ONCREATE", "Non-native mode = " + sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false));
@@ -143,7 +145,6 @@ public class NamaPopup extends AccessibilityService {
         while (startIndex < fullText.length()) {
             boolean matchFound = false;
             endIndex = startIndex; // Reset endIndex for each new startIndex
-            List<String> currentChihouResults = new ArrayList<>();
 
             while (endIndex < fullText.length()) {
                 String baseText = fullText.substring(startIndex, endIndex + 1);
@@ -166,22 +167,27 @@ public class NamaPopup extends AccessibilityService {
                             String hougen = cursor.getString(hougenColumnIndex);
                             String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");
-                            boolean isExactMatch = (hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText)) && !hougen.equals("ん");
+                            boolean isExactMatch = hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText);
 
-                            if (isExactMatch && endIndex >= baseText.length() - 1) {
+                            if (isExactMatch) {
                                 Log.d(TAG, "Exact match found: " + hougen);
                                 hougen = verbConjugator.conjugate(hougen, VerbConjugator.getVerbForm(baseText), verbMap);
                                 Log.d(TAG, "Conjugated hougen: " + hougen + " baseText: " + VerbConjugator.getVerbForm(baseText));
-                                currentChihouResults.add(hougen); // Add the match
 
                                 // Add to character positions, update relevant information
-                                updateHougenInformation(cursor, i);
+                                updateHougenInformation(cursor, i, hougen);
                                 Log.d("updateHougenInfo", "QUERYTEXT:" + queryText);
-                                addCharacterPositions(hougen, startIndex);
-                                separateNormalText(fullText, startIndex, endIndex);
 
-                                matchFound = true;
-                                break; // Stop scanning if exact match found
+                                // After scanning the entire substring from startIndex
+                                addCurrentResultToSearchResults(hougenInformation);
+
+                                addCharacterPositions(hougen, startIndex);
+//                                separateNormalText(fullText, startIndex, endIndex);
+
+                                if (endIndex == fullText.length() - 1) {
+                                    matchFound = true;
+                                    break; // Stop scanning if exact match found
+                                }
                             }
                         }
                     }
@@ -192,13 +198,11 @@ public class NamaPopup extends AccessibilityService {
                 endIndex++;
             }
 
-            // After scanning the entire substring from startIndex
-            addCurrentResultToSearchResults(currentChihouResults);
-
             // Move startIndex to the next position
             startIndex++;
         }
 
+        Log.d(TAG, "showAllResults: " + searchResults);
         // Update UI with final results
         updateSuggestionsUI();
     }
@@ -211,10 +215,10 @@ public class NamaPopup extends AccessibilityService {
     }
 
 
-    private void addCurrentResultToSearchResults(List<String> currentChihouResults) {
+    private void addCurrentResultToSearchResults(GlobalVariable.HougenInformation hougenInformation) {
         // Add all matches from the current chihou (if any) to the searchResults list
-        if (!currentChihouResults.isEmpty() && !searchResults.contains(currentChihouResults)) {
-            searchResults.add(currentChihouResults); // Add results for the current chihou
+        if (hougenInformation != null && !searchResults.contains(hougenInformation)) {
+            searchResults.add(hougenInformation); // Add results for the current chihou
         }
     }
 
@@ -252,19 +256,28 @@ public class NamaPopup extends AccessibilityService {
         String TAG = "updateFloatingButtonText";
 
         if (!searchResults.isEmpty() && currentResultIndex <= searchResults.size()) {
-            List<String> currentSublist = searchResults.get(currentResultIndex);
+            currentHougenInformation = searchResults.get(currentResultIndex);
 
-            if (!currentSublist.isEmpty() && currentItemIndex < currentSublist.size()) {
-                String currentItem = currentSublist.get(currentItemIndex);
+            if (currentHougenInformation != null) {
+                if (currentHougenInformation.hougen != null) {
+                    textView.setText(currentHougenInformation.hougen);
+                } else {
+                    textView.setText("な");
+                }
+
+                chihouTextView.setText(currentHougenInformation.chihou);
+                Log.d(TAG, "Showing: " + currentHougenInformation.hougen + " from searchResults[" + currentResultIndex + "]");
 
                 if (indicatorTextView == null) {
                     createIndicator(indicator);
                     Log.d(TAG, "Created indicator");
+                } else {
+                    updateIndicator();
+                    Log.d(TAG, "Updated indicator");
+
                 }
 
-                textView.setText(currentItem);
-                chihouTextView.setText(hougenInformation.chihou);
-                Log.d(TAG, "Showing: " + currentItem + " from searchResults[" + currentResultIndex + "][" + currentItemIndex + "]");
+
             } else {
                 Log.d(TAG, "Inner list is empty");
             }
@@ -277,13 +290,11 @@ public class NamaPopup extends AccessibilityService {
     }
 
     // Function to update the hougenInformation based on the current selected item and region index
-    private void updateHougenInformation(Cursor cursor, int regionIndex) {
-        int hougenColumnIndex = cursor.getColumnIndex("hougen");
+    private void updateHougenInformation(Cursor cursor, int regionIndex, String hougen) {
         int defColumnIndex = cursor.getColumnIndex("def");
         int exampleColumnIndex = cursor.getColumnIndex("example");
-        int posColumnIndex = cursor.getColumnIndex("pos");
 
-        hougenInformation.hougen = cursor.getString(hougenColumnIndex);
+        hougenInformation.hougen = hougen;
         hougenInformation.chihou = Constants.CHIHOUS_JP[regionIndex];// Region from the cursor
         hougenInformation.pref = Constants.PREFS[regionIndex];
         hougenInformation.area = Constants.AREAS[regionIndex];
@@ -498,15 +509,12 @@ public class NamaPopup extends AccessibilityService {
                             })
                             .start();
 
-                    if (currentItemIndex < searchResults.get(currentResultIndex).size() - 1) {
-                        // Move to the next item in the current sublist
-                        currentItemIndex++;
-                    } else if (currentResultIndex < searchResults.size() - 1) {
+
+                    if (currentResultIndex < searchResults.size() - 1) {
                         // Move to the next sublist if available
                         currentResultIndex++;
                         updateIndicator();
                         Log.d("swipeLeft", "Update indicatorTextView to " + indicator);
-                        currentItemIndex = 0; // Reset item index for the new sublist
                     }
                 }
 
@@ -538,15 +546,11 @@ public class NamaPopup extends AccessibilityService {
                             })
                             .start();
 
-                    if (currentItemIndex > 0) {
-                        // Move to the previous item in the current sublist
-                        currentItemIndex--;
-                    } else if (currentResultIndex > 0) {
+                    if (currentResultIndex > 0) {
                         // Move to the previous sublist if available
                         currentResultIndex--;
                         updateIndicator();
                         Log.d("swipeRight", "Update indicatorTextView to " + indicator);
-                        currentItemIndex = searchResults.get(currentResultIndex).size() - 1; // Set to last item in the previous sublist
                     }
                 }
 
@@ -556,7 +560,7 @@ public class NamaPopup extends AccessibilityService {
 
             private void handleButtonClick() {
                 Log.d("handleButtonClick", "Button clicked");
-                if (!searchResults.get(currentItemIndex).equals("")) {
+                if (!searchResults.get(currentResultIndex).equals("")) {
                     Log.d("handleButtonClick", "Setting composing text to " + convertedText);
 
                     // Attempt to modify the text in the focused edit field
@@ -634,7 +638,7 @@ public class NamaPopup extends AccessibilityService {
     private void launchShousaiActivity() {
         Intent intent = new Intent(this, HougenInfoActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("hougen", hougenInformation.hougen);
+        intent.putExtra("hougen", verbConjugator.reconjugate(hougenInformation.hougen, verbMap));
         intent.putExtra("chihou", hougenInformation.chihou);
         intent.putExtra("pref", hougenInformation.pref);
         intent.putExtra("area", hougenInformation.area);
