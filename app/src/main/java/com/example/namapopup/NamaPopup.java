@@ -39,7 +39,6 @@ public class NamaPopup extends AccessibilityService {
     private String convertedText = "";
     private static final long LONG_PRESS_THRESHOLD = 500;
     private DBHelper databaseHelper;
-    private String searchResult = "";
     private List<List<String>> searchResults = new ArrayList<>();
     private String normalText = "";
     private boolean textViewSet = false;
@@ -51,7 +50,6 @@ public class NamaPopup extends AccessibilityService {
     private WindowManager.LayoutParams params;
     private String indicator = "";
     private VerbConjugator verbConjugator;
-    private boolean isConjugated = false;
     private HashMap<String, List<String>> verbMap;
 
 
@@ -157,37 +155,27 @@ public class NamaPopup extends AccessibilityService {
                 // Iterate over each region
                 for (int i = 0; i < cursors.length; i++) {
                     Cursor cursor = cursors[i];
-//                    String reconjVerb = verbConjugator.reconjugate(queryText, verbMap);
-//                    Log.d("RECVERB", "reconjVerb: " + reconjVerb + " queryText: " + queryText);
-//                    Cursor conjCursor = databaseHelper.searchWordForDialect(reconjVerb, i);
-//                    Log.d(TAG, "conjcursor: " + conjCursor);
-                    Cursor usedCursor = cursor;
-
-//                    if (isConjugationExist(conjCursor)) {
-//                        usedCursor = conjCursor; // this was never run
-//                    }
-
-
+//
                     DialectState dialectState = getDialectState(this, Constants.CHIHOUS[i]);
-                    if (usedCursor != null && usedCursor.getCount() > 0) {
-                        if (usedCursor.moveToFirst()) {
-                            int hougenColumnIndex = usedCursor.getColumnIndex("hougen");
-                            int triggerColumnIndex = usedCursor.getColumnIndex("trigger");
+                    if (cursor != null && cursor.getCount() > 0) {
+                        if (cursor.moveToFirst()) {
+                            int hougenColumnIndex = cursor.getColumnIndex("hougen");
+                            int triggerColumnIndex = cursor.getColumnIndex("trigger");
 
                             // Check for dialect word match
-                            String hougen = usedCursor.getString(hougenColumnIndex);
-                            String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? usedCursor.getString(triggerColumnIndex) : "";
+                            String hougen = cursor.getString(hougenColumnIndex);
+                            String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");
-                            boolean isExactMatch = hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText);
+                            boolean isExactMatch = (hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText)) && !hougen.equals("ん");
 
-                            if (isExactMatch && endIndex >= fullText.length() - 1) {
+                            if (isExactMatch && endIndex >= baseText.length() - 1) {
                                 Log.d(TAG, "Exact match found: " + hougen);
                                 hougen = verbConjugator.conjugate(hougen, VerbConjugator.getVerbForm(baseText), verbMap);
                                 Log.d(TAG, "Conjugated hougen: " + hougen + " baseText: " + VerbConjugator.getVerbForm(baseText));
                                 currentChihouResults.add(hougen); // Add the match
 
                                 // Add to character positions, update relevant information
-                                updateHougenInformation(usedCursor, i);
+                                updateHougenInformation(cursor, i);
                                 Log.d("updateHougenInfo", "QUERYTEXT:" + queryText);
                                 addCharacterPositions(hougen, startIndex);
                                 separateNormalText(fullText, startIndex, endIndex);
@@ -197,7 +185,7 @@ public class NamaPopup extends AccessibilityService {
                             }
                         }
                     }
-                    if (usedCursor != null) usedCursor.close();
+                    if (cursor != null) cursor.close();
                 }
 
                 if (matchFound) break; // Stop expanding endIndex once a match is found
@@ -361,7 +349,6 @@ public class NamaPopup extends AccessibilityService {
         // Clear the editable text and set it to the converted text
         // Assuming you have a method to clear and set the text
         setEditableText(convertedText);
-        searchResult = "";
         convertedText = "";
         characterPositions.clear();
 
