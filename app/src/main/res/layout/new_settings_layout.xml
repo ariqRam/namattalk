@@ -74,17 +74,8 @@
                     android:id="@+id/mode_button_toyama"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="学習"
                     android:background="@drawable/rounded_rectangle_button" />
 
-                <!-- Circle button for toggle -->
-                <Button
-                    android:id="@+id/toggle_button_toyama"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:text="-"
-                    android:background="@drawable/round_button"
-                    android:layout_marginStart="8dp" />
             </LinearLayout>
 
             <!-- 飛騨弁 row -->
@@ -113,17 +104,7 @@
                     android:id="@+id/mode_button_hida"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="学習"
                     android:background="@drawable/rounded_rectangle_button" />
-
-                <!-- Circle button for toggle -->
-                <Button
-                    android:id="@+id/toggle_button_hida"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:text="-"
-                    android:background="@drawable/round_button"
-                    android:layout_marginStart="8dp" />
             </LinearLayout>
         </LinearLayout>
 

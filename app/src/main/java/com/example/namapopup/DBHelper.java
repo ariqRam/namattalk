@@ -40,7 +40,7 @@ public class DBHelper extends SQLiteOpenHelper {
         for(int i = 0; i < Constants.CHIHOUS.length; i++) {
             String chihou = Constants.CHIHOUS[i];
             DialectState dialectState = getDialectState(context, chihou);
-            if(dialectState.isEnabled) {
+            if(dialectState.isEnabled()) {
                 chosenChihous[i] = chihou;
                 Log.d("DB", chihou + " is Enabled");
             }
@@ -111,7 +111,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String tableName = chihou;
 
         // Only proceed if the dialect is enabled for searching
-        if (dialectState.isEnabled && tableName != null) {
+        if (dialectState.isEnabled() && tableName != null) {
             StringBuilder exactMatchQueryBuilder = new StringBuilder();
             StringBuilder partialMatchQueryBuilder = new StringBuilder();
 
@@ -184,7 +184,7 @@ public class DBHelper extends SQLiteOpenHelper {
             String tableName = chihou;
 
             // Only proceed if the dialect is enabled for searching
-            if (dialectState.isEnabled && tableName != null && !tableName.isEmpty()) {
+            if (dialectState.isEnabled() && tableName != null && !tableName.isEmpty()) {
                 StringBuilder exactMatchQueryBuilder = new StringBuilder();
                 StringBuilder partialMatchQueryBuilder = new StringBuilder();
 

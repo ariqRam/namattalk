@@ -53,8 +53,6 @@ public class NamaPopup extends AccessibilityService {
     private HashMap<String, List<String>> verbMap;
     private int convertTextIndex = 0;
 
-
-
     @Override
     public void onCreate() {
         super.onCreate();

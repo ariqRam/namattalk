@@ -41,17 +41,11 @@ public class NewSettingsActivity extends BaseDrawerActivity {
     // Map to store state for each dialect
     Map<String, DialectState> dialectStates = new HashMap<>();
     Button modeButtonToyama;
-    Button toggleButtonToyama;
     Button modeButtonHida;
-    Button toggleButtonHida;
     int colorGakushuBg = Color.argb(255, 5, 143, 106); // rgba(5, 143, 106, 1)
     int colorGakushuText = Color.WHITE;
     int colorBogoBg = Color.argb(255, 143, 71, 5); // rgba(143, 71, 5, 1)
     int colorBogoText = Color.WHITE;
-    int colorMinusBg = Color.argb(255, 161, 43, 43); // rgba(161, 43, 43, 1)
-    int colorMinusText = Color.WHITE;
-    int colorPlusBg = Color.parseColor("#268D58"); // Hex color
-    int colorPlusText = Color.WHITE;
     int colorUnusedBg = Color.parseColor("#D9D9D9"); // Background color
     int colorUnusedText = Color.parseColor("#8E8E8E"); // Text color
     private DBHelper db;
@@ -112,48 +106,35 @@ public class NewSettingsActivity extends BaseDrawerActivity {
 
     private void initButtonStates() {
         modeButtonToyama = findViewById(R.id.mode_button_toyama);
-        toggleButtonToyama = findViewById(R.id.toggle_button_toyama);
 
         modeButtonHida = findViewById(R.id.mode_button_hida);
-        toggleButtonHida = findViewById(R.id.toggle_button_hida);
 
         // Load saved states for dialects
         DialectState toyamaState = getDialectState(this, "toyama");
         DialectState hidaState = getDialectState(this, "hida");
 
         // Set initial states for toyama buttons
-        if (toyamaState.isEnabled) {
+        if (toyamaState.isEnabled()) {
             modeButtonToyama.setText(toyamaState.mode);
             modeButtonToyama.setBackground(createRoundedRectangleDrawable(
                     toyamaState.mode.equals("学習") ? colorGakushuBg : colorBogoBg));
             modeButtonToyama.setTextColor(colorGakushuText);
-            toggleButtonToyama.setText("-");
-            toggleButtonToyama.setBackground(createCircleDrawable(colorMinusBg));
-            toggleButtonToyama.setTextColor(colorMinusText);
         } else {
             modeButtonToyama.setText("未使用");
             modeButtonToyama.setBackground(createRoundedRectangleDrawable(colorUnusedBg));
             modeButtonToyama.setTextColor(colorUnusedText);
-            toggleButtonToyama.setText("+");
-            toggleButtonToyama.setBackground(createCircleDrawable(colorPlusBg));
-            toggleButtonToyama.setTextColor(colorPlusText);
         }
 
-        if (hidaState.isEnabled) {
+        if (hidaState.isEnabled()) {
             modeButtonHida.setText(hidaState.mode);
             modeButtonHida.setBackground(createRoundedRectangleDrawable(
                     hidaState.mode.equals("学習") ? colorGakushuBg : colorBogoBg));
             modeButtonHida.setTextColor(colorGakushuText);
-            toggleButtonHida.setText("-");
-            toggleButtonHida.setBackground(createCircleDrawable(colorMinusBg));
-            toggleButtonHida.setTextColor(colorMinusBg);
         } else {
             modeButtonHida.setText("未使用");
             modeButtonHida.setBackground(createRoundedRectangleDrawable(colorUnusedBg));
             modeButtonHida.setTextColor(colorUnusedText);
-            toggleButtonHida.setText("+");
-            toggleButtonHida.setBackground(createCircleDrawable(colorPlusBg));
-            toggleButtonHida.setTextColor(colorPlusText);
+
         }
     }
 
@@ -178,13 +159,13 @@ public class NewSettingsActivity extends BaseDrawerActivity {
     }
 
     // Save dialect state in SharedPreferences
-    private void saveDialectState(String dialect, String mode, boolean isEnabled) {
+    private void saveDialectState(String dialect, String mode) {
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         // Save the mode and enabled state with unique keys
         editor.putString(dialect + "_mode", mode);
-        editor.putBoolean(dialect + "_enabled", isEnabled);
+
 
         editor.apply(); // Save changes
     }
@@ -207,7 +188,12 @@ public class NewSettingsActivity extends BaseDrawerActivity {
                 button.setText(state.mode);
                 button.setBackground(createRoundedRectangleDrawable(colorBogoBg));
                 button.setTextColor(colorBogoText);
-            } else {
+            } else if(state.mode.equals("母語")) {
+                state.mode = "未使用";
+                button.setText(state.mode);
+                button.setBackground(createRoundedRectangleDrawable(colorUnusedBg));
+                button.setTextColor(colorUnusedText);
+            } else if (state.mode.equals("未使用")) {
                 state.mode = "学習";
                 button.setText(state.mode);
                 button.setBackground(createRoundedRectangleDrawable(colorGakushuBg));
@@ -215,71 +201,17 @@ public class NewSettingsActivity extends BaseDrawerActivity {
             }
 
             // Save updated state
-            saveDialectState(dialect, state.mode, state.isEnabled);
+            saveDialectState(dialect, state.mode);
         };
 
-
-        // Click listener for toggle buttons (circle)
-        View.OnClickListener toggleClickListener = v -> {
-            String dialect = (String) v.getTag();
-            DialectState state = dialectStates.get(dialect);
-            Button toggleButton = (Button) v;
-
-            // Find the corresponding mode button
-            Button modeButton;
-            if (dialect.equals("toyama")) {
-                modeButton = findViewById(R.id.mode_button_toyama);
-            } else { // hida
-                modeButton = findViewById(R.id.mode_button_hida);
-            }
-
-            // Toggle between + and -
-            state.isEnabled = !state.isEnabled;
-
-            if (state.isEnabled) {
-                // If toggle is -, revert mode button to 学習 or 母語
-                toggleButton.setText("-");
-                toggleButton.setBackground(createCircleDrawable(colorMinusBg));
-                toggleButton.setTextColor(colorMinusText);
-
-                // Restore the original mode background and text
-                modeButton.setText(state.mode);
-                if (state.mode.equals("学習")) {
-                    modeButton.setBackground(createRoundedRectangleDrawable(colorGakushuBg));
-                    modeButton.setTextColor(colorGakushuText);
-                } else {
-                    modeButton.setBackground(createRoundedRectangleDrawable(colorBogoBg));
-                    modeButton.setTextColor(colorBogoText);
-                }
-            } else {
-                // If toggle is -, set mode button to 未使用 with corresponding colors
-                toggleButton.setText("+");
-                toggleButton.setBackground(createCircleDrawable(colorPlusBg));
-                toggleButton.setTextColor(colorPlusText);
-
-                // Update mode button to "未使用"
-                modeButton.setText("未使用");
-                modeButton.setBackground(createRoundedRectangleDrawable(colorUnusedBg));
-                modeButton.setTextColor(colorUnusedText);
-            }
-
-            // Save updated state
-            saveDialectState(dialect, state.mode, state.isEnabled);
-        };
 
 
         // Assign tags to buttons and set listeners
         modeButtonToyama.setTag("toyama");
         modeButtonToyama.setOnClickListener(modeClickListener);
 
-        toggleButtonToyama.setTag("toyama");
-        toggleButtonToyama.setOnClickListener(toggleClickListener);
-
         modeButtonHida.setTag("hida");
         modeButtonHida.setOnClickListener(modeClickListener);
-
-        toggleButtonHida.setTag("hida");
-        toggleButtonHida.setOnClickListener(toggleClickListener);
     }
 
     // Create rounded rectangle drawable

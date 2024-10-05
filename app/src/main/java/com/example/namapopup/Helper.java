@@ -12,11 +12,9 @@ public class Helper {
 
         // Get mode and enabled state, with defaults if not found
         String mode = sharedPreferences.getString(dialect + "_mode", "学習");
-        boolean isEnabled = sharedPreferences.getBoolean(dialect + "_enabled", false);
 
         DialectState state = new DialectState();
         state.mode = mode;
-        state.isEnabled = isEnabled;
 
         return state;
     }
