@@ -53,6 +53,7 @@ public class NamaPopup extends AccessibilityService {
     private HashMap<String, List<String>> verbMap;
 
 
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -154,6 +155,8 @@ public class NamaPopup extends AccessibilityService {
                 // Iterate over each region
                 for (int i = 0; i < cursors.length; i++) {
                     Cursor cursor = cursors[i];
+                    characterPositions.clear();
+                    normalText = "";
 //
                     DialectState dialectState = getDialectState(this, Constants.CHIHOUS[i]);
                     if (cursor != null && cursor.getCount() > 0) {
@@ -180,15 +183,15 @@ public class NamaPopup extends AccessibilityService {
                                 // After scanning the entire substring from startIndex
                                 addCurrentResultToSearchResults(hougenInformation);
 
-                                addCharacterPositions(hougen, startIndex);
-//                                separateNormalText(fullText, startIndex, endIndex);
-
                                 if (endIndex == fullText.length() - 1) {
                                     matchFound = true;
                                     Log.d(TAG, "match founded!");
+                                    addCharacterPositions(hougen, startIndex);
+                                    separateNormalText(fullText, startIndex, endIndex);
                                     break; // Stop scanning if exact match found
                                 }
                             }
+
                         }
                     }
                     if (cursor != null) cursor.close();
@@ -201,7 +204,9 @@ public class NamaPopup extends AccessibilityService {
                 endIndex++;
             }
 
-            if (matchFound) break;
+            if (matchFound) {
+                break;
+            }
             // Move startIndex to the next position
             startIndex++;
         }
@@ -312,6 +317,7 @@ public class NamaPopup extends AccessibilityService {
         chihouTextView.setText("");
         chihouTextView.setVisibility(View.GONE);
         characterPositions.clear();
+        normalText = "";
         hougenInformation = new GlobalVariable.HougenInformation("","", "", "", "", "", "");
         hougenInformation.chihou = "";
         if (indicatorTextView != null) {
