@@ -1,25 +1,28 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="60dp"
     android:id="@+id/accessibility_button"
-    android:layout_height="wrap_content"
-    android:background="@android:color/holo_blue_bright">
+    android:layout_height="60dp"
+    android:background="@drawable/rounded_button_popup">
 
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:elevation="8dp"
+        android:padding="10sp"
+        android:layout_gravity="center"
+        android:orientation="vertical">
 
         <!-- Hougen-->
         <TextView
+            android:id="@+id/accessibility_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/accessibility_text"
+            android:gravity="center"
             android:text="な"
-            android:textSize="24sp"
-            android:paddingHorizontal="10dp"
-            android:gravity="center"/>
+            android:textSize="36sp"
+            android:textColor="#FFF5EC"
+            android:layout_gravity="center" />
 
         <!-- Chihou -->
         <TextView
@@ -27,8 +30,10 @@
             android:layout_height="wrap_content"
             android:id="@+id/chihou"
             android:text="富山弁"
+            android:textColor="#FFF5EC"
             android:textSize="14sp"
             android:gravity="left"
+            android:layout_marginLeft="10dp"
             android:paddingBottom="5dp"
             android:paddingHorizontal="5dp"
             android:visibility="gone"/>
