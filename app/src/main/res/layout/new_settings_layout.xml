@@ -62,6 +62,13 @@
                     android:textSize="16sp"
                     android:gravity="start" />
 
+                <TextView
+                    android:id="@+id/toyama_count"
+                    android:layout_width="wrap_content"
+                    android:textSize="16sp"
+                    android:layout_height="wrap_content"
+                    android:padding="10sp"/>
+
                 <!-- Rounded rectangle button for mode -->
                 <Button
                     android:id="@+id/mode_button_toyama"
@@ -94,6 +101,12 @@
                     android:text="飛騨弁"
                     android:textSize="16sp"
                     android:gravity="start" />
+                <TextView
+                    android:id="@+id/hida_count"
+                    android:layout_width="wrap_content"
+                    android:textSize="16sp"
+                    android:layout_height="wrap_content"
+                    android:padding="10sp"/>
 
                 <!-- Rounded rectangle button for mode -->
                 <Button

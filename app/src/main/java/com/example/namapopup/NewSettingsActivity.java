@@ -11,6 +11,7 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -49,6 +50,7 @@ public class NewSettingsActivity extends BaseDrawerActivity {
     int colorPlusText = Color.WHITE;
     int colorUnusedBg = Color.parseColor("#D9D9D9"); // Background color
     int colorUnusedText = Color.parseColor("#8E8E8E"); // Text color
+    private DBHelper db;
 
 
     @Override
@@ -56,11 +58,23 @@ public class NewSettingsActivity extends BaseDrawerActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_settings_layout);
         setupDrawer();
-
         setOnClickListenerForDropdowns();
         initButtonStates();
         setOnClickListenerForDialectButtons();
         checkPopupPermission();
+        setUpCountText();
+
+    }
+
+    private void setUpCountText() {
+        Log.d("NewSettingsAct", "SetupCountText");
+        db = new DBHelper(this);
+        TextView hidaCountText = findViewById(R.id.hida_count);
+        String hidaText =  db.getFoundWordsRatio(0);
+        hidaCountText.setText(hidaText);
+        TextView toyamaCountText = findViewById(R.id.toyama_count);
+        String toyamaText =  db.getFoundWordsRatio(1);
+        toyamaCountText.setText(toyamaText);
     }
 
     private void checkPopupPermission() {
