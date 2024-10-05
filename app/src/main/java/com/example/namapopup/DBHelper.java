@@ -4,6 +4,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 import static com.example.namapopup.Helper.getDialectState;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -11,6 +12,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import androidx.compose.material3.AlertDialogDefaults;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -51,6 +54,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 throw new Error("Error copying database from assets", e);
             }
         }
+
     }
 
     private boolean checkDatabase() {
@@ -82,6 +86,7 @@ public class DBHelper extends SQLiteOpenHelper {
         outputStream.close();
         inputStream.close();
     }
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -272,5 +277,43 @@ public class DBHelper extends SQLiteOpenHelper {
 
         return allResults.toArray(new Cursor[0]);
     }
-    
+
+    public void deleteRowUsingHougen() {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String query = "DELETE FROM hida WHERE hougen = ?";
+        db.execSQL(query, new String[]{"ん"});
+
+        Log.d("Database", "Row deleted using raw query");
+
+        db.close();
+    }
+
+    public void insertNewRow(String def, String trigger, String hougen, String pos) {
+        // Get the writable database
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Create a ContentValues object to hold the data you want to insert
+        ContentValues values = new ContentValues();
+        values.put("def", def);
+        values.put("trigger", trigger);
+        values.put("hougen", hougen);
+        values.put("pos", pos);
+
+        // Insert the new row, the second argument is a nullColumnHack in case you don't have any data
+        long newRowId = db.insert("hida", null, values);
+
+        // Check if the insertion was successful
+        if (newRowId != -1) {
+            Log.d("Database", "Row inserted successfully with ID: " + newRowId);
+        } else {
+            Log.d("Database", "Failed to insert row");
+        }
+
+        // Close the database connection
+        db.close();
+    }
+
+
+
 }
