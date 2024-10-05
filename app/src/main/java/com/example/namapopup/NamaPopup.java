@@ -45,7 +45,6 @@ public class NamaPopup extends AccessibilityService {
     private boolean textViewSet = false;
     private List<CharacterPosition> characterPositions = new ArrayList<>();
     private SharedPreferences sharedPreferences;
-    public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "");
     private int currentResultIndex = 0; // Tracks which list within searchResults we are currently in
     private WindowManager.LayoutParams params;
     private String indicator = "";
@@ -182,30 +181,27 @@ public class NamaPopup extends AccessibilityService {
 
                             // Check for dialect word match
                             String hougen = cursor.getString(hougenColumnIndex);
+                            GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "");
                             String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");
                             boolean isExactMatch = hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText);
 
-                            if (isExactMatch) {
+                            if (isExactMatch && endIndex == fullText.length() - 1) {
                                 Log.d(TAG, "Exact match found: " + hougen);
                                 Log.d(TAG, "endIndex: " + endIndex + " fulltextLength: " + (fullText.length() -1));
                                 hougen = verbConjugator.conjugate(hougen, VerbConjugator.getVerbForm(baseText), verbMap);
                                 Log.d(TAG, "Conjugated hougen: " + hougen + " baseText: " + VerbConjugator.getVerbForm(baseText));
 
                                 // Add to character positions, update relevant information
-                                updateHougenInformation(cursor, i, hougen);
-                                Log.d("updateHougenInfo", "QUERYTEXT:" + queryText);
-
+                                updateHougenInformation(cursor, i, hougen, hougenInformation);
                                 // After scanning the entire substring from startIndex
                                 addCurrentResultToSearchResults(hougenInformation);
+                                Log.d("updateHougenInfo", "QUERYTEXT:" + queryText);
 
-                                if (endIndex == fullText.length() - 1) {
-                                    matchFound = true;
-                                    Log.d(TAG, "match founded!");
-                                    addCharacterPositions(hougen, startIndex);
-                                    separateNormalText(fullText, startIndex, endIndex);
-                                    break; // Stop scanning if exact match found
-                                }
+                                matchFound = true;
+                                Log.d(TAG, "match founded! at: " + i);
+                                addCharacterPositions(hougen, startIndex);
+                                separateNormalText(fullText, startIndex, endIndex);
                             }
 
                         }
@@ -242,7 +238,7 @@ public class NamaPopup extends AccessibilityService {
 
     private void addCurrentResultToSearchResults(GlobalVariable.HougenInformation hougenInformation) {
         // Add all matches from the current chihou (if any) to the searchResults list
-        if (hougenInformation != null && !searchResults.contains(hougenInformation)) {
+        if (hougenInformation != null) {
             searchResults.add(hougenInformation); // Add results for the current chihou
         }
     }
@@ -290,8 +286,9 @@ public class NamaPopup extends AccessibilityService {
                     textView.setText("な");
                 }
 
+                Log.d(TAG, "currentChihou: " + currentHougenInformation.chihou + " in index: " + currentResultIndex);
                 chihouTextView.setText(currentHougenInformation.chihou);
-                Log.d(TAG, "Showing: " + currentHougenInformation.hougen + " from searchResults[" + currentResultIndex + "]");
+                Log.d(TAG, "Showing: " + currentHougenInformation.hougen + " in " + currentHougenInformation.chihou + " from searchResults[" + currentResultIndex + "]");
 
                 if (indicatorTextView == null) {
                     createIndicator(indicator);
@@ -315,7 +312,7 @@ public class NamaPopup extends AccessibilityService {
     }
 
     // Function to update the hougenInformation based on the current selected item and region index
-    private void updateHougenInformation(Cursor cursor, int regionIndex, String hougen) {
+    private void updateHougenInformation(Cursor cursor, int regionIndex, String hougen, GlobalVariable.HougenInformation hougenInformation) {
         int defColumnIndex = cursor.getColumnIndex("def");
         int exampleColumnIndex = cursor.getColumnIndex("example");
 
@@ -334,8 +331,7 @@ public class NamaPopup extends AccessibilityService {
         chihouTextView.setVisibility(View.GONE);
         characterPositions.clear();
         normalText = "";
-        hougenInformation = new GlobalVariable.HougenInformation("","", "", "", "", "", "");
-        hougenInformation.chihou = "";
+        currentResultIndex = 0;
         if (indicatorTextView != null) {
             windowManager.removeView(indicatorTextView);
             indicatorTextView = null;
@@ -451,6 +447,7 @@ public class NamaPopup extends AccessibilityService {
             private float initialTouchX, initialTouchY;
             private long touchStartTime;
             private boolean isLongPress = false;
+            private boolean isSwipe = false;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -475,11 +472,13 @@ public class NamaPopup extends AccessibilityService {
                             // Swiping left
                             if (deltaX < -50 && Math.abs(deltaY) < 50) {
                                 handleSwipeLeft();
+                                isSwipe = true;
                                 return true; // Stop further event processing
                             }
                             // Swiping right
                             else if (deltaX > 50 && Math.abs(deltaY) < 50) {
                                 handleSwipeRight();
+                                isSwipe = true;
                                 return true; // Stop further event processing
                             }
                         }
@@ -495,7 +494,7 @@ public class NamaPopup extends AccessibilityService {
                     case MotionEvent.ACTION_UP:
                         v.removeCallbacks(longPressRunnable);
                         long touchDuration = System.currentTimeMillis() - touchStartTime;
-                        if (!isLongPress && touchDuration < LONG_PRESS_THRESHOLD) {
+                        if (!isLongPress && touchDuration < LONG_PRESS_THRESHOLD && !isSwipe) {
                             handleButtonClick();
                         }
                         return true;
@@ -508,7 +507,7 @@ public class NamaPopup extends AccessibilityService {
                 @Override
                 public void run() {
                     isLongPress = true;
-                    launchShousaiActivity();
+                    launchShousaiActivity(currentHougenInformation);
                 }
             };
 
@@ -520,18 +519,23 @@ public class NamaPopup extends AccessibilityService {
                 if (!searchResults.isEmpty() && currentResultIndex < searchResults.size()) {
                     //implement left swiping animation
                     floatingButton.animate()
-                            .translationXBy(-800)
+                            .translationXBy(-500)
                             .alpha(0)
                             .setDuration(150)
                             .withEndAction(new Runnable() {
                                    @Override
                                    public void run() {
-                                       floatingButton.setTranslationX(800); // Move view to the right of the screen
+                                       floatingButton.setTranslationX(100); // Move view to the right of the screen
                                        floatingButton.animate()
                                                .translationX(0)  // Slide the new view into position
                                                .alpha(1)         // Fade in the new view
-                                               .setDuration(200)
-                                               .start();
+                                               .setDuration(100)
+                                               .withEndAction(new Runnable() {
+                                                   @Override
+                                                   public void run() {
+                                                       isSwipe = false;
+                                                   }
+                                               });
                                    }
                             })
                             .start();
@@ -540,7 +544,8 @@ public class NamaPopup extends AccessibilityService {
                     if (currentResultIndex < searchResults.size() - 1) {
                         // Move to the next sublist if available
                         currentResultIndex++;
-                        updateIndicator();
+                        // Update the floating button with the new text and hougenInformation
+                        updateFloatingButtonText();
                         Log.d("swipeLeft", "Update indicatorTextView to " + indicator);
                     }
                 }
@@ -557,18 +562,23 @@ public class NamaPopup extends AccessibilityService {
                 if (!searchResults.isEmpty()) {
                     //implement right swiping animation
                     floatingButton.animate()
-                            .translationXBy(800) // Move the view out of screen to the right
+                            .translationXBy(500) // Move the view out of screen to the right
                             .alpha(0)             // Fade out the current view
-                            .setDuration(100)     // Duration of the animation
+                            .setDuration(150)     // Duration of the animation
                             .withEndAction(new Runnable() {
                                 @Override
                                 public void run() {
-                                    floatingButton.setTranslationX(-800); // Move view to the left of the screen
+                                    floatingButton.setTranslationX(-100); // Move view to the left of the screen
                                     floatingButton.animate()
                                             .translationX(0)  // Slide the new view into position
                                             .alpha(1)         // Fade in the new view
-                                            .setDuration(150)
-                                            .start();
+                                            .setDuration(100)
+                                            .withEndAction(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    isSwipe = false;
+                                                }
+                                            });
                                 }
                             })
                             .start();
@@ -576,18 +586,17 @@ public class NamaPopup extends AccessibilityService {
                     if (currentResultIndex > 0) {
                         // Move to the previous sublist if available
                         currentResultIndex--;
-                        updateIndicator();
+                        // Update the floating button with the new text and hougenInformation
+                        updateFloatingButtonText();
                         Log.d("swipeRight", "Update indicatorTextView to " + indicator);
+
                     }
                 }
-
-                // Update the floating button with the new text and hougenInformation
-                updateFloatingButtonText();
             }
 
             private void handleButtonClick() {
                 Log.d("handleButtonClick", "Button clicked");
-                if (!searchResults.get(currentResultIndex).equals("")) {
+                if (!searchResults.isEmpty()) {
                     Log.d("handleButtonClick", "Setting composing text to " + convertedText);
 
                     // Attempt to modify the text in the focused edit field
@@ -597,8 +606,8 @@ public class NamaPopup extends AccessibilityService {
                         arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, convertedText);
                         focusedNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
                         onConvertText();
-                        int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(hougenInformation.chihou);
-                        databaseHelper.setWordToFound(hougenInformation.hougen, regionIndex);
+                        int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(currentHougenInformation.chihou);
+                        databaseHelper.setWordToFound(currentHougenInformation.hougen, regionIndex);
                         List<String> foundWords = databaseHelper.getFoundWords(regionIndex);
                         for(String foundWord: foundWords) Log.d("FoundWords", "FOUND WORD " + foundWord);
                         focusedNode.recycle();
@@ -666,7 +675,7 @@ public class NamaPopup extends AccessibilityService {
         }
     }
 
-    private void launchShousaiActivity() {
+    private void launchShousaiActivity(GlobalVariable.HougenInformation hougenInformation) {
         Intent intent = new Intent(this, HougenInfoActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("hougen", verbConjugator.reconjugate(hougenInformation.hougen, verbMap));
