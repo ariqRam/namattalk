@@ -92,6 +92,8 @@ public class NewSettingsActivity extends BaseDrawerActivity {
                     .setNegativeButton("Cancel", null)
                     .show();
         }
+
+
     }
 
     private void initButtonStates() {
