@@ -47,7 +47,6 @@ public class NamaPopup extends AccessibilityService {
     private SharedPreferences sharedPreferences;
     public GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "");
     private int currentResultIndex = 0; // Tracks which list within searchResults we are currently in
-    private int currentItemIndex = 0;   // Tracks the item within the current list
     private WindowManager.LayoutParams params;
     private String indicator = "";
     private VerbConjugator verbConjugator;
@@ -58,7 +57,6 @@ public class NamaPopup extends AccessibilityService {
     public void onCreate() {
         super.onCreate();
         databaseHelper = new DBHelper(this);
-        databaseHelper.deleteRowUsingHougen();
         sharedPreferences = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
 
         Log.d("ONCREATE", "Non-native mode = " + sharedPreferences.getBoolean(Constants.NON_NATIVE_MODE, false));
@@ -171,6 +169,7 @@ public class NamaPopup extends AccessibilityService {
 
                             if (isExactMatch) {
                                 Log.d(TAG, "Exact match found: " + hougen);
+                                Log.d(TAG, "endIndex: " + endIndex + " fulltextLength: " + (fullText.length() -1));
                                 hougen = verbConjugator.conjugate(hougen, VerbConjugator.getVerbForm(baseText), verbMap);
                                 Log.d(TAG, "Conjugated hougen: " + hougen + " baseText: " + VerbConjugator.getVerbForm(baseText));
 
@@ -186,6 +185,7 @@ public class NamaPopup extends AccessibilityService {
 
                                 if (endIndex == fullText.length() - 1) {
                                     matchFound = true;
+                                    Log.d(TAG, "match founded!");
                                     break; // Stop scanning if exact match found
                                 }
                             }
@@ -194,10 +194,14 @@ public class NamaPopup extends AccessibilityService {
                     if (cursor != null) cursor.close();
                 }
 
-                if (matchFound) break; // Stop expanding endIndex once a match is found
+                if (matchFound) {
+                    Log.d(TAG, "exit the endIndex loop");
+                    break; // Stop expanding endIndex once a match is found
+                }
                 endIndex++;
             }
 
+            if (matchFound) break;
             // Move startIndex to the next position
             startIndex++;
         }
