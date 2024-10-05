@@ -51,6 +51,7 @@ public class NamaPopup extends AccessibilityService {
     private String indicator = "";
     private VerbConjugator verbConjugator;
     private HashMap<String, List<String>> verbMap;
+    private int convertTextIndex = 0;
 
 
 
@@ -134,7 +135,8 @@ public class NamaPopup extends AccessibilityService {
 
     private void showDialectSuggestions(String fullText) {
         String TAG = "showDialectSuggestions";
-        int startIndex = 0;
+        int startIndex = convertTextIndex;
+        Log.d(TAG, "converTextIndex: " + convertTextIndex);
         int endIndex = 0;
 
         // List to hold results grouped by chihou (region)
@@ -370,6 +372,7 @@ public class NamaPopup extends AccessibilityService {
         // Clear the editable text and set it to the converted text
         // Assuming you have a method to clear and set the text
         setEditableText(convertedText);
+        convertTextIndex = convertedText.length() - 1;
         convertedText = "";
         characterPositions.clear();
 
