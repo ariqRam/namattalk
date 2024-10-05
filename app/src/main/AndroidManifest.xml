@@ -11,7 +11,7 @@
 
         <activity
             android:name=".NewSettingsActivity"
-            android:label="地方設定"
+            android:label="なまっtalk"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
             >
@@ -29,7 +29,6 @@
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 

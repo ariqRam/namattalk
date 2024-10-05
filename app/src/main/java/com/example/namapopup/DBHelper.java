@@ -248,7 +248,6 @@ public class DBHelper extends SQLiteOpenHelper {
         List<Cursor> allResults = new ArrayList<>();
 
         for (String tableName : chosenChihous) {
-            Log.d("KEn", tableName);
             if (tableName != null && !tableName.isEmpty()) {
                 try {
                     // Query to get verbs where 'pos' column is '動詞' (verb)

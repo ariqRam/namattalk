@@ -2,6 +2,10 @@ package com.example.namapopup;
 
 import static com.example.namapopup.Helper.getDialectState;
 
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
@@ -10,9 +14,11 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class NewSettingsActivity extends BaseDrawerActivity {
@@ -53,7 +60,24 @@ public class NewSettingsActivity extends BaseDrawerActivity {
         setOnClickListenerForDropdowns();
         initButtonStates();
         setOnClickListenerForDialectButtons();
+        checkPopupPermission();
+    }
 
+    private void checkPopupPermission() {
+        if (!isAccessibilityServiceEnabled(NamaPopup.class)) {
+            // Show a dialog or notification to the user
+            new AlertDialog.Builder(this)
+                    .setTitle("Enable Accessibility Service")
+                    .setMessage("Please enable なまっtalk accessibility service for the app to function properly.")
+                    .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            redirectToAccessibilitySettings();
+                        }
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        }
     }
 
     private void initButtonStates() {
@@ -244,6 +268,26 @@ public class NewSettingsActivity extends BaseDrawerActivity {
         drawable.setShape(GradientDrawable.OVAL);
         drawable.setColor(color);
         return drawable;
+    }
+
+    private boolean isAccessibilityServiceEnabled(Class<? extends AccessibilityService> service) {
+        AccessibilityManager accessibilityManager =
+                (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
+        List<AccessibilityServiceInfo> enabledServices =
+                accessibilityManager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+
+        for (AccessibilityServiceInfo enabledService : enabledServices) {
+            if (enabledService.getId().equals(getPackageName() + "/" + service.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void redirectToAccessibilitySettings() {
+        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
 }
