@@ -14,6 +14,8 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -26,6 +28,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -93,8 +97,18 @@ public class NewSettingsActivity extends BaseDrawerActivity {
                     .show();
         }
 
-
+        // Check if overlay permission is granted
+        if (canDrawOverlays()) {
+            // Permission is granted
+            Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+            // Proceed with your functionality
+        } else {
+            // Permission is not granted, prompt user to enable it
+            Toast.makeText(this, "Permission not granted. Redirecting to settings.", Toast.LENGTH_SHORT).show();
+            requestDrawOverlaysPermission();
+        }
     }
+
 
     private void initButtonStates() {
         modeButtonToyama = findViewById(R.id.mode_button_toyama);
@@ -293,17 +307,47 @@ public class NewSettingsActivity extends BaseDrawerActivity {
                 accessibilityManager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
 
         for (AccessibilityServiceInfo enabledService : enabledServices) {
-            if (enabledService.getId().equals(getPackageName() + "/" + service.getName())) {
-                return true;
+            Log.d("AccessibilityService", "Enabled Service ID: " + enabledService.getId());
+            if (enabledService.getId().contains("namapopup")) {
+                return true; // Service is enabled
             }
         }
-        return false;
+        return false; // Service is not enabled
     }
+
 
     private void redirectToAccessibilitySettings() {
         Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+    }
+
+    // Method to check if the permission is granted
+    private boolean canDrawOverlays() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this);
+    }
+
+    // Method to request the permission
+    private void requestDrawOverlaysPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, 100); // You can choose any request code
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // Check if the permission has been granted after returning from settings
+        if (requestCode == 100) {
+            if (canDrawOverlays()) {
+                Toast.makeText(this, "Permission granted after returning from settings", Toast.LENGTH_SHORT).show();
+                // Proceed with your functionality
+            } else {
+                Toast.makeText(this, "Permission still not granted", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 }
