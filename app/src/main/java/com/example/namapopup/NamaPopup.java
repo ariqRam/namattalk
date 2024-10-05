@@ -83,41 +83,57 @@ public class NamaPopup extends AccessibilityService {
     protected void onServiceConnected() {
         super.onServiceConnected();
 
-        // Configure the AccessibilityServiceInfo to listen for text changes
+        // Configure the AccessibilityServiceInfo to listen for various events
         AccessibilityServiceInfo serviceInfo = getServiceInfo();
+
+        // Listen to more events than just text changes
         serviceInfo.eventTypes = AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
+
         serviceInfo.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
+
+        // Include views that are not important for accessibility (e.g., certain input fields)
         serviceInfo.flags |= AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
-        serviceInfo.packageNames = null; // Listen to text changes in all apps
 
-        createFloatingButton();
+        // Listen to events in all apps
+        serviceInfo.packageNames = null;
 
+        // Set service info to make it active
         setServiceInfo(serviceInfo);
+
+        // Optionally create any floating UI you need
+        createFloatingButton();
     }
 
+
+    @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-            AccessibilityNodeInfo source = event.getSource();
+        int eventType = event.getEventType();
+        AccessibilityNodeInfo currentNode;
 
-            if (source != null && source.isEditable()) {
-                // Get the current text from the editable field
-                CharSequence currentText = event.getText() != null && !event.getText().isEmpty() ? event.getText().get(0) : null;
-                int positionStart = event.getFromIndex();
-                int positionEnd = positionStart + event.getAddedCount();
+        switch (eventType) {
+            case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
+                AccessibilityNodeInfo source = event.getSource();
+                if (source != null && source.isEditable()) {
+                    // Get the current text from the editable field
+                    CharSequence currentText = event.getText() != null && !event.getText().isEmpty() ? event.getText().get(0) : null;
+                    int positionStart = event.getFromIndex();
+                    int positionEnd = positionStart + event.getAddedCount();
 
-                if (currentText != null) {
-                    String fullText = currentText.toString();
-                    Log.d("composingText", "Full Text: " + fullText);
-                    Log.d("composingText", "Full Text Position: " + positionStart + " to " + positionEnd);
-                    if (positionStart == positionEnd) {
-                        Log.d("composingText", "no text");
-                        resetFloatingButtonText();
-                    } else {
-                        // Show suggestions for the new composing text
-                        showDialectSuggestions(fullText);
+                    if (currentText != null) {
+                        String fullText = currentText.toString();
+                        Log.d("composingText", "Full Text: " + fullText);
+                        Log.d("composingText", "Full Text Position: " + positionStart + " to " + positionEnd);
+                        if (positionStart == positionEnd) {
+                            Log.d("composingText", "No text");
+                            resetFloatingButtonText();
+                        } else {
+                            // Show suggestions for the new composing text
+                            showDialectSuggestions(fullText);
+                        }
                     }
                 }
-            }
+                break;
+
 
         }
     }
@@ -159,7 +175,7 @@ public class NamaPopup extends AccessibilityService {
                     Cursor cursor = cursors[i];
                     characterPositions.clear();
                     normalText = "";
-//
+
                     DialectState dialectState = getDialectState(this, Constants.CHIHOUS[i]);
                     if (cursor != null && cursor.getCount() > 0) {
                         if (cursor.moveToFirst()) {
