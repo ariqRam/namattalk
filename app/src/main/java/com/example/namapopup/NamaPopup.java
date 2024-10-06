@@ -42,17 +42,15 @@ public class NamaPopup extends AccessibilityService {
     private static final long LONG_PRESS_THRESHOLD = 500;
     private DBHelper databaseHelper;
     private List<GlobalVariable.HougenInformation> searchResults = new ArrayList<>();
-    private GlobalVariable.HougenInformation currentHougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "");
+    private GlobalVariable.HougenInformation currentHougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>());
     private String normalText = "";
     private boolean textViewSet = false;
-    private List<CharacterPosition> characterPositions = new ArrayList<>();
     private SharedPreferences sharedPreferences;
     private int currentResultIndex = 0; // Tracks which list within searchResults we are currently in
     private WindowManager.LayoutParams params;
     private String indicator = "";
     private VerbConjugator verbConjugator;
     private HashMap<String, List<String>> verbMap;
-    private int convertTextIndex = 0;
 
     @Override
     public void onCreate() {
@@ -115,7 +113,7 @@ public class NamaPopup extends AccessibilityService {
                 if (source != null && source.isEditable()) {
                     // Get the current text from the editable field
                     CharSequence currentText = event.getText() != null && !event.getText().isEmpty() ? event.getText().get(0) : null;
-                    int positionStart = event.getFromIndex();
+                    int positionStart = event.getFromIndex() - 1;
                     int positionEnd = positionStart + event.getAddedCount();
 
                     if (currentText != null) {
@@ -150,8 +148,7 @@ public class NamaPopup extends AccessibilityService {
 
     private void showDialectSuggestions(String fullText) {
         String TAG = "showDialectSuggestions";
-        int startIndex = convertTextIndex;
-        Log.d(TAG, "converTextIndex: " + convertTextIndex);
+        int startIndex = 0;
         int endIndex = 0;
 
         // List to hold results grouped by chihou (region)
@@ -172,7 +169,7 @@ public class NamaPopup extends AccessibilityService {
                 // Iterate over each region
                 for (int i = 0; i < cursors.length; i++) {
                     Cursor cursor = cursors[i];
-                    characterPositions.clear();
+                    List<CharacterPosition> characterPositions = new ArrayList<>();
                     normalText = "";
 
                     DialectState dialectState = getDialectState(this, Constants.CHIHOUS[i]);
@@ -183,7 +180,7 @@ public class NamaPopup extends AccessibilityService {
 
                             // Check for dialect word match
                             String hougen = cursor.getString(hougenColumnIndex);
-                            GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "");
+                            GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>());
                             String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");
                             boolean isExactMatch = hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText);
@@ -195,15 +192,15 @@ public class NamaPopup extends AccessibilityService {
                                 Log.d(TAG, "Conjugated hougen: " + hougen + " baseText: " + VerbConjugator.getVerbForm(baseText));
 
                                 // Add to character positions, update relevant information
-                                updateHougenInformation(cursor, i, hougen, hougenInformation);
+                                updateHougenInformation(cursor, i, hougen, hougenInformation, characterPositions);
                                 // After scanning the entire substring from startIndex
                                 addCurrentResultToSearchResults(hougenInformation);
                                 Log.d("updateHougenInfo", "QUERYTEXT:" + queryText);
 
                                 matchFound = true;
                                 Log.d(TAG, "match founded! at: " + i);
-                                addCharacterPositions(hougen, startIndex);
-                                separateNormalText(fullText, startIndex, endIndex);
+                                addCharacterPositions(hougenInformation.characterPositions, hougen, startIndex);
+                                separateNormalText(hougenInformation.characterPositions, fullText, startIndex, endIndex);
                             }
 
                         }
@@ -256,7 +253,7 @@ public class NamaPopup extends AccessibilityService {
     }
 
 
-    private void addCharacterPositions(String matchedWord, int startIndex) {
+    private void addCharacterPositions(List<CharacterPosition> characterPositions, String matchedWord, int startIndex) {
         characterPositions.clear(); // Clear existing character positions before adding new ones
         int position = startIndex;
 
@@ -315,7 +312,7 @@ public class NamaPopup extends AccessibilityService {
     }
 
     // Function to update the hougenInformation based on the current selected item and region index
-    private void updateHougenInformation(Cursor cursor, int regionIndex, String hougen, GlobalVariable.HougenInformation hougenInformation) {
+    private void updateHougenInformation(Cursor cursor, int regionIndex, String hougen, GlobalVariable.HougenInformation hougenInformation, List<CharacterPosition> characterPositions) {
         int defColumnIndex = cursor.getColumnIndex("def");
         int exampleColumnIndex = cursor.getColumnIndex("example");
 
@@ -325,6 +322,7 @@ public class NamaPopup extends AccessibilityService {
         hougenInformation.area = Constants.AREAS[regionIndex];
         hougenInformation.def = cursor.getString(defColumnIndex);
         hougenInformation.example = cursor.getString(exampleColumnIndex);
+        hougenInformation.characterPositions = characterPositions;
     }
 
     private void resetFloatingButtonText() {
@@ -332,7 +330,7 @@ public class NamaPopup extends AccessibilityService {
         setOverlayIdle();
         chihouTextView.setText("");
         chihouTextView.setVisibility(View.GONE);
-        characterPositions.clear();
+        currentHougenInformation.characterPositions.clear();
         normalText = "";
         currentResultIndex = 0;
         if (indicatorTextView != null) {
@@ -353,7 +351,7 @@ public class NamaPopup extends AccessibilityService {
 
 
     //this method can search the text that cannot be converted from fullText
-    private void separateNormalText(String fullText, int startIndex, int endIndex) {
+    private void separateNormalText(List<CharacterPosition> characterPositions, String fullText, int startIndex, int endIndex) {
         int position = 0;
         Log.d("array", "characterPosition_before" + characterPositions);
 
@@ -373,8 +371,8 @@ public class NamaPopup extends AccessibilityService {
     // Call this method when the user performs conversion
     private void onConvertText() {
         // Sort character positions by their start index
-        if (characterPositions != null && !characterPositions.isEmpty()) {
-            Collections.sort(characterPositions, new Comparator<CharacterPosition>() {
+        if (currentHougenInformation.characterPositions != null && !currentHougenInformation.characterPositions.isEmpty()) {
+            Collections.sort(currentHougenInformation.characterPositions, new Comparator<CharacterPosition>() {
                 @Override
                 public int compare(CharacterPosition cp1, CharacterPosition cp2) {
                     return Integer.compare(cp1.position, cp2.position);
@@ -384,7 +382,7 @@ public class NamaPopup extends AccessibilityService {
 
         StringBuilder combinedWord = new StringBuilder();
 
-        for (CharacterPosition cp : characterPositions) {
+        for (CharacterPosition cp : currentHougenInformation.characterPositions) {
             combinedWord.append(cp.character);
         }
 
@@ -395,9 +393,8 @@ public class NamaPopup extends AccessibilityService {
         // Clear the editable text and set it to the converted text
         // Assuming you have a method to clear and set the text
         setEditableText(convertedText);
-        convertTextIndex = convertedText.length() - 1;
         convertedText = "";
-        characterPositions.clear();
+        currentHougenInformation.characterPositions.clear();
 
     }
 
