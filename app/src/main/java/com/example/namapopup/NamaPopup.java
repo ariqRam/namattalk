@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.net.Uri;
 
@@ -35,6 +36,7 @@ public class NamaPopup extends AccessibilityService {
     private View floatingButton;
     private TextView indicatorTextView;
     private TextView textView;
+    private ImageView logoView;
     private TextView chihouTextView;
     private String convertedText = "";
     private static final long LONG_PRESS_THRESHOLD = 500;
@@ -281,9 +283,10 @@ public class NamaPopup extends AccessibilityService {
 
             if (currentHougenInformation != null) {
                 if (currentHougenInformation.hougen != null) {
+                    setOverlayActive();
                     textView.setText(currentHougenInformation.hougen);
                 } else {
-                    textView.setText("な");
+                    setOverlayIdle();
                 }
 
                 Log.d(TAG, "currentChihou: " + currentHougenInformation.chihou + " in index: " + currentResultIndex);
@@ -326,7 +329,7 @@ public class NamaPopup extends AccessibilityService {
 
     private void resetFloatingButtonText() {
         textViewSet = false;
-        textView.setText("な");
+        setOverlayIdle();
         chihouTextView.setText("");
         chihouTextView.setVisibility(View.GONE);
         characterPositions.clear();
@@ -336,6 +339,16 @@ public class NamaPopup extends AccessibilityService {
             windowManager.removeView(indicatorTextView);
             indicatorTextView = null;
         }
+    }
+
+    private void setOverlayIdle() {
+        textView.setVisibility(View.GONE);
+        logoView.setVisibility(View.VISIBLE);
+    }
+
+    private void setOverlayActive() {
+        textView.setVisibility(View.VISIBLE);
+        logoView.setVisibility(View.GONE);
     }
 
 
@@ -425,6 +438,7 @@ public class NamaPopup extends AccessibilityService {
         // Inflate the floating button layout
         floatingButton = LayoutInflater.from(this).inflate(R.layout.accessibility_button_layout, null);
         textView = floatingButton.findViewById(R.id.accessibility_text);
+        logoView = floatingButton.findViewById(R.id.accessibility_logo);
         chihouTextView = floatingButton.findViewById(R.id.chihou);
 
 

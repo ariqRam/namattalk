@@ -22,7 +22,14 @@
             android:text="な"
             android:textSize="36sp"
             android:textColor="#FFF5EC"
-            android:layout_gravity="center" />
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/accessibility_logo"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/logo"
+            android:contentDescription="App Logo" />
 
         <!-- Chihou -->
         <TextView
