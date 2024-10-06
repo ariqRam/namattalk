@@ -40,6 +40,7 @@ public class HougenInfoActivity extends Service {
                 Intent intent = new Intent(getApplicationContext(), NewSettingsActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+                stopSelf();
                 if (mFloatingView != null) {
                     mWindowManager.removeView(mFloatingView);
                 }

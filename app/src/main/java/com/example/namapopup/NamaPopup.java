@@ -518,6 +518,7 @@ public class NamaPopup extends AccessibilityService {
                 @Override
                 public void run() {
                     isLongPress = true;
+                    Log.d("longPressRunnable", "Long press detected");
                     launchShousaiActivity(currentHougenInformation);
                 }
             };
@@ -661,11 +662,12 @@ public class NamaPopup extends AccessibilityService {
                 PixelFormat.TRANSLUCENT);
 
         // Position the new TextView below the existing floating layout
-        int indicatorOffset = floatingButton.getHeight() * 23 / 10;
+        int indicatorOffsetX = 20;
+        int indicatorOffsetY = floatingButton.getHeight() * 17/10;
 
         indicatorParams.gravity = Gravity.TOP | Gravity.LEFT;
-        indicatorParams.x = params.x; // Keep same X position
-        indicatorParams.y = params.y + indicatorOffset; // Position below the floating layout
+        indicatorParams.x = params.x + indicatorOffsetX; // Keep same X position
+        indicatorParams.y = params.y + indicatorOffsetY; // Position below the floating layout
 
         // Add the new TextView to the WindowManager
         windowManager.addView(indicatorTextView, indicatorParams);
