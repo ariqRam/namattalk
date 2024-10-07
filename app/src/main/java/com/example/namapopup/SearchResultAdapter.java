@@ -93,6 +93,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         intent.putExtra("pref", hougenInformation.pref);
         intent.putExtra("area", hougenInformation.area);
         intent.putExtra("def", hougenInformation.def);
+        intent.putExtra("pos", hougenInformation.pos);
         intent.putExtra("example", hougenInformation.example);
         startActivity(context, intent, null);
     }
