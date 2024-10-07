@@ -97,6 +97,7 @@ public class HougenInfoActivity extends Service {
             String area = intent.getStringExtra("area");
             String def = intent.getStringExtra("def");
             String example = intent.getStringExtra("example");
+            String hinshi = intent.getStringExtra("pos");
 
             // Update the floating view TextViews with the received data
             if (mFloatingView != null) {
@@ -105,6 +106,7 @@ public class HougenInfoActivity extends Service {
                 TextView inputPrefTextView = mFloatingView.findViewById(R.id.inputPref);
                 TextView inputAreaTextView = mFloatingView.findViewById(R.id.inputArea);
                 TextView inputMeaningTextView = mFloatingView.findViewById(R.id.inputMeaning);
+                TextView inputHinshiTextView = mFloatingView.findViewById(R.id.inputHinshi);
                 TextView inputExampleTextView = mFloatingView.findViewById(R.id.inputExample);
 
                 inputWordTextView.setText(hougen);
@@ -112,6 +114,7 @@ public class HougenInfoActivity extends Service {
                 inputPrefTextView.setText(pref);
                 inputAreaTextView.setText(area);
                 inputMeaningTextView.setText(def);
+                inputHinshiTextView.setText(hinshi);
                 inputExampleTextView.setText(example);
             }
         }

@@ -157,6 +157,7 @@ public class DictionaryActivity extends BaseDrawerActivity {
         intent.putExtra("pref", hougenInformation.pref);
         intent.putExtra("area", hougenInformation.area);
         intent.putExtra("def", hougenInformation.def);
+        intent.putExtra("pos", hougenInformation.pos);
         intent.putExtra("example", hougenInformation.example);
         startService(intent);
     }

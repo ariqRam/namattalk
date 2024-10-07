@@ -26,6 +26,7 @@ public class DictionaryInfoActivity extends AppCompatActivity {
             String pref = intent.getStringExtra("pref");
             String area = intent.getStringExtra("area");
             String def = intent.getStringExtra("def");
+            String hinshi = intent.getStringExtra("pos");
             String example = intent.getStringExtra("example");
 
             // Find the TextViews and set their content
@@ -34,6 +35,7 @@ public class DictionaryInfoActivity extends AppCompatActivity {
             TextView inputPrefTextView = findViewById(R.id.inputPref);
             TextView inputAreaTextView = findViewById(R.id.inputArea);
             TextView inputMeaningTextView = findViewById(R.id.inputMeaning);
+            TextView inputHinshiTextView = findViewById(R.id.inputHinshi);
             TextView inputExampleTextView = findViewById(R.id.inputExample);
 
             inputWordTextView.setText(hougen);
@@ -41,6 +43,7 @@ public class DictionaryInfoActivity extends AppCompatActivity {
             inputPrefTextView.setText(pref);
             inputAreaTextView.setText(area);
             inputMeaningTextView.setText(def);
+            inputHinshiTextView.setText(hinshi);
             inputExampleTextView.setText(example);
         }
 

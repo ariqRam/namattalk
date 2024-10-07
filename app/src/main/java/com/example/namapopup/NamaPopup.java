@@ -296,6 +296,7 @@ public class NamaPopup extends AccessibilityService {
     private void updateHougenInformation(Cursor cursor, int regionIndex, String hougen, GlobalVariable.HougenInformation hougenInformation, List<CharacterPosition> characterPositions) {
         int defColumnIndex = cursor.getColumnIndex("def");
         int exampleColumnIndex = cursor.getColumnIndex("example");
+        int posColumnIndex = cursor.getColumnIndex("pos");
 
         hougenInformation.hougen = hougen;
         hougenInformation.chihou = Constants.CHIHOUS_JP[regionIndex];// Region from the cursor
@@ -304,6 +305,7 @@ public class NamaPopup extends AccessibilityService {
         hougenInformation.def = cursor.getString(defColumnIndex);
         hougenInformation.example = cursor.getString(exampleColumnIndex);
         hougenInformation.characterPositions = characterPositions;
+        hougenInformation.pos = cursor.getString(posColumnIndex);
     }
 
     private void resetFloatingButtonText() {
@@ -671,6 +673,7 @@ public class NamaPopup extends AccessibilityService {
         intent.putExtra("area", hougenInformation.area);
         intent.putExtra("def", hougenInformation.def);
         intent.putExtra("example", hougenInformation.example);
+        intent.putExtra("pos", hougenInformation.pos);
         startService(intent);
     }
 
