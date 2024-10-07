@@ -10,19 +10,42 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <activity
-            android:name=".SettingsActivity"
-            android:label="settings"
-            android:exported="true">
+            android:name=".NewSettingsActivity"
+            android:label="なまっtalk"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".DictionaryActivity"
+            android:label="辞書"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".DictionaryInfoActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+
         <service android:name=".HougenInfoActivity"
             android:label="hougenInformation"
             android:permission="android.permission.SYSTEM_ALERT_WINDOW"
-            android:exported="false" />/>
+            android:exported="false" />
 
 
         <service

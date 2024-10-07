@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/rounded_button_with_border.xml -->
+<shape xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:ignore="ExtraText">
+    <!-- Define the background color -->
+    <solid android:color="#CC8F4705" /> <!-- Orange background -->
+
+    <!-- Define the border (stroke) color and width -->
+    <stroke
+        android:width="3dp"
+        android:color="#CCFFF5EC" />
+
+    <!-- Define the corner radius -->
+    <corners android:radius="20dp" />
+</shape>

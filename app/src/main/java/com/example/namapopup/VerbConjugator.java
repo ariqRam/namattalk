@@ -1,6 +1,8 @@
 package com.example.namapopup;
 
 
+import static com.example.namapopup.Helper.getDialectState;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -16,10 +18,15 @@ public class VerbConjugator {
 
     private DBHelper dbHelper;
     private SharedPreferences sharedPreferences;
+    private DialectState toyamaState;
+    private DialectState hidaState;
 
     public VerbConjugator(Context context) {
         dbHelper = new DBHelper(context);
         sharedPreferences = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE);
+        // Load saved states for dialects
+        toyamaState = getDialectState(context, "toyama");
+        hidaState = getDialectState(context, "hida");
     }
 
     public HashMap<String, List<String>> getVerbs() {
@@ -38,7 +45,7 @@ public class VerbConjugator {
                         String trigger = cursor.getString(triggerIndex);
                         String pos = cursor.getString(posIndex);
 
-                        if ("動詞".equals(pos) && hougen != null && trigger != null) {
+                        if ("動詞".equals(pos) && hougen != null && trigger != null && toyamaState.isEnabled() || hidaState.isEnabled()) {
                             if (trigger != null) {
                                 String[] splitTriggers = trigger.split("、");
                                 for (String singleTrigger : splitTriggers) {
@@ -100,7 +107,7 @@ public class VerbConjugator {
     }
 
     public static VerbForm getVerbForm(String verb) {
-        if (verb.endsWith("ない")) {
+        if (verb.endsWith("ない") || verb.endsWith("ん")) {
             return VerbForm.NEGATIVE;
         }
 
@@ -214,7 +221,7 @@ public class VerbConjugator {
         }
     }
 
-    //Method to reconjugate other forms to base form
+    //Method to reconjugate other forms to base form いない =》 いる
     public String reconjugate(String verb, HashMap<String, List<String>> verbMap) {
         for (Map.Entry<String, List<String>> entry : verbMap.entrySet()) {
             String baseVerb = entry.getKey();
@@ -226,6 +233,7 @@ public class VerbConjugator {
                 }
             }
         }
+
         return verb;
     }
 
@@ -233,7 +241,6 @@ public class VerbConjugator {
     // Conjugate based on verb type
     public static String conjugateFromBase(String verb, VerbForm conjugationform, boolean isHougen) {
         VerbType type = getVerbType(verb, getVerbForm(verb));
-        Log.d("conjugator", "verb: " + verb + " form: " + conjugationform + " type: " + type);
 
 
         switch (type) {
@@ -264,7 +271,6 @@ public class VerbConjugator {
         String stem = verb.substring(0, verb.length() - 1);
         char lastChar = verb.charAt(verb.length() - 1);
         String newStem = changeGodanEnding(stem, lastChar, form, endingMap);
-        Log.d("ending", "changeGodanEnding: " + newStem);// Changes ending based on form
 
         switch (form) {
             case NEGATIVE: return isHougen ? newStem + "ん" : newStem + "ない";

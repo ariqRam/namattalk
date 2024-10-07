@@ -37,9 +37,10 @@ public class HougenInfoActivity extends Service {
             public void onClick(View v) {
                 // Start the SettingsActivity when the settings button is clicked
                 Log.d("FloatingView", "Settings button clicked");
-                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                Intent intent = new Intent(getApplicationContext(), NewSettingsActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+                stopSelf();
                 if (mFloatingView != null) {
                     mWindowManager.removeView(mFloatingView);
                 }
