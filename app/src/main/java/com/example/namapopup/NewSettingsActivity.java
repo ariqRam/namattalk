@@ -172,6 +172,7 @@ public class NewSettingsActivity extends BaseDrawerActivity {
 
 
     private void setOnClickListenerForDialectButtons() {
+        String TAG = "NewSettingsActivity";
 
         dialectStates.put("toyama", new DialectState());
         dialectStates.put("hida", new DialectState());
@@ -182,18 +183,24 @@ public class NewSettingsActivity extends BaseDrawerActivity {
             DialectState state = dialectStates.get(dialect);
             Button button = (Button) v;
 
-            // Toggle mode between 学習 and 母語
+            // Toggle mode between 学習 母語 and 未使用
             if (state.mode.equals("学習")) {
+                Log.d(TAG, "学習 mode off in " + dialect);
+                Log.d(TAG, "母語 mode on in " + dialect);
                 state.mode = "母語";
                 button.setText(state.mode);
                 button.setBackground(createRoundedRectangleDrawable(colorBogoBg));
                 button.setTextColor(colorBogoText);
             } else if(state.mode.equals("母語")) {
+                Log.d(TAG, "母語 mode off in " + dialect);
+                Log.d(TAG, "未使用 mode on in " + dialect);
                 state.mode = "未使用";
                 button.setText(state.mode);
                 button.setBackground(createRoundedRectangleDrawable(colorUnusedBg));
                 button.setTextColor(colorUnusedText);
             } else if (state.mode.equals("未使用")) {
+                Log.d(TAG, "未使用 mode off in " + dialect);
+                Log.d(TAG, "学習 mode on in " + dialect);
                 state.mode = "学習";
                 button.setText(state.mode);
                 button.setBackground(createRoundedRectangleDrawable(colorGakushuBg));

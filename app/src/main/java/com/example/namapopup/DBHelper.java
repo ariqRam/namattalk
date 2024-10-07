@@ -42,7 +42,7 @@ public class DBHelper extends SQLiteOpenHelper {
             DialectState dialectState = getDialectState(context, chihou);
             if(dialectState.isEnabled()) {
                 chosenChihous[i] = chihou;
-                Log.d("DB", chihou + " is Enabled");
+                Log.d("DB", chihou + " database is Enabled");
             }
         }
 
@@ -118,77 +118,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public Cursor searchWordForDialect(String word, int idx) {
-        String chihou = Constants.CHIHOUS[idx];
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        // Split the search word by '、' to handle multiple words
-        String[] splitWords = word.split("、");
-
-        DialectState dialectState = getDialectState(context, chihou);
-        Log.d("ARIQ", chihou);
-        String tableName = chihou;
-
-        // Only proceed if the dialect is enabled for searching
-        if (dialectState.isEnabled() && tableName != null) {
-            StringBuilder exactMatchQueryBuilder = new StringBuilder();
-            StringBuilder partialMatchQueryBuilder = new StringBuilder();
-
-            // Determine the column to search based on the mode ("学習" for non-native, "母語" for native)
-            String searchColumn = "学習".equals(dialectState.mode) ? "trigger" : "hougen";
-
-            // Build the exact match query
-            exactMatchQueryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
-            for (int i = 0; i < splitWords.length; i++) {
-                exactMatchQueryBuilder.append(searchColumn).append(" = ?");
-                if (i != splitWords.length - 1) {
-                    exactMatchQueryBuilder.append(" OR ");
-                }
-            }
-
-            // Build the partial match query
-            partialMatchQueryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
-            for (int i = 0; i < splitWords.length; i++) {
-                partialMatchQueryBuilder.append(searchColumn).append(" LIKE ?");
-                if (i != splitWords.length - 1) {
-                    partialMatchQueryBuilder.append(" OR ");
-                }
-            }
-
-            // Prepare query arguments for exact matching
-            String[] exactQueryArgs = splitWords;
-
-            // Prepare query arguments for partial matching (append % for LIKE)
-            String[] partialQueryArgs = new String[splitWords.length];
-            for (int i = 0; i < splitWords.length; i++) {
-                partialQueryArgs[i] = "%" + splitWords[i] + "%";
-            }
-
-            // Try exact match first
-            Cursor cursor = db.rawQuery(exactMatchQueryBuilder.toString(), exactQueryArgs);
-            Log.d("searchWord", "Exact search for [" + word + "] in table " + tableName + " | count: " + cursor.getCount());
-
-            // If exact match found, return the cursor
-            if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-                int index = cursor.getColumnIndex(searchColumn);
-                Log.d("searchWord", "Exact match found in " + tableName + ": " + cursor.getString(index));
-            } else {
-                // If no exact match, fallback to partial match
-                cursor = db.rawQuery(partialMatchQueryBuilder.toString(), partialQueryArgs);
-                Log.d("searchWord", "Partial search for [" + word + "] in table " + tableName + " | count: " + cursor.getCount());
-
-                if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-                    int index = cursor.getColumnIndex(searchColumn);
-                    Log.d("searchWord", "Partial match found in " + tableName + ": " + cursor.getString(index));
-                }
-            }
-
-            return cursor;
-        }
-
-        return null;
-    }
-
     // Add methods to query your dictionary here
 
     public Cursor[] searchWord(String word) {
@@ -239,20 +168,16 @@ public class DBHelper extends SQLiteOpenHelper {
 
                 // Try exact match first
                 Cursor cursor = db.rawQuery(exactMatchQueryBuilder.toString(), exactQueryArgs);
-                Log.d("searchWord", "Exact search for [" + word + "] in table " + tableName + " | count: " + cursor.getCount());
 
                 // If exact match found, return the cursor
                 if (cursor.getCount() > 0 && cursor.moveToFirst()) {
                     int index = cursor.getColumnIndex(searchColumn);
-                    Log.d("searchWord", "Exact match found in " + tableName + ": " + cursor.getString(index));
                 } else {
                     // If no exact match, fallback to partial match
                     cursor = db.rawQuery(partialMatchQueryBuilder.toString(), partialQueryArgs);
-                    Log.d("searchWord", "Partial search for [" + word + "] in table " + tableName + " | count: " + cursor.getCount());
 
                     if (cursor.getCount() > 0 && cursor.moveToFirst()) {
                         int index = cursor.getColumnIndex(searchColumn);
-                        Log.d("searchWord", "Partial match found in " + tableName + ": " + cursor.getString(index));
                     }
                 }
 
@@ -353,7 +278,6 @@ public class DBHelper extends SQLiteOpenHelper {
                                 String columnName = cursor.getString(cursor.getColumnIndex("name"));
                                 if ("found".equals(columnName)) {
                                     foundColumnExists = true;
-                                    Log.d("DB", "'found' column already exists in table: " + tableName);
                                     break;
                                 }
                             } while (cursor.moveToNext());
@@ -442,8 +366,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public int getFoundWordsCount(int regionIndex) {
         List<String> foundWords = getFoundWords(regionIndex);
         int count = foundWords.size();
-        for(String foundWord: foundWords) Log.d("GETFOUNDWORDSCOUNT", foundWord);
-
         return count;
     }
 
@@ -452,6 +374,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String TABLE_NAME = Constants.CHIHOUS[regionIndex];
 
         int foundCount = getFoundWordsCount(regionIndex);
+        List<String> foundWords = getFoundWords(regionIndex);
 
         // Query to count total rows in the table
         Cursor totalCursor = db.rawQuery(
@@ -465,9 +388,9 @@ public class DBHelper extends SQLiteOpenHelper {
             totalCursor.close();
         }
 
-        String resultText = foundCount + "/" + totalCount;
-        Log.d(TABLE_NAME, resultText);
+        String resultCount = foundCount + "/" + totalCount;
+        Log.d("getFoundWordsRatio", "word that was found in " + TABLE_NAME + ": " + foundWords + " (" + foundCount + "/" + totalCount + ")");
 
-        return resultText;
+        return resultCount;
     }
 }

@@ -4,6 +4,7 @@ import static androidx.core.content.ContextCompat.startActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,6 +87,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
     }
 
     private void launchDictinfoActivity(Context context, GlobalVariable.HougenInformation hougenInformation) {
+        Log.d("launchDictinfoActivity", "launched dictionary info activity");
         Intent intent = new Intent(context, DictionaryInfoActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("hougen", hougenInformation.hougen);

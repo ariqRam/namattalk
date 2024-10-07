@@ -241,7 +241,6 @@ public class VerbConjugator {
     // Conjugate based on verb type
     public static String conjugateFromBase(String verb, VerbForm conjugationform, boolean isHougen) {
         VerbType type = getVerbType(verb, getVerbForm(verb));
-        Log.d("conjugator", "verb: " + verb + " form: " + conjugationform + " type: " + type);
 
 
         switch (type) {
@@ -272,7 +271,6 @@ public class VerbConjugator {
         String stem = verb.substring(0, verb.length() - 1);
         char lastChar = verb.charAt(verb.length() - 1);
         String newStem = changeGodanEnding(stem, lastChar, form, endingMap);
-        Log.d("ending", "changeGodanEnding: " + newStem);// Changes ending based on form
 
         switch (form) {
             case NEGATIVE: return isHougen ? newStem + "ん" : newStem + "ない";

@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
+import android.util.Log;
 
 public abstract class BaseDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -48,8 +49,10 @@ public abstract class BaseDrawerActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.dictionary) {
+            Log.d("onNavigationItemSelected", "launched dictionary screen");
             switchScreen("dictionary");
         } else if (id == R.id.settings) {
+            Log.d("onNavigationItemSelected", "launched dictionary screen");
             switchScreen("settings");
         }
 
