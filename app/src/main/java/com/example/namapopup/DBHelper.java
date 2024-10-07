@@ -99,6 +99,25 @@ public class DBHelper extends SQLiteOpenHelper {
         // Handle database upgrades if needed
     }
 
+    public Cursor[] searchDictionary(String searchTerm) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String wildcardTerm = "%" + searchTerm + "%";
+        Cursor[] resultCursors = new Cursor[Constants.CHIHOUS.length];
+        for(int i = 0; i < Constants.CHIHOUS.length; i++) {
+            String chihou = Constants.CHIHOUS[i];
+            String rawQuery =
+                    "SELECT hougen, trigger, def, example, pos FROM " + chihou +
+                            " WHERE trigger LIKE ? OR hougen LIKE ?";
+
+            String[] selectionArgs = new String[] { wildcardTerm, wildcardTerm };
+
+            Cursor cursor = db.rawQuery(rawQuery, selectionArgs);
+            resultCursors[i] = cursor;
+        }
+        return resultCursors;
+
+    }
+
     public Cursor searchWordForDialect(String word, int idx) {
         String chihou = Constants.CHIHOUS[idx];
         SQLiteDatabase db = this.getReadableDatabase();

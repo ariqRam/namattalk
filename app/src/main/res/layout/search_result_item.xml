@@ -4,6 +4,7 @@
     android:layout_height="56dp"
     android:layout_marginTop="10dp"
     android:background="@drawable/rounded_border"
+    android:id="@+id/search_result_item"
     android:orientation="horizontal">
 
     <TextView

@@ -42,7 +42,7 @@ public class NamaPopup extends AccessibilityService {
     private static final long LONG_PRESS_THRESHOLD = 500;
     private DBHelper databaseHelper;
     private List<GlobalVariable.HougenInformation> searchResults = new ArrayList<>();
-    private GlobalVariable.HougenInformation currentHougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>());
+    private GlobalVariable.HougenInformation currentHougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
     private String normalText = "";
     private boolean textViewSet = false;
     private SharedPreferences sharedPreferences;
@@ -180,7 +180,7 @@ public class NamaPopup extends AccessibilityService {
 
                             // Check for dialect word match
                             String hougen = cursor.getString(hougenColumnIndex);
-                            GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>());
+                            GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
                             String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");
                             boolean isExactMatch = hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText);

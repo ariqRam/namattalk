@@ -1,8 +1,13 @@
 package com.example.namapopup;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder> {
-    private List<HashMap<String, String>> results;
+    private List<GlobalVariable.HougenInformation> results;
 
     public SearchResultAdapter() {
         this.results = new ArrayList<>();
@@ -25,12 +30,14 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         private final TextView textView;
         private final TextView meaningView;
         private final TextView regionView;
+        private final LinearLayout searchItemLayout;
 
         public ViewHolder(View view) {
             super(view);
             textView = view.findViewById(R.id.result_text);
             meaningView = view.findViewById(R.id.meaning_text);
             regionView = view.findViewById(R.id.region_text);
+            searchItemLayout = view.findViewById(R.id.search_result_item);
         }
 
         public TextView getTextView() {
@@ -44,6 +51,8 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         public TextView getRegionView() {
             return regionView;
         }
+
+        public LinearLayout getSearchItemLayout() { return searchItemLayout; }
     }
 
     @NonNull
@@ -56,9 +65,14 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.getTextView().setText(results.get(position).get("text") + ": ");
-        holder.getMeaningView().setText(results.get(position).get("meaning"));
-        holder.getRegionView().setText(results.get(position).get("region"));
+        GlobalVariable.HougenInformation hougenInformation = results.get(position);
+        holder.getTextView().setText(hougenInformation.hougen + ": ");
+        holder.getMeaningView().setText(hougenInformation.def);
+        holder.getRegionView().setText(hougenInformation.chihou);
+        View.OnClickListener resultItemOnClickHandler = v -> {
+            launchDictinfoActivity(v.getContext(), hougenInformation);
+        };
+        holder.getSearchItemLayout().setOnClickListener(resultItemOnClickHandler);
     }
 
     @Override
@@ -66,8 +80,21 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         return results.size();
     }
 
-    public void updateResults(List<HashMap<String,String>> newResults) {
+    public void updateResults(List<GlobalVariable.HougenInformation> newResults) {
         this.results = newResults;
         notifyDataSetChanged();
     }
+
+    private void launchDictinfoActivity(Context context, GlobalVariable.HougenInformation hougenInformation) {
+        Intent intent = new Intent(context, DictionaryInfoActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("hougen", hougenInformation.hougen);
+        intent.putExtra("chihou", hougenInformation.chihou);
+        intent.putExtra("pref", hougenInformation.pref);
+        intent.putExtra("area", hougenInformation.area);
+        intent.putExtra("def", hougenInformation.def);
+        intent.putExtra("example", hougenInformation.example);
+        startActivity(context, intent, null);
+    }
+
 }

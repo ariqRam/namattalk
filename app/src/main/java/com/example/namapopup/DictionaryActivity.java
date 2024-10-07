@@ -8,6 +8,8 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -39,11 +41,13 @@ import java.util.Map;
 public class DictionaryActivity extends BaseDrawerActivity {
     private SearchResultAdapter adapter;
     private EditText searchInput;
+    private DBHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dictionary_activity_layout);
+        db = new DBHelper(this);
         setupDrawer();
         setupSearchResultView();
         setupSearchInputView();
@@ -96,22 +100,42 @@ public class DictionaryActivity extends BaseDrawerActivity {
         // TODO : Implement search
         // Implement your search logic here
         // This is just an example:
-        List<HashMap<String,String>> searchResults = new ArrayList<>();
+        List<GlobalVariable.HougenInformation> searchResults = new ArrayList<>();
 
         if (!query.isEmpty()) {
-            // Replace this with your actual dictionary search logic
-            // When you have search results:
-            HashMap<String, String> result = new HashMap<>();
-            result.put("text", "おる");
-            result.put("meaning", "いる、います");
-            result.put("region", "飛騨弁");
+            Cursor[] cursors = db.searchDictionary(query);
+            for(int i = 0; i < cursors.length; i++) {
+                Cursor cursor = cursors[i];
+                if (cursor != null && cursor.moveToFirst()) {
+                    do {
+                        GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
+                        String hougen = cursor.getString(cursor.getColumnIndexOrThrow("hougen"));
+                        String trigger = cursor.getString(cursor.getColumnIndexOrThrow("trigger"));
+                        String def = cursor.getString(cursor.getColumnIndexOrThrow("def"));
+                        String example = cursor.getString(cursor.getColumnIndexOrThrow("example"));
+                        String pos = cursor.getString(cursor.getColumnIndexOrThrow("pos"));
+                        hougenInformation.hougen = hougen;
+                        hougenInformation.chihou = Constants.CHIHOUS_JP[i];// Region from the cursor
+                        hougenInformation.pref = Constants.PREFS[i];
+                        hougenInformation.area = Constants.AREAS[i];
+                        hougenInformation.def = def;
+                        hougenInformation.example = example;
+                        hougenInformation.pos = pos;
 
-            HashMap<String, String> result3 = new HashMap<>();
-            result3.put("text", "べらぼう");
-            result3.put("meaning", "とても、非常に");
-            result3.put("region", "江戸弁");
-            searchResults.add(result);
-            searchResults.add(result3);
+                        // When search results found:
+                        searchResults.add(hougenInformation);
+
+                        // Use the retrieved data as needed
+                    } while (cursor.moveToNext());
+                }
+
+                if (cursor != null) {
+                    cursor.close();
+                }
+
+            }
+
+
         }
 
         // Update the RecyclerView with results
@@ -123,27 +147,19 @@ public class DictionaryActivity extends BaseDrawerActivity {
         adapter = new SearchResultAdapter();
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        // When you have search results:
-        HashMap<String, String> result1 = new HashMap<>();
-        result1.put("text", "おる");
-        result1.put("meaning", "いる、います");
-        result1.put("region", "飛騨弁");
-
-        // Result 2
-        HashMap<String, String> result2 = new HashMap<>();
-        result2.put("text", "あかん");
-        result2.put("meaning", "だめ、いけない");
-        result2.put("region", "関西弁");
-
-        // Result 3
-        HashMap<String, String> result3 = new HashMap<>();
-        result3.put("text", "べらぼう");
-        result3.put("meaning", "とても、非常に");
-        result3.put("region", "江戸弁");
-
-        List<HashMap<String, String>> searchResults = Arrays.asList(result1);
-        adapter.updateResults(searchResults);
     }
+
+    private void launchDictinfoActivity(GlobalVariable.HougenInformation hougenInformation) {
+        Intent intent = new Intent(this, DictionaryActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("hougen", hougenInformation.hougen);
+        intent.putExtra("chihou", hougenInformation.chihou);
+        intent.putExtra("pref", hougenInformation.pref);
+        intent.putExtra("area", hougenInformation.area);
+        intent.putExtra("def", hougenInformation.def);
+        intent.putExtra("example", hougenInformation.example);
+        startService(intent);
+    }
+
 }
 
