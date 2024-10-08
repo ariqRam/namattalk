@@ -47,7 +47,15 @@ public class DictionaryActivity extends BaseDrawerActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dictionary_activity_layout);
+        TextView title = findViewById(R.id.screenTitle);
+        title.setText("辞書");
         db = new DBHelper(this);
+
+        // Remove default action bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
         setupDrawer();
         setupSearchResultView();
         setupSearchInputView();

@@ -18,6 +18,11 @@ public class DictionaryInfoActivity extends AppCompatActivity {
         // Set the layout for the activity
         setContentView(R.layout.dictionaryinfo_activity_layout);
 
+        // Remove default action bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
         // Retrieve any extras from the intent
         Intent intent = getIntent();
         if (intent != null) {

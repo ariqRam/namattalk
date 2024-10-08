@@ -55,6 +55,14 @@ public class NewSettingsActivity extends BaseDrawerActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_settings_layout);
+        TextView title = findViewById(R.id.screenTitle);
+        title.setText("地方設定");
+
+        // Remove default action bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
         setupDrawer();
         setOnClickListenerForDropdowns();
         initButtonStates();
