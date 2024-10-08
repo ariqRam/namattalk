@@ -24,6 +24,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -175,6 +177,7 @@ public class NamaPopup extends AccessibilityService {
 
                             // Check for dialect word match
                             String hougen = cursor.getString(hougenColumnIndex);
+                            hougen = processKako(hougen);
                             GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
                             String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");
@@ -265,7 +268,9 @@ public class NamaPopup extends AccessibilityService {
             if (currentHougenInformation != null) {
                 if (currentHougenInformation.hougen != null) {
                     setOverlayActive();
-                    textView.setText(currentHougenInformation.hougen);
+                    String hougen = currentHougenInformation.hougen;
+                    hougen = processKako(hougen);
+                    textView.setText(hougen);
                 } else {
                     setOverlayIdle();
                 }
@@ -290,6 +295,14 @@ public class NamaPopup extends AccessibilityService {
 
         // Set the current region (chihou)
         chihouTextView.setVisibility(View.VISIBLE);
+    }
+
+    private @NonNull String processKako(String hougen) {
+        int kakoIndex = hougen.indexOf("（");
+        if(kakoIndex != -1) {
+            hougen = hougen.substring(0, kakoIndex);
+        }
+        return hougen;
     }
 
     // Function to update the hougenInformation based on the current selected item and region index
