@@ -10,7 +10,7 @@
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
         <activity
-            android:name=".NewSettingsActivity"
+            android:name=".SettingsActivity"
             android:label="なまっtalk"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"

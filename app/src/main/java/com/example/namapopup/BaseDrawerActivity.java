@@ -2,7 +2,6 @@ package com.example.namapopup;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -12,7 +11,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 import android.util.Log;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 public abstract class BaseDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -72,7 +70,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity
                 intent = new Intent(this, DictionaryActivity.class);
                 break;
             case "settings":
-                intent = new Intent(this, NewSettingsActivity.class);
+                intent = new Intent(this, SettingsActivity.class);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid screen type: " + screenType);
