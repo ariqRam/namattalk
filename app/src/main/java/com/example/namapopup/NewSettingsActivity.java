@@ -51,6 +51,7 @@ public class NewSettingsActivity extends BaseDrawerActivity {
     private DBHelper db;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -181,6 +182,7 @@ public class NewSettingsActivity extends BaseDrawerActivity {
 
     private void setOnClickListenerForDialectButtons() {
         String TAG = "NewSettingsActivity";
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
 
         dialectStates.put("toyama", new DialectState());
         dialectStates.put("hida", new DialectState());
@@ -189,24 +191,25 @@ public class NewSettingsActivity extends BaseDrawerActivity {
         View.OnClickListener modeClickListener = v -> {
             String dialect = (String) v.getTag();
             DialectState state = dialectStates.get(dialect);
+            String currentMode = sharedPreferences.getString(dialect + "_mode", "未使用");
             Button button = (Button) v;
 
             // Toggle mode between 学習 母語 and 未使用
-            if (state.mode.equals("学習")) {
+            if (currentMode.equals("学習")) {
                 Log.d(TAG, "学習 mode off in " + dialect);
                 Log.d(TAG, "母語 mode on in " + dialect);
                 state.mode = "母語";
                 button.setText(state.mode);
                 button.setBackground(createRoundedRectangleDrawable(colorBogoBg));
                 button.setTextColor(colorBogoText);
-            } else if(state.mode.equals("母語")) {
+            } else if(currentMode.equals("母語")) {
                 Log.d(TAG, "母語 mode off in " + dialect);
                 Log.d(TAG, "未使用 mode on in " + dialect);
                 state.mode = "未使用";
                 button.setText(state.mode);
                 button.setBackground(createRoundedRectangleDrawable(colorUnusedBg));
                 button.setTextColor(colorUnusedText);
-            } else if (state.mode.equals("未使用")) {
+            } else if (currentMode.equals("未使用")) {
                 Log.d(TAG, "未使用 mode off in " + dialect);
                 Log.d(TAG, "学習 mode on in " + dialect);
                 state.mode = "学習";

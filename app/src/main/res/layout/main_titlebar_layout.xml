@@ -5,7 +5,7 @@
     android:padding="16dp"
     android:background="#8F4705">
 
-    <!-- Hamburger Button -->
+    <!-- Menu Button -->
     <ImageButton
         android:id="@+id/main_menu"
         android:layout_width="wrap_content"
