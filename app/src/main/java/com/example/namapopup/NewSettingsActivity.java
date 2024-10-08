@@ -71,6 +71,11 @@ public class NewSettingsActivity extends BaseDrawerActivity {
         checkPopupPermission();
         setUpCountText();
 
+        if (GlobalVariable.verbMap == null) {
+            VerbConjugator verbConjugator = new VerbConjugator(this);
+            GlobalVariable.verbMap = verbConjugator.getVerbs();
+        }
+
     }
 
     private void setUpCountText() {

@@ -60,7 +60,10 @@ public class NamaPopup extends AccessibilityService {
 
         //initialize verbConjugator
         verbConjugator = new VerbConjugator(this);
-        verbMap = verbConjugator.getVerbs();
+        if (GlobalVariable.verbMap != null) {
+            verbMap = GlobalVariable.verbMap;
+            Log.d("onCreate", "imported verbMap to NamaPopup");
+        }
 
         // Check for the SYSTEM_ALERT_WINDOW permission
         if (!Settings.canDrawOverlays(this)) {
