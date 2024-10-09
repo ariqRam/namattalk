@@ -59,6 +59,7 @@ public class NamaPopup extends AccessibilityService {
 
         //initialize verbConjugator
         verbConjugator = new VerbConjugator(this);
+        verbMap = verbConjugator.getVerbs();
 
         // Check for the SYSTEM_ALERT_WINDOW permission
         if (!Settings.canDrawOverlays(this)) {
@@ -102,11 +103,6 @@ public class NamaPopup extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         int eventType = event.getEventType();
         AccessibilityNodeInfo currentNode;
-
-        if (GlobalVariable.verbMap != null) {
-            verbMap = GlobalVariable.verbMap;
-            Log.d("onCreate", "imported verbMap to NamaPopup");
-        }
 
         switch (eventType) {
             case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
@@ -599,7 +595,7 @@ public class NamaPopup extends AccessibilityService {
             private void handleButtonClick() {
                 String TAG = "handleButtonClick";
                 Log.d(TAG, "Button clicked");
-                if (!searchResults.isEmpty()) {
+                if (!searchResults.isEmpty() && textViewSet) {
 
                     // Attempt to modify the text in the focused edit field
                     AccessibilityNodeInfo focusedNode = getRootInActiveWindow().findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
