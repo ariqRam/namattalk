@@ -86,7 +86,6 @@ public class HougenInfoActivity extends Service {
         }
     }
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Check if the intent is not null and contains the expected data

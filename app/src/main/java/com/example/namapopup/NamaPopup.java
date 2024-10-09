@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NamaPopup extends AccessibilityService {
     private WindowManager windowManager;
@@ -42,6 +44,8 @@ public class NamaPopup extends AccessibilityService {
     private String convertedText = "";
     private static final long LONG_PRESS_THRESHOLD = 500;
     private DBHelper databaseHelper;
+    private boolean isTappedOnce = false;
+    private Timer doubleTapTimer = new Timer();
     private List<GlobalVariable.HougenInformation> searchResults = new ArrayList<>();
     private GlobalVariable.HougenInformation currentHougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
     private String normalText = "";
@@ -612,7 +616,18 @@ public class NamaPopup extends AccessibilityService {
                         resetFloatingButtonText();
                     }
                 } else {
-                    launchSettingsActivity();
+                    if(isTappedOnce) {
+                        launchSettingsActivity();
+                    }
+                    isTappedOnce = true;
+                    doubleTapTimer = new Timer();
+                    TimerTask task = new TimerTask() {
+                        @Override
+                        public void run() {
+                            isTappedOnce = false;
+                        }
+                    };
+                    doubleTapTimer.schedule(task, 200);
                 }
             }
         });
