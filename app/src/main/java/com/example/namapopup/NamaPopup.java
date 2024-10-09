@@ -177,14 +177,16 @@ public class NamaPopup extends AccessibilityService {
                         if (cursor.moveToFirst()) {
                             int hougenColumnIndex = cursor.getColumnIndex("hougen");
                             int triggerColumnIndex = cursor.getColumnIndex("trigger");
+                            int defColumnIndex = cursor.getColumnIndex("def");
 
                             // Check for dialect word match
                             String hougen = cursor.getString(hougenColumnIndex);
+                            String def = cursor.getString(defColumnIndex);
                             hougen = processKako(hougen);
                             GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
                             String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");
-                            boolean isExactMatch = hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText);
+                            boolean isExactMatch = (hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText)) && def != null;
 
                             if (isExactMatch && endIndex == fullText.length() - 1) {
                                 matchFound = true;
