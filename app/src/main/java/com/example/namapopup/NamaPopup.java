@@ -6,7 +6,6 @@ import static com.example.namapopup.Helper.isNonNativeMode;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -32,6 +31,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NamaPopup extends AccessibilityService {
     private WindowManager windowManager;
@@ -43,6 +44,8 @@ public class NamaPopup extends AccessibilityService {
     private String convertedText = "";
     private static final long LONG_PRESS_THRESHOLD = 500;
     private DBHelper databaseHelper;
+    private boolean isTappedOnce = false;
+    private Timer doubleTapTimer = new Timer();
     private List<GlobalVariable.HougenInformation> searchResults = new ArrayList<>();
     private GlobalVariable.HougenInformation currentHougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
     private String normalText = "";
@@ -174,14 +177,16 @@ public class NamaPopup extends AccessibilityService {
                         if (cursor.moveToFirst()) {
                             int hougenColumnIndex = cursor.getColumnIndex("hougen");
                             int triggerColumnIndex = cursor.getColumnIndex("trigger");
+                            int defColumnIndex = cursor.getColumnIndex("def");
 
                             // Check for dialect word match
                             String hougen = cursor.getString(hougenColumnIndex);
+                            String def = cursor.getString(defColumnIndex);
                             hougen = processKako(hougen);
                             GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
                             String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split("、");
-                            boolean isExactMatch = hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText);
+                            boolean isExactMatch = (hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText)) && def != null;
 
                             if (isExactMatch && endIndex == fullText.length() - 1) {
                                 matchFound = true;
@@ -596,7 +601,7 @@ public class NamaPopup extends AccessibilityService {
             private void handleButtonClick() {
                 String TAG = "handleButtonClick";
                 Log.d(TAG, "Button clicked");
-                if (!searchResults.isEmpty()) {
+                if (!searchResults.isEmpty() && textViewSet) {
 
                     // Attempt to modify the text in the focused edit field
                     AccessibilityNodeInfo focusedNode = getRootInActiveWindow().findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
@@ -612,6 +617,19 @@ public class NamaPopup extends AccessibilityService {
                         focusedNode.recycle();
                         resetFloatingButtonText();
                     }
+                } else {
+                    if(isTappedOnce) {
+                        launchSettingsActivity();
+                    }
+                    isTappedOnce = true;
+                    doubleTapTimer = new Timer();
+                    TimerTask task = new TimerTask() {
+                        @Override
+                        public void run() {
+                            isTappedOnce = false;
+                        }
+                    };
+                    doubleTapTimer.schedule(task, 200);
                 }
             }
         });
@@ -688,6 +706,12 @@ public class NamaPopup extends AccessibilityService {
         intent.putExtra("example", hougenInformation.example);
         intent.putExtra("pos", hougenInformation.pos);
         startService(intent);
+    }
+
+    private void launchSettingsActivity() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
 }

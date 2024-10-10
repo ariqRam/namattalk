@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class GlobalVariable {
@@ -31,4 +32,6 @@ public class GlobalVariable {
             this.characterPositions = characterPositions;
         }
     }
+
+    public static HashMap<String, List<String>> verbMap;
 }

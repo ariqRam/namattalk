@@ -1,0 +1,28 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:background="#8F4705">
+
+    <!-- Menu Button -->
+    <ImageButton
+        android:id="@+id/main_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:src="@drawable/ic_menu"
+        android:layout_gravity="center_vertical"/>
+
+    <!-- Title Text -->
+    <TextView
+        android:id="@+id/screenTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="地方設定"
+        android:textColor="@android:color/white"
+        android:textSize="28sp"
+        android:layout_gravity="center_vertical"
+        android:paddingStart="16dp" />
+
+</LinearLayout>

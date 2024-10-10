@@ -5,6 +5,8 @@
     android:orientation="vertical"
     android:background="#EAE1B0">
 
+    <include layout="@layout/hougeninfo_titlebar_layout"/>
+
     <TextView
         android:id="@+id/inputWord"
         android:layout_width="match_parent"

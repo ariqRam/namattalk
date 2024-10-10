@@ -42,12 +42,28 @@ public class DictionaryActivity extends BaseDrawerActivity {
     private SearchResultAdapter adapter;
     private EditText searchInput;
     private DBHelper db;
+    private VerbConjugator verbConjugator;
+    private HashMap<String, List<String>> verbMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dictionary_activity_layout);
+        TextView title = findViewById(R.id.screenTitle);
+        title.setText("辞書");
         db = new DBHelper(this);
+
+        // Remove default action bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
+        verbConjugator = new VerbConjugator(this);
+        if (GlobalVariable.verbMap != null) {
+            verbMap = GlobalVariable.verbMap;
+            Log.d("onCreate", "imported verbMap to DictionaryActivity");
+        }
+
         setupDrawer();
         setupSearchResultView();
         setupSearchInputView();
@@ -103,7 +119,8 @@ public class DictionaryActivity extends BaseDrawerActivity {
         List<GlobalVariable.HougenInformation> searchResults = new ArrayList<>();
 
         if (!query.isEmpty()) {
-            Cursor[] cursors = db.searchDictionary(query);
+            String baseFormQuery = verbConjugator.reconjugate(query, verbMap);
+            Cursor[] cursors = db.searchDictionary(baseFormQuery);
             for(int i = 0; i < cursors.length; i++) {
                 Cursor cursor = cursors[i];
                 if (cursor != null && cursor.moveToFirst()) {

@@ -2,7 +2,6 @@ package com.example.namapopup;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -11,6 +10,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 import android.util.Log;
+import android.widget.ImageButton;
 
 public abstract class BaseDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -26,25 +26,27 @@ public abstract class BaseDrawerActivity extends AppCompatActivity
 
     protected void setupDrawer() {
         drawerLayout = findViewById(R.id.drawer_layout);
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.nav_open, R.string.nav_close);
 
-        // set up navigation item
+        // Set up custom titlebar elements
+        ImageButton hamburgerButton = findViewById(R.id.main_menu);
+
+        // Set up hamburger button click listener
+        hamburgerButton.setOnClickListener(v -> {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+
+        // Set up NavigationView
         NavigationView navigationView = findViewById(R.id.nav_view);
-
-        // pass the Open and Close toggle for the drawer layout listener
-        // to toggle the button
-        drawerLayout.addDrawerListener(actionBarDrawerToggle);
-        actionBarDrawerToggle.syncState();
-
-
-        // to make the Navigation drawer icon always appear on the action bar
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -68,7 +70,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity
                 intent = new Intent(this, DictionaryActivity.class);
                 break;
             case "settings":
-                intent = new Intent(this, NewSettingsActivity.class);
+                intent = new Intent(this, SettingsActivity.class);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid screen type: " + screenType);
