@@ -37,7 +37,6 @@ import java.util.TimerTask;
 public class NamaPopup extends AccessibilityService {
     private WindowManager windowManager;
     private View floatingButton;
-    private TextView indicatorTextView;
     private TextView textView;
     private ImageView logoView;
     private TextView chihouTextView;
@@ -55,6 +54,7 @@ public class NamaPopup extends AccessibilityService {
     private String indicator = "";
     private VerbConjugator verbConjugator;
     private HashMap<String, List<String>> verbMap;
+    private TextView pageIndicatorView;
 
     @Override
     public void onCreate() {
@@ -260,7 +260,8 @@ public class NamaPopup extends AccessibilityService {
 
     private void updateIndicator() {
         indicator = (currentResultIndex + 1) + "/" + searchResults.size();
-        indicatorTextView.setText(indicator);
+        if (searchResults.size() == 1) pageIndicatorView.setVisibility(View.GONE);
+        else pageIndicatorView.setText(indicator);
     }
 
     private void updateFloatingButtonText() {
@@ -282,11 +283,7 @@ public class NamaPopup extends AccessibilityService {
 
                 chihouTextView.setText(currentHougenInformation.chihou);
 
-                if (indicatorTextView == null) {
-                    createIndicator(indicator);
-                } else {
-                    updateIndicator();
-                }
+                updateIndicator();
 
                 Log.d(TAG, "Update FloatingButtonText to " + currentHougenInformation.hougen + " in " + currentHougenInformation.chihou + " (" + indicator + ")");
 
@@ -334,19 +331,17 @@ public class NamaPopup extends AccessibilityService {
         currentHougenInformation.characterPositions.clear();
         normalText = "";
         currentResultIndex = 0;
-        if (indicatorTextView != null) {
-            windowManager.removeView(indicatorTextView);
-            indicatorTextView = null;
-        }
     }
 
     private void setOverlayIdle() {
         textView.setVisibility(View.GONE);
         logoView.setVisibility(View.VISIBLE);
+        pageIndicatorView.setVisibility(View.GONE);
     }
 
     private void setOverlayActive() {
         textView.setVisibility(View.VISIBLE);
+        pageIndicatorView.setVisibility(View.VISIBLE);
         logoView.setVisibility(View.GONE);
     }
 
@@ -430,6 +425,7 @@ public class NamaPopup extends AccessibilityService {
         // Inflate the floating button layout
         floatingButton = LayoutInflater.from(this).inflate(R.layout.accessibility_button_layout, null);
         textView = floatingButton.findViewById(R.id.accessibility_text);
+        pageIndicatorView = floatingButton.findViewById(R.id.page_indicator);
         logoView = floatingButton.findViewById(R.id.accessibility_logo);
         chihouTextView = floatingButton.findViewById(R.id.chihou);
 
@@ -520,7 +516,8 @@ public class NamaPopup extends AccessibilityService {
 
             // Handle swipe left to move to the next item
             private void handleSwipeLeft() {
-                String TAG = "handleSwipeLeft";
+                if(currentResultIndex == searchResults.size() - 1) return;
+                 String TAG = "handleSwipeLeft";
                 Log.d(TAG, "SwipeLeft detected");
 
                 if (!searchResults.isEmpty() && currentResultIndex < searchResults.size()) {
@@ -562,6 +559,7 @@ public class NamaPopup extends AccessibilityService {
 
             // Handle swipe right to move to the previous item
             private void handleSwipeRight() {
+                if(currentResultIndex == 0) return;
                 String TAG = "handleSwipeRight";
                 Log.d(TAG, "SwipeRight detected");
 
@@ -642,44 +640,6 @@ public class NamaPopup extends AccessibilityService {
             Log.e(TAG, "Error adding view to WindowManager", e);
         }
     }
-
-    private void createIndicator(String indicator) {
-        String TAG = "createIndicator";
-        // Check if indicatorTextView is already created
-        if (indicatorTextView != null && indicatorTextView.isShown()) {
-            Log.d(TAG, "indicatorTextView is already displayed");
-            return;
-        }
-
-        //create indicator textView
-        indicatorTextView = new TextView(this);
-        indicatorTextView.setTextSize(14);
-        indicatorTextView.setTextColor(Color.BLACK);
-        indicatorTextView.setPadding(5, 5, 5, 5);
-
-        updateIndicator();  //update indicatorTextView with current resultsIndex value
-
-        //set layout parameters for indicatorTextView
-        WindowManager.LayoutParams indicatorParams = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT);
-
-        // Position the new TextView below the existing floating layout
-        int indicatorOffsetX = 20;
-        int indicatorOffsetY = floatingButton.getHeight() * 17/10;
-
-        indicatorParams.gravity = Gravity.TOP | Gravity.LEFT;
-        indicatorParams.x = params.x + indicatorOffsetX; // Keep same X position
-        indicatorParams.y = params.y + indicatorOffsetY; // Position below the floating layout
-
-        // Add the new TextView to the WindowManager
-        windowManager.addView(indicatorTextView, indicatorParams);
-    }
-
-
 
     @Override
     public void onInterrupt() {
