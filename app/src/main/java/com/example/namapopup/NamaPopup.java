@@ -162,7 +162,7 @@ public class NamaPopup extends AccessibilityService {
             while (endIndex < fullText.length()) {
                 String selectedText = fullText.substring(startIndex, endIndex + 1);
                 String queryText = verbConjugator.reconjugate(selectedText, verbMap);
-                Log.d(TAG, "reconjugated selectedText to: " + queryText);
+                Log.d(TAG, "reconjugate from " + selectedText + " to " + queryText);
                 Cursor[] cursors = databaseHelper.searchWord(queryText);
 
 
@@ -187,12 +187,19 @@ public class NamaPopup extends AccessibilityService {
                             GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", "", "", new ArrayList<>(), "");
                             String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split(Constants.SEPARATOR);
-                            boolean isExactMatch = (yomikata.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText)) && def != null;
-                            Log.d(TAG, "yomikata: " + yomikata);
+                            String[] splitYomikata = yomikata.split(Constants.SEPARATOR);
+                            boolean isExactMatch = (Arrays.asList(splitYomikata).contains(queryText) || Arrays.asList(splitTriggers).contains(queryText));
+                            Log.d(TAG, "yomikata: " + Arrays.asList(splitYomikata));
                             if (isExactMatch && endIndex == fullText.length() - 1) {
+                                Boolean isHougen = null;
+
                                 matchFound = true;
                                 Log.d(TAG, "Exact match found: " + candidate + " in " + Constants.CHIHOUS[i] + " at position: " + startIndex + " to " + endIndex);
-                                String conjugatedCandidate = verbConjugator.conjugate(candidate, VerbConjugator.getVerbForm(selectedText), verbMap);
+
+                                if (Arrays.asList(splitYomikata).contains(queryText)) isHougen = true;
+                                else if (Arrays.asList(splitTriggers).contains(queryText)) isHougen = false;
+
+                                String conjugatedCandidate = VerbConjugator.conjugateFromBase(candidate, VerbConjugator.getVerbForm(selectedText), isHougen);
                                 Log.d(TAG, "Conjugated hougen: " + candidate + " in form of: " + VerbConjugator.getVerbForm(selectedText) + " to " + conjugatedCandidate);
 
                                 // Add to character positions, update relevant information

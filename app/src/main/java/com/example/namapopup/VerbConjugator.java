@@ -36,16 +36,19 @@ public class VerbConjugator {
         for (Cursor cursor : cursors) {
             if (cursor != null && cursor.moveToFirst()) {
                 do {
-                    int hougenIndex = cursor.getColumnIndex("hougen");
+
                     int triggerIndex = cursor.getColumnIndex("trigger");
                     int posIndex = cursor.getColumnIndex("pos");
+                    int yomikataIndex = cursor.getColumnIndex("yomikata");
+                    int candidateIndex = cursor.getColumnIndex("candidate");
 
-                    if (hougenIndex != -1 && triggerIndex != -1 && posIndex != -1) {
-                        String hougen = cursor.getString(hougenIndex);
+                    if (yomikataIndex != -1 && triggerIndex != -1 && posIndex != -1 && candidateIndex != -1) {
                         String trigger = cursor.getString(triggerIndex);
+                        String yomikata = cursor.getString(yomikataIndex);
                         String pos = cursor.getString(posIndex);
+                        String candidate = cursor.getString(candidateIndex);
 
-                        if ("動詞".equals(pos) && hougen != null && trigger != null && toyamaState.isEnabled() || hidaState.isEnabled()) {
+                        if ("動詞".equals(pos) && yomikata != null && trigger != null && toyamaState.isEnabled() || hidaState.isEnabled()) {
                             if (trigger != null) {
                                 String[] splitTriggers = trigger.split(Constants.SEPARATOR);
                                 for (String singleTrigger : splitTriggers) {
@@ -53,16 +56,23 @@ public class VerbConjugator {
                                     for (VerbForm form : VerbForm.values()) {
                                         verbFormList.add(conjugateFromBase(singleTrigger.trim(), form, false));
                                     }
+                                    verbFormList.add(singleTrigger.trim()); //the last element in the list is the yomikata for detect form
                                     verbMap.put(singleTrigger.trim(), verbFormList);
                                 }
                             }
 
                             // Handle hougen
-                            List<String> hougenFormList = new ArrayList<>();
-                            for (VerbForm form : VerbForm.values()) {
-                                hougenFormList.add(conjugateFromBase(hougen, form, true));
+                            if (yomikata != null) {
+                                String[] splitYomikata = yomikata.split(Constants.SEPARATOR);
+                                for (String singleYomikata : splitYomikata) {
+                                    List<String> verbFormList = new ArrayList<>();
+                                    for (VerbForm form : VerbForm.values()) {
+                                        verbFormList.add(conjugateFromBase(singleYomikata.trim(), form, true));
+                                    }
+                                    verbFormList.add(singleYomikata.trim());    //the last element in the list is the yomikata for detect form
+                                    verbMap.put(singleYomikata, verbFormList);
+                                }
                             }
-                            verbMap.put(hougen, hougenFormList);
                         }
                     }
                 } while (cursor.moveToNext());
@@ -82,6 +92,38 @@ public class VerbConjugator {
             Log.d("VerbMap", "Key: " + key + ", Values: " + values.toString());
         }
     }
+
+//    public String getCandidate(String verb, VerbForm form) {
+//        Cursor[] cursors = dbHelper.getVerbs();
+//
+//        for (Cursor cursor : cursors) {
+//            if (cursor != null && cursor.moveToFirst()) {
+//                do {
+//                    int triggerIndex = cursor.getColumnIndex("trigger");
+//                    int posIndex = cursor.getColumnIndex("pos");
+//                    int yomikataIndex = cursor.getColumnIndex("yomikata");
+//                    int candidateIndex = cursor.getColumnIndex("candidate");
+//
+//                    if (yomikataIndex != -1 && triggerIndex != -1 && posIndex != -1 && candidateIndex != -1) {
+//                        String trigger = cursor.getString(triggerIndex);
+//                        String yomikata = cursor.getString(yomikataIndex);
+//                        String pos = cursor.getString(posIndex);
+//                        String candidate = cursor.getString(candidateIndex);
+//
+//                        if ("動詞".equals(pos) && yomikata != null && trigger != null) {
+//                            String[] splitTriggers = trigger.split(Constants.SEPARATOR);
+//                            for (String singleTrigger : splitTriggers) {
+//                                if (singleTrigger.trim().equals(verb)) {
+//                                    return candidate;
+//                                }
+//                            }
+//
+//                        }
+//                    }
+//                } while (cursor.moveToNext());
+//            }
+//        }
+//    }
 
 
     public enum VerbType {
@@ -138,7 +180,7 @@ public class VerbConjugator {
                 }
 
                 //Handle godan verbs
-                stem = verb.substring(0, verb.length() - 2); // remove "ない" for check verb type
+                if (verb.length() >= 2) stem = verb.substring(0, verb.length() - 2); // remove "ない" for check verb type
                 if (stem.endsWith("わ") || stem.endsWith("か") || stem.endsWith("が") || stem.endsWith("さ") ||
                         stem.endsWith("ざ") || stem.endsWith("た") || stem.endsWith("だ") || stem.endsWith("な") ||
                         stem.endsWith("は") || stem.endsWith("ば") || stem.endsWith("ぱ") || stem.endsWith("ま") || stem.endsWith("ら")) {

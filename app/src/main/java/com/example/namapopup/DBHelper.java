@@ -25,7 +25,7 @@ import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "hougenList.db";
+    private static final String DATABASE_NAME = "hogen.db";
     private static final int DATABASE_VERSION = 1;
     private final Context context;
     private String[] chosenChihous;
@@ -125,7 +125,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
         // Split the search word by '|' to handle multiple words
         String[] splitWords = word.split(Constants.SEPARATOR);
-        Log.d("Split Words", " " + splitWords.length + " " + splitWords.);
 
         for (String chihou : Constants.CHIHOUS) {
             DialectState dialectState = getDialectState(context, chihou);
