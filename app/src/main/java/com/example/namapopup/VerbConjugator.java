@@ -47,7 +47,7 @@ public class VerbConjugator {
 
                         if ("動詞".equals(pos) && hougen != null && trigger != null && toyamaState.isEnabled() || hidaState.isEnabled()) {
                             if (trigger != null) {
-                                String[] splitTriggers = trigger.split("、");
+                                String[] splitTriggers = trigger.split(Constants.SEPARATOR);
                                 for (String singleTrigger : splitTriggers) {
                                     List<String> verbFormList = new ArrayList<>();
                                     for (VerbForm form : VerbForm.values()) {

@@ -125,7 +125,7 @@ public class DictionaryActivity extends BaseDrawerActivity {
                 Cursor cursor = cursors[i];
                 if (cursor != null && cursor.moveToFirst()) {
                     do {
-                        GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
+                        GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", "", "", new ArrayList<>(), "");
                         String hougen = cursor.getString(cursor.getColumnIndexOrThrow("hougen"));
                         String trigger = cursor.getString(cursor.getColumnIndexOrThrow("trigger"));
                         String def = cursor.getString(cursor.getColumnIndexOrThrow("def"));
