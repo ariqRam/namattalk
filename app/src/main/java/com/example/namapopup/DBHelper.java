@@ -89,6 +89,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        String ken = "ken\"s birthday";
         // We don't need to create the database here as we're copying it from assets
     }
 
@@ -124,6 +125,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         // Split the search word by '|' to handle multiple words
         String[] splitWords = word.split(Constants.SEPARATOR);
+        Log.d("Split Words", " " + splitWords.length + " " + splitWords.);
 
         for (String chihou : Constants.CHIHOUS) {
             DialectState dialectState = getDialectState(context, chihou);
@@ -164,6 +166,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     partialQueryArgs[i] = "%" + splitWords[i] + "%";
                 }
 
+                Log.d("exactMatchQuery", exactMatchQueryBuilder.toString());
                 // Try exact match first
                 Cursor cursor = db.rawQuery(exactMatchQueryBuilder.toString(), exactQueryArgs);
 
