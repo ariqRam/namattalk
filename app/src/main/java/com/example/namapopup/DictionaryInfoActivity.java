@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -50,6 +51,14 @@ public class DictionaryInfoActivity extends AppCompatActivity {
             inputMeaningTextView.setText(def);
             inputHinshiTextView.setText(hinshi);
             inputExampleTextView.setText(example);
+
+            if (inputMeaningTextView.getText().toString().trim().isEmpty()) inputMeaningTextView.setText("―");
+
+            LinearLayout posRow = findViewById(R.id.posRow);
+            if (inputHinshiTextView.getText().toString().trim().isEmpty()) posRow.setVisibility(View.GONE);
+
+            LinearLayout exampleRow = findViewById(R.id.exampleRow);
+            if (inputExampleTextView.getText().toString().trim().isEmpty()) exampleRow.setVisibility(View.GONE);
         }
 
         // Handle the close button click if necessary

@@ -67,7 +67,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         GlobalVariable.HougenInformation hougenInformation = results.get(position);
-        holder.getTextView().setText(hougenInformation.hougen + ": ");
+        holder.getTextView().setText(hougenInformation.hougen);
         holder.getMeaningView().setText(hougenInformation.def);
         holder.getRegionView().setText(hougenInformation.chihou);
         View.OnClickListener resultItemOnClickHandler = v -> {

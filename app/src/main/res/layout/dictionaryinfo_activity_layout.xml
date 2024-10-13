@@ -45,7 +45,9 @@
                     android:layout_width="53dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="方言"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
@@ -60,7 +62,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="7"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="富山弁"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
@@ -77,7 +81,9 @@
                     android:layout_width="53dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="都道府県"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
@@ -92,7 +98,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="7"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="富山県"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
@@ -109,7 +117,9 @@
                     android:layout_width="53dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="地域"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
@@ -124,7 +134,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="7"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="市区町村など"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
@@ -141,7 +153,9 @@
                     android:layout_width="53dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="意味"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
@@ -156,12 +170,15 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="7"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="なし"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
             </LinearLayout>
             <LinearLayout
+                android:id="@+id/posRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -172,7 +189,9 @@
                     android:layout_width="53dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="品詞"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
@@ -187,7 +206,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="7"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="動詞"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
@@ -195,6 +216,7 @@
 
 
             <LinearLayout
+                android:id="@+id/exampleRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#C3B4A6"
@@ -204,17 +226,27 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
                     android:text="例文"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="#8B4513" />
 
                 <TextView
                     android:id="@+id/inputExample"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
-                    android:padding="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="4dp"
+                    android:paddingLeft="12dp"
                     android:text="なし"
                     android:textColor="#3E3E3E"
                     android:textSize="24dp" />

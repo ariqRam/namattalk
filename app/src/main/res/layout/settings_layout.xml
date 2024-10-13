@@ -64,7 +64,9 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="富山弁"
-                        android:textSize="16sp"
+                        android:textColor="#8B4513"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
                         android:gravity="start" />
 
                     <TextView
@@ -95,7 +97,9 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="飛騨弁"
-                        android:textSize="16sp"
+                        android:textColor="#8B4513"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
                         android:gravity="start" />
                     <TextView
                         android:id="@+id/hida_count"

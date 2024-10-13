@@ -1,41 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="56dp"
+    android:layout_height="64dp"
     android:layout_marginTop="10dp"
     android:background="@drawable/rounded_border"
     android:id="@+id/search_result_item"
     android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/result_text"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:text="おる:"
         android:layout_height="match_parent"
-        android:gravity="start"
-        android:padding="12dp"
-        android:textColor="#000000"
-        android:textSize="18sp" />
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingLeft="12dp">
 
-    <TextView
-        android:id="@+id/meaning_text"
-        android:layout_width="wrap_content"
-        android:text="いる、います"
-        android:layout_height="match_parent"
-        android:gravity="start"
-        android:paddingTop="12dp"
-        android:textColor="#000000"
-        android:textSize="18sp" />
+        <TextView
+            android:id="@+id/result_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:text="おる"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/meaning_text"
+            android:layout_width="247dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:paddingLeft="2dp"
+            android:maxLines="1"
+            android:paddingTop="2dp"
+            android:text="いる、います"
+            android:textColor="#000000"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+
 
 
     <TextView
         android:id="@+id/region_text"
         android:layout_width="match_parent"
         android:text="飛騨弁"
+        android:textStyle="bold"
         android:layout_height="match_parent"
         android:gravity="end"
-        android:padding="12dp"
-        android:textColor="#000000"
-        android:textSize="18sp" />
+        android:padding="18dp"
+        android:textColor="#8B4513"
+        android:textSize="20sp" />
 
 </LinearLayout>
