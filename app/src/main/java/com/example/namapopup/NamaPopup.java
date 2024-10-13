@@ -179,15 +179,19 @@ public class NamaPopup extends AccessibilityService {
                             int candidateColumnIndex = cursor.getColumnIndex("candidate");
                             int triggerColumnIndex = cursor.getColumnIndex("trigger");
                             int defColumnIndex = cursor.getColumnIndex("def");
+                            int posColumnIndex = cursor.getColumnIndex("pos");
 
                             // Check for dialect word match
                             String yomikata = (yomikataColumnIndex != -1) ? cursor.getString(yomikataColumnIndex) : "";
                             String candidate = (candidateColumnIndex != -1) ? cursor.getString(candidateColumnIndex) : "";
                             String def = cursor.getString(defColumnIndex);
-                            GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", "", "", new ArrayList<>(), "");
+                            String pos = cursor.getString(posColumnIndex);
                             String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
                             String[] splitTriggers = triggers.split(Constants.SEPARATOR);
                             String[] splitYomikata = yomikata.split(Constants.SEPARATOR);
+
+                            GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", "", "", new ArrayList<>(), "");
+
                             boolean isExactMatch = (Arrays.asList(splitYomikata).contains(queryText) || Arrays.asList(splitTriggers).contains(queryText));
                             Log.d(TAG, "yomikata: " + Arrays.asList(splitYomikata));
                             if (isExactMatch && endIndex == fullText.length() - 1) {
@@ -199,7 +203,7 @@ public class NamaPopup extends AccessibilityService {
                                 if (Arrays.asList(splitYomikata).contains(queryText)) isHougen = true;
                                 else if (Arrays.asList(splitTriggers).contains(queryText)) isHougen = false;
 
-                                String conjugatedCandidate = VerbConjugator.conjugateFromBase(candidate, VerbConjugator.getVerbForm(selectedText), isHougen);
+                                String conjugatedCandidate = "動詞".equals(pos) ? VerbConjugator.conjugateFromBase(candidate, VerbConjugator.getVerbForm(selectedText), isHougen) : candidate;
                                 Log.d(TAG, "Conjugated hougen: " + candidate + " in form of: " + VerbConjugator.getVerbForm(selectedText) + " to " + conjugatedCandidate);
 
                                 // Add to character positions, update relevant information

@@ -105,8 +105,8 @@ public class DBHelper extends SQLiteOpenHelper {
         for(int i = 0; i < Constants.CHIHOUS.length; i++) {
             String chihou = Constants.CHIHOUS[i];
             String rawQuery =
-                    "SELECT hougen, trigger, def, example, pos FROM " + chihou +
-                            " WHERE trigger LIKE ? OR hougen LIKE ?";
+                    "SELECT hougen, trigger, yomikata, candidate, def, example, pos FROM " + chihou +
+                            " WHERE trigger LIKE ? OR hougen LIKE ? OR def LIKE ?";
 
             String[] selectionArgs = new String[] { wildcardTerm, wildcardTerm };
 

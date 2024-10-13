@@ -127,11 +127,15 @@ public class DictionaryActivity extends BaseDrawerActivity {
                     do {
                         GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", "", "", new ArrayList<>(), "");
                         String hougen = cursor.getString(cursor.getColumnIndexOrThrow("hougen"));
+                        String yomikata = cursor.getString(cursor.getColumnIndexOrThrow("yomikata"));
+                        String candidate = cursor.getString(cursor.getColumnIndexOrThrow("candidate"));
                         String trigger = cursor.getString(cursor.getColumnIndexOrThrow("trigger"));
                         String def = cursor.getString(cursor.getColumnIndexOrThrow("def"));
                         String example = cursor.getString(cursor.getColumnIndexOrThrow("example"));
                         String pos = cursor.getString(cursor.getColumnIndexOrThrow("pos"));
                         hougenInformation.hougen = hougen;
+                        hougenInformation.yomikata = yomikata;
+                        hougenInformation.candidate = candidate;
                         hougenInformation.chihou = Constants.CHIHOUS_JP[i];// Region from the cursor
                         hougenInformation.pref = Constants.PREFS[i];
                         hougenInformation.area = Constants.AREAS[i];
