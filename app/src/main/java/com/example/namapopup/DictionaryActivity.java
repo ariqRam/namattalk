@@ -76,7 +76,8 @@ public class DictionaryActivity extends BaseDrawerActivity {
         // Method 1: Listen for text changes
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
@@ -127,15 +128,10 @@ public class DictionaryActivity extends BaseDrawerActivity {
                     do {
                         GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", "", "", new ArrayList<>(), "");
                         String hougen = cursor.getString(cursor.getColumnIndexOrThrow("hougen"));
-                        String yomikata = cursor.getString(cursor.getColumnIndexOrThrow("yomikata"));
-                        String candidate = cursor.getString(cursor.getColumnIndexOrThrow("candidate"));
-                        String trigger = cursor.getString(cursor.getColumnIndexOrThrow("trigger"));
                         String def = cursor.getString(cursor.getColumnIndexOrThrow("def"));
                         String example = cursor.getString(cursor.getColumnIndexOrThrow("example"));
                         String pos = cursor.getString(cursor.getColumnIndexOrThrow("pos"));
                         hougenInformation.hougen = hougen;
-                        hougenInformation.yomikata = yomikata;
-                        hougenInformation.candidate = candidate;
                         hougenInformation.chihou = Constants.CHIHOUS_JP[i];// Region from the cursor
                         hougenInformation.pref = Constants.PREFS[i];
                         hougenInformation.area = Constants.AREAS[i];
