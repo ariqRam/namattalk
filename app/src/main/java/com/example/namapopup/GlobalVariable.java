@@ -12,6 +12,8 @@ public class GlobalVariable {
     public static class HougenInformation {
         String hougen;
         String trigger;
+        String yomikata;
+        String candidate;
         String chihou;
         String pref;
         String area;
@@ -20,9 +22,11 @@ public class GlobalVariable {
         String pos;
         List<NamaPopup.CharacterPosition> characterPositions;
 
-        HougenInformation(String hougen, String trigger, String chihou, String pref, String area, String def, String example, List<NamaPopup.CharacterPosition> characterPositions, String pos) {
+        HougenInformation(String hougen, String trigger, String candidate, String yomikata, String chihou, String pref, String area, String def, String example, List<NamaPopup.CharacterPosition> characterPositions, String pos) {
             this.hougen = hougen;
             this.trigger = trigger;
+            this.yomikata = yomikata;
+            this.candidate = candidate;
             this.chihou = chihou;
             this.pref = pref;
             this.area = area;

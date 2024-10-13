@@ -25,7 +25,7 @@ import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "hougen.db";
+    private static final String DATABASE_NAME = "hougenList.db";
     private static final int DATABASE_VERSION = 1;
     private final Context context;
     private String[] chosenChihous;
@@ -48,12 +48,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         // Check if the database exists, if not, copy it from assets
-        if (!checkDatabase()) {
-            try {
-                copyDatabaseFromAssets();
-            } catch (IOException e) {
-                throw new Error("Error copying database from assets", e);
-            }
+        try {
+            copyDatabaseFromAssets();
+        } catch (IOException e) {
+            throw new Error("Error copying database from assets", e);
         }
         addFoundColumnToAllRegions();
     }
@@ -124,8 +122,8 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         List<Cursor> allResults = new ArrayList<>();
 
-        // Split the search word by '、' to handle multiple words
-        String[] splitWords = word.split("、");
+        // Split the search word by '|' to handle multiple words
+        String[] splitWords = word.split(Constants.SEPARATOR);
 
         for (String chihou : Constants.CHIHOUS) {
             DialectState dialectState = getDialectState(context, chihou);
@@ -137,10 +135,10 @@ public class DBHelper extends SQLiteOpenHelper {
                 StringBuilder partialMatchQueryBuilder = new StringBuilder();
 
                 // Determine the column to search based on the mode ("学習" for non-native, "母語" for native)
-                String searchColumn = "学習".equals(dialectState.mode) ? "trigger" : "hougen";
+                String searchColumn = "学習".equals(dialectState.mode) ? "trigger" : "yomikata";
 
                 // Build the exact match query
-                exactMatchQueryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
+                exactMatchQueryBuilder.append("SELECT hougen, trigger, yomikata, candidate, def, example, pos FROM ").append(tableName).append(" WHERE ");
                 for (int i = 0; i < splitWords.length; i++) {
                     exactMatchQueryBuilder.append(searchColumn).append(" = ?");
                     if (i != splitWords.length - 1) {
@@ -149,7 +147,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 }
 
                 // Build the partial match query
-                partialMatchQueryBuilder.append("SELECT hougen, trigger, def, example, pos FROM ").append(tableName).append(" WHERE ");
+                partialMatchQueryBuilder.append("SELECT hougen, trigger, yomikata, candidate, def, example, pos FROM ").append(tableName).append(" WHERE ");
                 for (int i = 0; i < splitWords.length; i++) {
                     partialMatchQueryBuilder.append(searchColumn).append(" LIKE ?");
                     if (i != splitWords.length - 1) {
@@ -200,7 +198,7 @@ public class DBHelper extends SQLiteOpenHelper {
             if (tableName != null && !tableName.isEmpty()) {
                 try {
                     // Query to get verbs where 'pos' column is '動詞' (verb)
-                    String verbQuery = "SELECT hougen, trigger, pos FROM " + tableName + " WHERE pos = ?";
+                    String verbQuery = "SELECT trigger, yomikata, candidate, pos FROM " + tableName + " WHERE pos = ?";
                     // Execute the query
                     String[] queryArgs = new String[]{"動詞"};
                     Cursor cursor = db.rawQuery(verbQuery, queryArgs);

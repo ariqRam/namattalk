@@ -46,7 +46,7 @@ public class NamaPopup extends AccessibilityService {
     private boolean isTappedOnce = false;
     private Timer doubleTapTimer = new Timer();
     private List<GlobalVariable.HougenInformation> searchResults = new ArrayList<>();
-    private GlobalVariable.HougenInformation currentHougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
+    private GlobalVariable.HougenInformation currentHougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", "", "", new ArrayList<>(), "");
     private String normalText = "";
     private boolean textViewSet = false;
     private int currentResultIndex = 0; // Tracks which list within searchResults we are currently in
@@ -175,30 +175,31 @@ public class NamaPopup extends AccessibilityService {
                     DialectState dialectState = getDialectState(this, Constants.CHIHOUS[i]);
                     if (cursor != null && cursor.getCount() > 0) {
                         if (cursor.moveToFirst()) {
-                            int hougenColumnIndex = cursor.getColumnIndex("hougen");
+                            int yomikataColumnIndex = cursor.getColumnIndex("yomikata");
+                            int candidateColumnIndex = cursor.getColumnIndex("candidate");
                             int triggerColumnIndex = cursor.getColumnIndex("trigger");
                             int defColumnIndex = cursor.getColumnIndex("def");
 
                             // Check for dialect word match
-                            String hougen = cursor.getString(hougenColumnIndex);
+                            String yomikata = (yomikataColumnIndex != -1) ? cursor.getString(yomikataColumnIndex) : "";
+                            String candidate = (candidateColumnIndex != -1) ? cursor.getString(candidateColumnIndex) : "";
                             String def = cursor.getString(defColumnIndex);
-                            hougen = processKako(hougen);
-                            GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", new ArrayList<>(), "");
+                            GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", "", "", new ArrayList<>(), "");
                             String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
-                            String[] splitTriggers = triggers.split("、");
-                            boolean isExactMatch = (hougen.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText)) && def != null;
-
+                            String[] splitTriggers = triggers.split(Constants.SEPARATOR);
+                            boolean isExactMatch = (yomikata.equals(queryText) || Arrays.asList(splitTriggers).contains(queryText)) && def != null;
+                            Log.d(TAG, "yomikata: " + yomikata);
                             if (isExactMatch && endIndex == fullText.length() - 1) {
                                 matchFound = true;
-                                Log.d(TAG, "Exact match found: " + hougen + " in " + Constants.CHIHOUS[i] + " at position: " + startIndex + " to " + endIndex);
-                                String conjugatedHougen = verbConjugator.conjugate(hougen, VerbConjugator.getVerbForm(selectedText), verbMap);
-                                Log.d(TAG, "Conjugated hougen: " + hougen + " in form of: " + VerbConjugator.getVerbForm(selectedText) + " to " + conjugatedHougen);
+                                Log.d(TAG, "Exact match found: " + candidate + " in " + Constants.CHIHOUS[i] + " at position: " + startIndex + " to " + endIndex);
+                                String conjugatedCandidate = verbConjugator.conjugate(candidate, VerbConjugator.getVerbForm(selectedText), verbMap);
+                                Log.d(TAG, "Conjugated hougen: " + candidate + " in form of: " + VerbConjugator.getVerbForm(selectedText) + " to " + conjugatedCandidate);
 
                                 // Add to character positions, update relevant information
-                                updateHougenInformation(cursor, i, conjugatedHougen, hougenInformation, characterPositions);
+                                updateHougenInformation(cursor, i, conjugatedCandidate, hougenInformation, characterPositions);
                                 // After scanning the entire substring from startIndex
                                 addCurrentResultToSearchResults(hougenInformation);
-                                addCharacterPositions(hougenInformation.characterPositions, conjugatedHougen, startIndex);
+                                addCharacterPositions(hougenInformation.characterPositions, conjugatedCandidate, startIndex);
                                 separateNormalText(hougenInformation.characterPositions, fullText, startIndex, endIndex);
                             }
 
@@ -274,9 +275,8 @@ public class NamaPopup extends AccessibilityService {
             if (currentHougenInformation != null) {
                 if (currentHougenInformation.hougen != null) {
                     setOverlayActive();
-                    String hougen = currentHougenInformation.hougen;
-                    hougen = processKako(hougen);
-                    textView.setText(hougen);
+                    String candidate = currentHougenInformation.candidate;
+                    textView.setText(candidate);
                 } else {
                     setOverlayIdle();
                 }
@@ -285,7 +285,7 @@ public class NamaPopup extends AccessibilityService {
 
                 updateIndicator();
 
-                Log.d(TAG, "Update FloatingButtonText to " + currentHougenInformation.hougen + " in " + currentHougenInformation.chihou + " (" + indicator + ")");
+                Log.d(TAG, "Update FloatingButtonText to " + currentHougenInformation.candidate + " in " + currentHougenInformation.chihou + " (" + indicator + ")");
 
 
             } else {
@@ -299,21 +299,17 @@ public class NamaPopup extends AccessibilityService {
         chihouTextView.setVisibility(View.VISIBLE);
     }
 
-    private @NonNull String processKako(String hougen) {
-        int kakoIndex = hougen.indexOf("（");
-        if(kakoIndex != -1) {
-            hougen = hougen.substring(0, kakoIndex);
-        }
-        return hougen;
-    }
-
     // Function to update the hougenInformation based on the current selected item and region index
-    private void updateHougenInformation(Cursor cursor, int regionIndex, String hougen, GlobalVariable.HougenInformation hougenInformation, List<CharacterPosition> characterPositions) {
+    private void updateHougenInformation(Cursor cursor, int regionIndex, String candidate, GlobalVariable.HougenInformation hougenInformation, List<CharacterPosition> characterPositions) {
         int defColumnIndex = cursor.getColumnIndex("def");
+        int hougenColumnIndex = cursor.getColumnIndex("hougen");
+        int yomikataColumnIndex = cursor.getColumnIndex("yomikata");
         int exampleColumnIndex = cursor.getColumnIndex("example");
         int posColumnIndex = cursor.getColumnIndex("pos");
 
-        hougenInformation.hougen = hougen;
+        hougenInformation.hougen = cursor.getString(hougenColumnIndex);
+        hougenInformation.yomikata = cursor.getString(yomikataColumnIndex);
+        hougenInformation.candidate = candidate;
         hougenInformation.chihou = Constants.CHIHOUS_JP[regionIndex];// Region from the cursor
         hougenInformation.pref = Constants.PREFS[regionIndex];
         hougenInformation.area = Constants.AREAS[regionIndex];
@@ -658,7 +654,7 @@ public class NamaPopup extends AccessibilityService {
         Log.d("launchShousaiActivity", "lauched ShousaiActivity");
         Intent intent = new Intent(this, HougenInfoActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("hougen", verbConjugator.reconjugate(hougenInformation.hougen, verbMap));
+        intent.putExtra("hougen", hougenInformation.hougen);
         intent.putExtra("chihou", hougenInformation.chihou);
         intent.putExtra("pref", hougenInformation.pref);
         intent.putExtra("area", hougenInformation.area);
