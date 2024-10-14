@@ -51,3 +51,13 @@
 ## サポート
 
 アプリに関する問題や質問、または方言データ追加は、[こちら](mailto:ariqathallah38@gmail.com)からご連絡ください。
+
+## スクリーンショット
+
+<img src="https://github.com/user-attachments/assets/e18814bf-d5dc-4b70-815c-2f0a69396705" alt="Setting Activity" width="400"/>
+
+<img src="https://github.com/user-attachments/assets/006ea675-1547-4be4-88e1-28d631be9f4e" alt="Dictionary Activity" width="400"/>
+
+<img src="https://github.com/user-attachments/assets/4f6e29a1-58cd-4144-a6f7-cb6e0151f52c" alt="Dictionary Info Activity" width="400"/>
+
+<img src="https://github.com/user-attachments/assets/2c0ea0db-851a-44c3-b7df-f34464018270" alt="Hougen Info Activity" width="400"/>
