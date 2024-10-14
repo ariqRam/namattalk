@@ -52,7 +52,11 @@ public class DictionaryInfoActivity extends AppCompatActivity {
             inputHinshiTextView.setText(hinshi);
             inputExampleTextView.setText(example);
 
-            if (inputMeaningTextView.getText().toString().trim().isEmpty()) inputMeaningTextView.setText("―");
+            LinearLayout areaRow = findViewById(R.id.areaRow);
+            if (inputAreaTextView.getText().toString().trim().isEmpty()) areaRow.setVisibility(View.GONE);
+
+            LinearLayout meaningRow = findViewById(R.id.meaningRow);
+            if (inputMeaningTextView.getText().toString().trim().isEmpty()) meaningRow.setVisibility(View.GONE);
 
             LinearLayout posRow = findViewById(R.id.posRow);
             if (inputHinshiTextView.getText().toString().trim().isEmpty()) posRow.setVisibility(View.GONE);

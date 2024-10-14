@@ -4,6 +4,9 @@ import static androidx.core.content.ContextCompat.startActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +53,9 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         }
 
         public TextView getRegionView() {
+            regionView.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#8B4513")));
+            GradientDrawable regionViewBackground = (GradientDrawable) regionView.getBackground();
+            regionViewBackground.setStroke(0, Color.parseColor("#8B4513"));
             return regionView;
         }
 

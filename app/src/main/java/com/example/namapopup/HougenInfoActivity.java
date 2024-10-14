@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class HougenInfoActivity extends Service {
@@ -115,6 +116,18 @@ public class HougenInfoActivity extends Service {
                 inputMeaningTextView.setText(def);
                 inputHinshiTextView.setText(hinshi);
                 inputExampleTextView.setText(example);
+
+                LinearLayout areaRow = mFloatingView.findViewById(R.id.areaRow);
+                if (inputAreaTextView.getText().toString().trim().isEmpty()) areaRow.setVisibility(View.GONE);
+
+                LinearLayout meaningRow = mFloatingView.findViewById(R.id.meaningRow);
+                if (inputMeaningTextView.getText().toString().trim().isEmpty()) meaningRow.setVisibility(View.GONE);
+
+                LinearLayout posRow = mFloatingView.findViewById(R.id.posRow);
+                if (inputHinshiTextView.getText().toString().trim().isEmpty()) posRow.setVisibility(View.GONE);
+
+                LinearLayout exampleRow = mFloatingView.findViewById(R.id.exampleRow);
+                if (inputExampleTextView.getText().toString().trim().isEmpty()) exampleRow.setVisibility(View.GONE);
             }
         }
 

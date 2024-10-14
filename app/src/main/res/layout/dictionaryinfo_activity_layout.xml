@@ -43,13 +43,15 @@
 
                 <TextView
                     android:layout_width="53dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
                     android:layout_weight="3"
                     android:paddingRight="4dp"
                     android:paddingVertical="4dp"
                     android:paddingLeft="12dp"
                     android:text="方言"
-                    android:textColor="#3E3E3E"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
                     android:textSize="24dp" />
 
                 <View
@@ -79,13 +81,15 @@
 
                 <TextView
                     android:layout_width="53dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
                     android:layout_weight="3"
                     android:paddingRight="4dp"
                     android:paddingVertical="4dp"
                     android:paddingLeft="12dp"
                     android:text="都道府県"
-                    android:textColor="#3E3E3E"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
                     android:textSize="24dp" />
 
                 <View
@@ -107,6 +111,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/areaRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
@@ -115,13 +120,15 @@
 
                 <TextView
                     android:layout_width="53dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
                     android:layout_weight="3"
                     android:paddingRight="4dp"
                     android:paddingVertical="4dp"
                     android:paddingLeft="12dp"
                     android:text="地域"
-                    android:textColor="#3E3E3E"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
                     android:textSize="24dp" />
 
                 <View
@@ -143,6 +150,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/meaningRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
@@ -151,13 +159,15 @@
 
                 <TextView
                     android:layout_width="53dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
                     android:layout_weight="3"
                     android:paddingRight="4dp"
                     android:paddingVertical="4dp"
                     android:paddingLeft="12dp"
                     android:text="意味"
-                    android:textColor="#3E3E3E"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
                     android:textSize="24dp" />
 
                 <View
@@ -187,13 +197,15 @@
 
                 <TextView
                     android:layout_width="53dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
                     android:layout_weight="3"
                     android:paddingRight="4dp"
                     android:paddingVertical="4dp"
                     android:paddingLeft="12dp"
                     android:text="品詞"
-                    android:textColor="#3E3E3E"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
                     android:textSize="24dp" />
 
                 <View
@@ -230,7 +242,8 @@
                     android:paddingVertical="4dp"
                     android:paddingLeft="12dp"
                     android:text="例文"
-                    android:textColor="#3E3E3E"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
                     android:textSize="24dp" />
 
                 <View

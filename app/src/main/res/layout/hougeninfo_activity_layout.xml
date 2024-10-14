@@ -33,223 +33,236 @@
             android:layout_marginBottom="8dp"
             android:layout_marginRight="16dp">
 
-                <LinearLayout
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:background="#C3B4A6"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="53dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="3"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="方言"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
+                    android:textSize="24dp" />
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="match_parent"
+                    android:background="#8B4513" />
+
+                <TextView
+                    android:id="@+id/inputChihou"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="7"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="富山弁"
+                    android:textColor="#3E3E3E"
+                    android:textSize="24dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:background="#C3B4A6"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="53dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="3"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="都道府県"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
+                    android:textSize="24dp" />
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="match_parent"
+                    android:background="#8B4513" />
+
+                <TextView
+                    android:id="@+id/inputPref"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="7"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="富山県"
+                    android:textColor="#3E3E3E"
+                    android:textSize="24dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/areaRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:background="#C3B4A6"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="53dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="3"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="地域"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
+                    android:textSize="24dp" />
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="match_parent"
+                    android:background="#8B4513" />
+
+                <TextView
+                    android:id="@+id/inputArea"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="7"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="市区町村など"
+                    android:textColor="#3E3E3E"
+                    android:textSize="24dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/meaningRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:background="#C3B4A6"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="53dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="3"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="意味"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
+                    android:textSize="24dp" />
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="match_parent"
+                    android:background="#8B4513" />
+
+                <TextView
+                    android:id="@+id/inputMeaning"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="7"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="なし"
+                    android:textColor="#3E3E3E"
+                    android:textSize="24dp" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/posRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:background="#C3B4A6"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="53dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="3"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="品詞"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
+                    android:textSize="24dp" />
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="match_parent"
+                    android:background="#8B4513" />
+
+                <TextView
+                    android:id="@+id/inputHinshi"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="7"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="動詞"
+                    android:textColor="#3E3E3E"
+                    android:textSize="24dp" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/exampleRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#C3B4A6"
+                android:orientation="vertical">
+
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:background="#C3B4A6"
-                    android:orientation="horizontal">
+                    android:layout_weight="3"
+                    android:paddingRight="4dp"
+                    android:paddingVertical="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="例文"
+                    android:textColor="@color/white"
+                    android:background="#8B4513"
+                    android:textSize="24dp" />
 
-                    <TextView
-                        android:layout_width="53dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="方言"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="#8B4513" />
 
-                    <View
-                        android:layout_width="4dp"
-                        android:layout_height="match_parent"
-                        android:background="#8B4513" />
-
-                    <TextView
-                        android:id="@+id/inputChihou"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="7"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="富山弁"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-                </LinearLayout>
-
-                <LinearLayout
+                <TextView
+                    android:id="@+id/inputExample"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:background="#C3B4A6"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="53dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="都道府県"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-
-                    <View
-                        android:layout_width="4dp"
-                        android:layout_height="match_parent"
-                        android:background="#8B4513" />
-
-                    <TextView
-                        android:id="@+id/inputPref"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="7"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="富山県"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:background="#C3B4A6"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="53dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="地域"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-
-                    <View
-                        android:layout_width="4dp"
-                        android:layout_height="match_parent"
-                        android:background="#8B4513" />
-
-                    <TextView
-                        android:id="@+id/inputArea"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="7"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="市区町村など"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:background="#C3B4A6"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="53dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="意味"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-
-                    <View
-                        android:layout_width="4dp"
-                        android:layout_height="match_parent"
-                        android:background="#8B4513" />
-
-                    <TextView
-                        android:id="@+id/inputMeaning"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="7"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="なし"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/posRow"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:background="#C3B4A6"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="53dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="品詞"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-
-                    <View
-                        android:layout_width="4dp"
-                        android:layout_height="match_parent"
-                        android:background="#8B4513" />
-
-                    <TextView
-                        android:id="@+id/inputHinshi"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="7"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="動詞"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-                </LinearLayout>
-
-
-                <LinearLayout
-                    android:id="@+id/exampleRow"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#C3B4A6"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:paddingRight="4dp"
-                        android:paddingVertical="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="例文"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="4dp"
-                        android:background="#8B4513" />
-
-                    <TextView
-                        android:id="@+id/inputExample"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:paddingRight="4dp"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="4dp"
-                        android:paddingLeft="12dp"
-                        android:text="なし"
-                        android:textColor="#3E3E3E"
-                        android:textSize="24dp" />
-                </LinearLayout>
+                    android:layout_weight="3"
+                    android:paddingRight="4dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="4dp"
+                    android:paddingLeft="12dp"
+                    android:text="なし"
+                    android:textColor="#3E3E3E"
+                    android:textSize="24dp" />
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

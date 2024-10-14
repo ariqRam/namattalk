@@ -12,23 +12,23 @@
         android:layout_gravity="center"
         android:orientation="vertical">
 
-        <!-- Hougen-->
-        <TextView
-            android:id="@+id/accessibility_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="な"
-            android:textSize="36sp"
-            android:textColor="#FFF5EC"
-            android:visibility="gone" />
-
         <ImageView
             android:id="@+id/accessibility_logo"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:src="@drawable/logo"
             android:contentDescription="App Logo" />
+
+        <!-- Hougen-->
+        <TextView
+            android:id="@+id/accessibility_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="な"
+            android:textSize="36sp"
+            android:textColor="#FFF5EC"
+            android:visibility="gone" />
 
         <!-- Chihou -->
         <TextView
@@ -39,17 +39,19 @@
             android:textColor="#FFF5EC"
             android:textSize="14sp"
             android:gravity="left"
-            android:layout_marginLeft="10dp"
             android:paddingHorizontal="5dp"
+            android:layout_marginBottom="5dp"
             android:visibility="gone"/>
+
+        <!-- Indicator for page -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="1/2"
             android:id="@+id/page_indicator"
             android:textColor="@color/white"
-            android:paddingBottom="5dp"
-            android:gravity="center"
+            android:paddingRight="10dp"
+            android:gravity="right"
             android:visibility="gone"/>
     </LinearLayout>
 
