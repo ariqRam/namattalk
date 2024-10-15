@@ -73,9 +73,11 @@ public class SettingsActivity extends BaseDrawerActivity {
         db = new DBHelper(this);
         TextView hidaCountText = findViewById(R.id.hida_count);
         String hidaText =  db.getFoundWordsRatio(0);
+        Log.d("settingGetFoundWordsRatio", "Hida: " + hidaText);
         hidaCountText.setText(hidaText);
         TextView toyamaCountText = findViewById(R.id.toyama_count);
         String toyamaText =  db.getFoundWordsRatio(1);
+        Log.d("settingGetFoundWordsRatio", "Toyama: " + toyamaText);
         toyamaCountText.setText(toyamaText);
     }
 

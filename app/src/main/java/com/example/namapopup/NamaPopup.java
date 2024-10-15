@@ -617,8 +617,6 @@ public class NamaPopup extends AccessibilityService {
                         onConvertText();
                         int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(currentHougenInformation.chihou);
                         databaseHelper.setWordToFound(currentHougenInformation.hougen, regionIndex);
-                        List<String> foundWords = databaseHelper.getFoundWords(regionIndex);
-                        Log.d("FoundWords", "FOUND WORD " + foundWords + " in " + Constants.CHIHOUS[regionIndex]);
                         focusedNode.recycle();
                         resetFloatingButtonText();
                     }

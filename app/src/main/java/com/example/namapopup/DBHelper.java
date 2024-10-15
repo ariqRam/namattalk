@@ -26,7 +26,7 @@ import java.util.List;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "hogen.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 6;
     private final Context context;
     private String[] chosenChihous;
 
@@ -48,26 +48,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         // Check if the database exists, if not, copy it from assets
-        try {
-            copyDatabaseFromAssets();
-        } catch (IOException e) {
-            throw new Error("Error copying database from assets", e);
-        }
-        addFoundColumnToAllRegions();
-    }
-
-    private boolean checkDatabase() {
-        SQLiteDatabase checkDB = null;
-        try {
-            String path = context.getDatabasePath(DATABASE_NAME).getPath();
-            checkDB = SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READONLY);
-        } catch (SQLiteException e) {
-            // Database doesn't exist yet
-        }
-        if (checkDB != null) {
-            checkDB.close();
-        }
-        return checkDB != null;
+//        try {
+//            copyDatabaseFromAssets();
+//        } catch (IOException e) {
+//            throw new Error("Error copying database from assets", e);
+//        }
+//        addFoundColumnToAllRegions();
     }
 
     private void copyDatabaseFromAssets() throws IOException {
@@ -95,8 +81,41 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Handle database upgrades if needed
+        Log.d("DB", "Upgrading database from version " + oldVersion + " to " + newVersion);
+        if (oldVersion < 6) {
+            for (String tableName : Constants.CHIHOUS) {
+                // Add 'found' column if it doesn't exist
+                try {
+                    Cursor cursor = db.rawQuery("PRAGMA table_info(" + tableName + ")", null);
+                    boolean foundColumnExists = false;
+                    if (cursor != null) {
+                        try {
+                            if (cursor.moveToFirst()) {
+                                do {
+                                    String columnName = cursor.getString(cursor.getColumnIndex("name"));
+                                    if ("found".equals(columnName)) {
+                                        foundColumnExists = true;
+                                        break;
+                                    }
+                                } while (cursor.moveToNext());
+                            }
+                        } finally {
+                            cursor.close();
+                        }
+                    }
+
+                    // Add the 'found' column if it doesn't exist
+                    if (!foundColumnExists) {
+                        db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN found INTEGER DEFAULT 0");
+                        Log.d("DB Upgrade", "'found' column added to table: " + tableName);
+                    }
+                } catch (SQLException e) {
+                    Log.e("DB", "Error adding 'found' column to table: " + tableName, e);
+                }
+            }
+        }
     }
+
 
     public Cursor[] searchDictionary(String searchTerm) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -222,42 +241,6 @@ public class DBHelper extends SQLiteOpenHelper {
         return allResults.toArray(new Cursor[0]);
     }
 
-    public void deleteRowUsingHougen() {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        String query = "DELETE FROM hida WHERE hougen = ?";
-        db.execSQL(query, new String[]{"ん"});
-
-        Log.d("Database", "Row deleted using raw query");
-
-        db.close();
-    }
-
-    public void insertNewRow(String def, String trigger, String hougen, String pos) {
-        // Get the writable database
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        // Create a ContentValues object to hold the data you want to insert
-        ContentValues values = new ContentValues();
-        values.put("def", def);
-        values.put("trigger", trigger);
-        values.put("hougen", hougen);
-        values.put("pos", pos);
-
-        // Insert the new row, the second argument is a nullColumnHack in case you don't have any data
-        long newRowId = db.insert("hida", null, values);
-
-        // Check if the insertion was successful
-        if (newRowId != -1) {
-            Log.d("Database", "Row inserted successfully with ID: " + newRowId);
-        } else {
-            Log.d("Database", "Failed to insert row");
-        }
-
-        // Close the database connection
-        db.close();
-    }
-
     public boolean addFoundColumnToAllRegions() {
         SQLiteDatabase db = this.getWritableDatabase();
         boolean allColumnsAdded = true;
@@ -317,7 +300,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         try {
             // Ensure the 'found' column exists
-            addFoundColumnToAllRegions();
+//            addFoundColumnToAllRegions();
 
             // Update the 'found' status for the word
             ContentValues values = new ContentValues();
