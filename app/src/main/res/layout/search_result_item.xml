@@ -8,7 +8,8 @@
     android:orientation="horizontal">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:paddingTop="8dp"
@@ -38,14 +39,14 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-
     <TextView
         android:id="@+id/region_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:gravity="center"
         android:text="飛騨弁"
         android:background="@drawable/rounded_border"
-        android:layout_height="match_parent"
-        android:gravity="end"
         android:padding="18dp"
         android:textColor="@color/white"
         android:textSize="20sp" />
