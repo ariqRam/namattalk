@@ -29,55 +29,68 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "hogen.db";
     private static final int DATABASE_VERSION = 6;
     private final Context context;
+    private SQLiteDatabase db;
     private String[] chosenChihous;
-
-
-
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
+        this.db = getWritableDatabase(); // Initialize the database here
         chosenChihous = new String[Constants.CHIHOUS.length];
-        for(int i = 0; i < Constants.CHIHOUS.length; i++) {
+        for (int i = 0; i < Constants.CHIHOUS.length; i++) {
             String chihou = Constants.CHIHOUS[i];
             DialectState dialectState = getDialectState(context, chihou);
-            if(dialectState.isEnabled()) {
+            if (dialectState.isEnabled()) {
                 chosenChihous[i] = chihou;
                 Log.d("DB", chihou + " database is Enabled");
             }
         }
-
-
-
-    }
-
-    private void copyDatabaseFromAssets() throws IOException {
-        InputStream inputStream = context.getAssets().open(DATABASE_NAME);
-        String outFileName = context.getDatabasePath(DATABASE_NAME).getPath();
-        OutputStream outputStream = new FileOutputStream(outFileName);
-
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = inputStream.read(buffer)) > 0) {
-            outputStream.write(buffer, 0, length);
-        }
-
-        outputStream.flush();
-        outputStream.close();
-        inputStream.close();
-    }
-
-
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        String ken = "ken\"s birthday";
-        // Check if the database exists, if not, copy it from assets
         try {
             copyDatabaseFromAssets();
         } catch (IOException e) {
             throw new Error("Error copying database from assets", e);
         }
-        addFoundColumnToAllRegions();
+        addFoundColumnToAllRegions(db);
+    }
+
+    // Access the db variable instead of calling getReadableDatabase() or getWritableDatabase()
+    public SQLiteDatabase getDatabase() {
+        if (db == null || !db.isOpen()) {
+            db = getWritableDatabase();
+        }
+        return db;
+    }
+
+    private void copyDatabaseFromAssets() throws IOException {
+        File databaseFile = context.getDatabasePath(DATABASE_NAME);
+
+        // Check if the database file already exists
+        if (!databaseFile.exists()) {
+            InputStream inputStream = context.getAssets().open(DATABASE_NAME);
+            String outFileName = databaseFile.getPath();
+            OutputStream outputStream = new FileOutputStream(outFileName);
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+
+            outputStream.flush();
+            outputStream.close();
+            inputStream.close();
+
+            Log.d("DBHelper", "Database copied from assets.");
+        } else {
+            Log.d("DBHelper", "Database already exists. No need to copy.");
+        }
+    }
+
+
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+
     }
 
     @Override
@@ -119,28 +132,27 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     public Cursor[] searchDictionary(String searchTerm) {
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getDatabase(); // Use the private variable here
         String wildcardTerm = "%" + searchTerm + "%";
         Cursor[] resultCursors = new Cursor[Constants.CHIHOUS.length];
-        for(int i = 0; i < Constants.CHIHOUS.length; i++) {
+        for (int i = 0; i < Constants.CHIHOUS.length; i++) {
             String chihou = Constants.CHIHOUS[i];
             String rawQuery =
                     "SELECT hougen, trigger, yomikata, candidate, def, example, pos FROM " + chihou +
                             " WHERE trigger LIKE ? OR yomikata LIKE ? OR candidate LIKE ? OR def LIKE ?";
 
-            String[] selectionArgs = new String[] { wildcardTerm, wildcardTerm };
+            String[] selectionArgs = new String[]{wildcardTerm, wildcardTerm};
 
             Cursor cursor = db.rawQuery(rawQuery, selectionArgs);
             resultCursors[i] = cursor;
         }
         return resultCursors;
-
     }
 
     // Add methods to query your dictionary here
 
     public Cursor[] searchWord(String word) {
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getDatabase();
         List<Cursor> allResults = new ArrayList<>();
 
         // Split the search word by '|' to handle multiple words
@@ -213,7 +225,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     public Cursor[] getVerbs() {
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getDatabase();
         List<Cursor> allResults = new ArrayList<>();
 
         for (String tableName : chosenChihous) {
@@ -242,8 +254,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return allResults.toArray(new Cursor[0]);
     }
 
-    public boolean addFoundColumnToAllRegions() {
-        SQLiteDatabase db = this.getWritableDatabase();
+    public boolean addFoundColumnToAllRegions(SQLiteDatabase db) {
         boolean allColumnsAdded = true;
 
         Log.d("DB", "Starting to add 'found' column to all tables.");
@@ -289,15 +300,13 @@ public class DBHelper extends SQLiteOpenHelper {
             Log.e("DB", "Some tables failed to add 'found' column.");
         }
 
-
-
         return allColumnsAdded;
     }
 
 
     public boolean setWordToFound(String word, int regionIndex) {
         String TABLE_NAME = Constants.CHIHOUS[regionIndex];
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = getDatabase();
 
         try {
             // Ensure the 'found' column exists
@@ -324,7 +333,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public List<String> getFoundWords(int regionIndex) {
         List<String> foundWords = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getDatabase();
         String TABLE_NAME = Constants.CHIHOUS[regionIndex];
 
         Cursor cursor = db.query(
@@ -354,7 +363,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public String getFoundWordsRatio(int regionIndex) {
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getDatabase();
         String TABLE_NAME = Constants.CHIHOUS[regionIndex];
 
         int foundCount = getFoundWordsCount(regionIndex);
