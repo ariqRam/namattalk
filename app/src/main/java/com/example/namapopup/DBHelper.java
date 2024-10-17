@@ -61,11 +61,13 @@ public class DBHelper extends SQLiteOpenHelper {
         return db;
     }
 
+
+
     private void copyDatabaseFromAssets() throws IOException {
         File databaseFile = context.getDatabasePath(DATABASE_NAME);
 
         // Check if the database file already exists
-        if (!databaseFile.exists()) {
+        if (!databaseFile.exists() || !tablesExist()) {
             InputStream inputStream = context.getAssets().open(DATABASE_NAME);
             String outFileName = databaseFile.getPath();
             OutputStream outputStream = new FileOutputStream(outFileName);
@@ -82,7 +84,34 @@ public class DBHelper extends SQLiteOpenHelper {
 
             Log.d("DBHelper", "Database copied from assets.");
         } else {
-            Log.d("DBHelper", "Database already exists. No need to copy.");
+            Log.d("DBHelper", "Database already exists and contains required tables. No need to copy.");
+        }
+    }
+
+    // Method to check if both "hida" and "toyama" tables exist
+    private boolean tablesExist() {
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
+        try {
+            db = SQLiteDatabase.openDatabase(context.getDatabasePath(DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY);
+
+            // Check if "hida" table exists
+            cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='hida'", null);
+            boolean hidaExists = cursor != null && cursor.moveToFirst();
+            cursor.close();
+
+            // Check if "toyama" table exists
+            cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='toyama'", null);
+            boolean toyamaExists = cursor != null && cursor.moveToFirst();
+            cursor.close();
+
+            return hidaExists && toyamaExists;
+        } catch (Exception e) {
+            Log.e("DBHelper", "Error checking tables: " + e.getMessage());
+            return false;
+        } finally {
+            if (cursor != null) cursor.close();
+            if (db != null) db.close();
         }
     }
 
