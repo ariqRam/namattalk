@@ -188,7 +188,7 @@ public class SettingsActivity extends BaseDrawerActivity {
         View.OnClickListener modeClickListener = v -> {
             String dialect = (String) v.getTag();
             DialectState state = dialectStates.get(dialect);
-            String currentMode = sharedPreferences.getString(dialect + "_mode", "未使用");
+            String currentMode = sharedPreferences.getString(dialect + "_mode", "学習");
             Button button = (Button) v;
 
             // Toggle mode between 学習 母語 and 未使用

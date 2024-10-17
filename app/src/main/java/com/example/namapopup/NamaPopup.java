@@ -63,8 +63,14 @@ public class NamaPopup extends AccessibilityService {
 
         //initialize verbConjugator
         verbConjugator = new VerbConjugator(this);
-        verbMap = verbConjugator.getVerbs();
-
+        if (GlobalVariable.verbMap == null) {
+            Log.d("onCreate", "created verbMap in Namapopup");
+            verbMap = verbConjugator.getVerbs();
+        }
+        else {
+            Log.d("onCreate", "imported verbMap from settingsActivity");
+            verbMap = GlobalVariable.verbMap;
+        }
         // Check for the SYSTEM_ALERT_WINDOW permission
         if (!Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
