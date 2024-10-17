@@ -179,7 +179,6 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // Add methods to query your dictionary here
-
     public Cursor[] searchWord(String word) {
         SQLiteDatabase db = getDatabase();
         List<Cursor> allResults = new ArrayList<>();
@@ -200,7 +199,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 String searchColumn = "学習".equals(dialectState.mode) ? "trigger" : "yomikata";
 
                 // Build the exact match query
-                exactMatchQueryBuilder.append("SELECT hougen, trigger, yomikata, candidate, def, example, pos FROM ").append(tableName).append(" WHERE ");
+                exactMatchQueryBuilder.append("SELECT hougen, trigger, yomikata, candidate, def, example, pos FROM ")
+                        .append(tableName).append(" WHERE ");
+
                 for (int i = 0; i < splitWords.length; i++) {
                     exactMatchQueryBuilder.append(searchColumn).append(" = ?");
                     if (i != splitWords.length - 1) {
@@ -227,6 +228,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 }
 
                 Log.d("exactMatchQuery", exactMatchQueryBuilder.toString());
+
                 // Try exact match first
                 Cursor cursor = db.rawQuery(exactMatchQueryBuilder.toString(), exactQueryArgs);
 
@@ -261,7 +263,8 @@ public class DBHelper extends SQLiteOpenHelper {
             if (tableName != null && !tableName.isEmpty()) {
                 try {
                     // Query to get verbs where 'pos' column is '動詞' (verb)
-                    String verbQuery = "SELECT trigger, yomikata, candidate, pos FROM " + tableName + " WHERE pos = ?";
+                    String verbQuery = "SELECT trigger, yomikata, candidate, pos FROM " + tableName + " WHERE pos = ? AND def IS NOT NULL AND def <> '' AND example IS NOT NULL AND example <> ''";
+
                     // Execute the query
                     String[] queryArgs = new String[]{"動詞"};
                     Cursor cursor = db.rawQuery(verbQuery, queryArgs);
