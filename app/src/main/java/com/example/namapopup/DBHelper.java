@@ -51,6 +51,7 @@ public class DBHelper extends SQLiteOpenHelper {
             throw new Error("Error copying database from assets", e);
         }
         addFoundColumnToAllRegions(db);
+        addBookmarkColumnToAllRegions(db);
     }
 
     // Access the db variable instead of calling getReadableDatabase() or getWritableDatabase()
@@ -124,39 +125,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d("DB", "Upgrading database from version " + oldVersion + " to " + newVersion);
-        if (oldVersion < 6) {
-            for (String tableName : Constants.CHIHOUS) {
-                // Add 'found' column if it doesn't exist
-                try {
-                    Cursor cursor = db.rawQuery("PRAGMA table_info(" + tableName + ")", null);
-                    boolean foundColumnExists = false;
-                    if (cursor != null) {
-                        try {
-                            if (cursor.moveToFirst()) {
-                                do {
-                                    String columnName = cursor.getString(cursor.getColumnIndex("name"));
-                                    if ("found".equals(columnName)) {
-                                        foundColumnExists = true;
-                                        break;
-                                    }
-                                } while (cursor.moveToNext());
-                            }
-                        } finally {
-                            cursor.close();
-                        }
-                    }
-
-                    // Add the 'found' column if it doesn't exist
-                    if (!foundColumnExists) {
-                        db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN found INTEGER DEFAULT 0");
-                        Log.d("DB Upgrade", "'found' column added to table: " + tableName);
-                    }
-                } catch (SQLException e) {
-                    Log.e("DB", "Error adding 'found' column to table: " + tableName, e);
-                }
-            }
-        }
     }
 
 
@@ -335,6 +303,55 @@ public class DBHelper extends SQLiteOpenHelper {
         return allColumnsAdded;
     }
 
+    public boolean addBookmarkColumnToAllRegions(SQLiteDatabase db) {
+        boolean allColumnsAdded = true;
+
+        Log.d("DB", "Starting to add 'bookmark' column to all tables.");
+
+        for (String tableName : Constants.CHIHOUS) {
+            Log.d("DB", "Processing table: " + tableName);
+            try {
+                // Check if the 'found' column exists
+                Cursor cursor = db.rawQuery("PRAGMA table_info(" + tableName + ")", null);
+                boolean bookmarkColumnExists = false;
+
+                if (cursor != null) {
+                    try {
+                        if (cursor.moveToFirst()) {
+                            do {
+                                String columnName = cursor.getString(cursor.getColumnIndex("name"));
+                                if ("bookmark".equals(columnName)) {
+                                    bookmarkColumnExists = true;
+                                    break;
+                                }
+                            } while (cursor.moveToNext());
+                        }
+                    } finally {
+                        cursor.close();
+                    }
+                }
+
+                // If the column doesn't exist, add it
+                if (!bookmarkColumnExists) {
+                    db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN bookmark INTEGER DEFAULT 0");
+                    Log.d("DB", "Successfully added 'bookmark' column to table: " + tableName);
+                }
+            } catch (SQLException e) {
+                Log.e("DB", "Error adding 'bookmark' column to table: " + tableName, e);
+                allColumnsAdded = false;
+                // Continue with other tables even if one fails
+            }
+        }
+
+        if (allColumnsAdded) {
+            Log.d("DB", "Successfully added 'bookmark' column to all tables.");
+        } else {
+            Log.e("DB", "Some tables failed to add 'bookmark' column.");
+        }
+
+        return allColumnsAdded;
+    }
+
 
     public boolean setWordToFound(String word, int regionIndex) {
         String TABLE_NAME = Constants.CHIHOUS[regionIndex];
@@ -342,7 +359,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
         try {
             // Ensure the 'found' column exists
-//            addFoundColumnToAllRegions();
 
             // Update the 'found' status for the word
             ContentValues values = new ContentValues();
@@ -417,5 +433,61 @@ public class DBHelper extends SQLiteOpenHelper {
         Log.d("getFoundWordsRatio", "word that was found in " + TABLE_NAME + ": " + foundWords + " (" + foundCount + "/" + totalCount + ")");
 
         return resultCount;
+    }
+
+    public boolean addWordToBookmarks(String word, int regionIndex) {
+        String TABLE_NAME = Constants.CHIHOUS[regionIndex];
+        SQLiteDatabase db = getDatabase();
+
+        try {
+            ContentValues values = new ContentValues();
+            values.put("bookmark", 1); // Using 1 for true, 0 for false
+
+            int rowsAffected = db.update(
+                    TABLE_NAME,
+                    values,
+                    "hougen = ?",
+                    new String[]{word}
+            );
+            db.close();
+
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            Log.e("DB", "Error adding word to bookmark: " + word, e);
+            return false;
+        }
+    }
+    public List<GlobalVariable.Flashcard> getBookmarks(int regionIndex) {
+        List<GlobalVariable.Flashcard> foundWords = new ArrayList<>();
+        SQLiteDatabase db = getDatabase();
+        String TABLE_NAME = Constants.CHIHOUS[regionIndex];
+
+        Cursor cursor = db.query(
+                TABLE_NAME,
+                new String[]{"hougen"},
+                "bookmark = 1",
+                null,
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                String title = cursor.getString(0);
+                foundWords.add(new GlobalVariable.Flashcard(title));
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+
+        return foundWords;
+    }
+
+    public List<List<GlobalVariable.Flashcard>> getAllBookmarks () {
+        List<List<GlobalVariable.Flashcard>> allBookmarks = new ArrayList<>();
+        for (int i = 0; i < Constants.CHIHOUS.length; i++) {
+            allBookmarks.add(getBookmarks(i));
+        }
+        return allBookmarks;
     }
 }

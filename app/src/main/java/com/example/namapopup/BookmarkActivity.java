@@ -14,19 +14,23 @@ public class BookmarkActivity extends BaseDrawerActivity {
     private ViewPager2 viewPager;
     private FlashcardAdapter adapter;
     private List<GlobalVariable.Flashcard> flashcardList;
+    DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbHelper = new DBHelper(this);
+
         setContentView(R.layout.bookmark_layout);
 
         RecyclerView bookmarkRecyclerView = findViewById(R.id.bookmarkRecyclerView);
 
-        // Sample data for demonstration
+        List<List<GlobalVariable.Flashcard>> allBookmarks = dbHelper.getAllBookmarks();
+
         List<GlobalVariable.Flashcard> bookmarks = new ArrayList<>();
-        bookmarks.add(new GlobalVariable.Flashcard("Title 1"));
-        bookmarks.add(new GlobalVariable.Flashcard("Title 2"));
-        bookmarks.add(new GlobalVariable.Flashcard("Title 3"));
+        for (int i = 0; i < allBookmarks.size(); i++) {
+            bookmarks.addAll(allBookmarks.get(i));
+        }
 
         FlashcardAdapter adapter = new FlashcardAdapter(bookmarks);
         bookmarkRecyclerView.setAdapter(adapter);

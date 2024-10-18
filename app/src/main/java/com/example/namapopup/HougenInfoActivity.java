@@ -14,10 +14,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Arrays;
+
 public class HougenInfoActivity extends Service {
-    NamaPopup namaPopup = new NamaPopup();
     private WindowManager mWindowManager;
     private View mFloatingView;
+    DBHelper dbHelper;
 
 
     @Override
@@ -29,6 +31,7 @@ public class HougenInfoActivity extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        dbHelper = new DBHelper(this);
 
         showFloatingView();
 
@@ -129,6 +132,15 @@ public class HougenInfoActivity extends Service {
                 LinearLayout exampleRow = mFloatingView.findViewById(R.id.exampleRow);
                 if (inputExampleTextView.getText().toString().trim().isEmpty()) exampleRow.setVisibility(View.GONE);
             }
+            // Handle bookmark
+            ImageView bookmarkButton = mFloatingView.findViewById(R.id.bookmarkButton);
+            bookmarkButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(chihou);
+                    dbHelper.addWordToBookmarks(hougen, regionIndex);
+                }
+            });
         }
 
         // Return START_STICKY to keep the service running

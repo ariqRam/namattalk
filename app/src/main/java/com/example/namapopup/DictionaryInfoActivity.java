@@ -9,11 +9,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.Arrays;
+
 public class DictionaryInfoActivity extends AppCompatActivity {
-    NamaPopup namaPopup = new NamaPopup();
+    DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        dbHelper = new DBHelper(this);
         super.onCreate(savedInstanceState);
 
         // Set the layout for the activity
@@ -63,6 +66,16 @@ public class DictionaryInfoActivity extends AppCompatActivity {
 
             LinearLayout exampleRow = findViewById(R.id.exampleRow);
             if (inputExampleTextView.getText().toString().trim().isEmpty()) exampleRow.setVisibility(View.GONE);
+            // Handle bookmark
+            ImageView bookmarkButton = findViewById(R.id.bookmarkButton);
+            bookmarkButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    v.
+                    int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(chihou);
+                    dbHelper.addWordToBookmarks(hougen, regionIndex);
+                }
+            });
         }
 
         // Handle the close button click if necessary
@@ -73,5 +86,6 @@ public class DictionaryInfoActivity extends AppCompatActivity {
                 finish(); // Close the activity
             }
         });
+
     }
 }
