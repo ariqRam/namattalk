@@ -472,7 +472,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 String def = cursor.getString(cursor.getColumnIndexOrThrow("def"));
                 String example = cursor.getString(cursor.getColumnIndexOrThrow("example"));
                 String pos = cursor.getString(cursor.getColumnIndexOrThrow("pos"));
-                foundWords.add(new GlobalVariable.HougenInformation(hougen, "", "", "", Constants.CHIHOUS_JP[regionIndex], "", "", def, example, new ArrayList<>(), pos));
+                foundWords.add(new GlobalVariable.HougenInformation(hougen, "", "", "", Constants.CHIHOUS_JP[regionIndex], Constants.PREFS[regionIndex], Constants.AREAS[regionIndex], def, example, new ArrayList<>(), pos));
             } while (cursor.moveToNext());
             cursor.close();
         }
