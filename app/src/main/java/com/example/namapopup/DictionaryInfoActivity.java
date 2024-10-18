@@ -76,17 +76,18 @@ public class DictionaryInfoActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     int currentImageResource = (int) bookmarkButton.getTag(); // Get the current tag (image resource)
+                    int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(chihou);
 
                     if (currentImageResource == R.drawable.baseline_bookmark_border_24) {
                         bookmarkButton.setImageResource(R.drawable.baseline_bookmark_24); // Set filled bookmark
+                        dbHelper.addWordToBookmarks(hougen, regionIndex);
                         bookmarkButton.setTag(R.drawable.baseline_bookmark_24); // Update tag
                     } else {
                         bookmarkButton.setImageResource(R.drawable.baseline_bookmark_border_24); // Set border bookmark
                         bookmarkButton.setTag(R.drawable.baseline_bookmark_border_24); // Update tag
+                        dbHelper.removeWordFromBookmarks(hougen, regionIndex);
                     }
 
-                    int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(chihou);
-                    dbHelper.addWordToBookmarks(hougen, regionIndex);
                 }
             });
         }

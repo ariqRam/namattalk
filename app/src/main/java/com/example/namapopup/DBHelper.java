@@ -516,4 +516,13 @@ public class DBHelper extends SQLiteOpenHelper {
             return false;
         }
     }
+
+    public void removeWordFromBookmarks(String hougen, int regionIndex) {
+        String TABLE_NAME = Constants.CHIHOUS[regionIndex];
+        SQLiteDatabase db = getDatabase();
+        ContentValues values = new ContentValues();
+        values.put("bookmark", 0); // Using 1 for true, 0 for false
+        db.update(TABLE_NAME, values, "hougen = ?", new String[]{hougen});
+        db.close();
+    }
 }
