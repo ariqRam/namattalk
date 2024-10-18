@@ -141,7 +141,7 @@ public class HougenInfoActivity extends Service {
 
             // Handle bookmark
             boolean isBookmarked = dbHelper.isBookmarked(hougen);
-            bookmarkButton.setImageResource(isBookmarked ? R.drawable.baseline_bookmark_border_24 : R.drawable.baseline_bookmark_24);
+            bookmarkButton.setImageResource(isBookmarked ? R.drawable.baseline_bookmark_24 : R.drawable.baseline_bookmark_border_24);
             bookmarkButton.setTag(isBookmarked ? R.drawable.baseline_bookmark_24 : R.drawable.baseline_bookmark_border_24);
             bookmarkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
