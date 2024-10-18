@@ -39,7 +39,7 @@ public class BookmarkActivity extends BaseDrawerActivity {
             bookmarks.addAll(allBookmarks.get(i));
         }
 
-        FlashcardAdapter adapter = new FlashcardAdapter(bookmarks);
+        FlashcardAdapter adapter = new FlashcardAdapter(bookmarks, this);
         bookmarkRecyclerView.setAdapter(adapter);
 
         // Set horizontal layout manager

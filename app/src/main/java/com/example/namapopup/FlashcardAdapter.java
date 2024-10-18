@@ -1,5 +1,7 @@
 package com.example.namapopup;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,17 +10,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.FlashcardViewHolder> {
 
-    private List<GlobalVariable.HougenInformation> Flashcards;
+    private List<GlobalVariable.HougenInformation> flashcards;
+    private Context context;
+    public GlobalVariable.HougenInformation currentFlashcard;
 
-    public FlashcardAdapter(List<GlobalVariable.HougenInformation> Flashcards) {
-        this.Flashcards = Flashcards;
+    public FlashcardAdapter(List<GlobalVariable.HougenInformation> flashcards, Context context) {
+        this.flashcards = flashcards;
+        this.context = context;
     }
 
     @NonNull
@@ -30,7 +34,8 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
     @Override
     public void onBindViewHolder(@NonNull FlashcardViewHolder holder, int position) {
-        GlobalVariable.HougenInformation flashcard = Flashcards.get(position);
+        currentFlashcard = flashcards.get(position);
+        GlobalVariable.HougenInformation flashcard = flashcards.get(position); // [i]
         holder.titleHougen.setText(flashcard.hougen);
         holder.titleChihou.setText(flashcard.chihou);
         holder.titleDef.setText("意味: " + flashcard.def);
@@ -38,10 +43,10 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
     @Override
     public int getItemCount() {
-        return Flashcards.size();
+        return flashcards.size();
     }
 
-    public static class FlashcardViewHolder extends RecyclerView.ViewHolder {
+    public class FlashcardViewHolder extends RecyclerView.ViewHolder {
         TextView titleHougen;
         TextView titleChihou;
         TextView titleDef;
@@ -52,6 +57,7 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
             titleHougen = itemView.findViewById(R.id.tvHougen);
             titleChihou = itemView.findViewById(R.id.tvChihou);
             titleDef = itemView.findViewById(R.id.tvDef);
+            currentFlashcard = null;
 
             // Set click listener on the CardView
             flashcardField.setOnClickListener(new View.OnClickListener() {
@@ -67,7 +73,33 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
                     }
                 }
             });
+
+            // Set long click listener on the CardView
+            flashcardField.setOnLongClickListener(new View.OnLongClickListener() {
+                GlobalVariable.HougenInformation flashcard = currentFlashcard;
+                @Override
+                public boolean onLongClick(View view) {
+                    Log.d("haha", "onLongClick: ");
+                    launchShousaiActivity(currentFlashcard);
+                    // Return true to indicate the event was handled
+                    return true;
+                }
+            });
         }
+    }
+
+    private void launchShousaiActivity(GlobalVariable.HougenInformation hougenInformation) {
+        Log.d("launchShousaiActivity", "lauched ShousaiActivity");
+        Intent intent = new Intent(this.context, HougenInfoActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("hougen", hougenInformation.hougen);
+        intent.putExtra("chihou", hougenInformation.chihou);
+        intent.putExtra("pref", hougenInformation.pref);
+        intent.putExtra("area", hougenInformation.area);
+        intent.putExtra("def", hougenInformation.def);
+        intent.putExtra("example", hougenInformation.example);
+        intent.putExtra("pos", hougenInformation.pos);
+        context.startService(intent);
     }
 }
 

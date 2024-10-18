@@ -22,4 +22,5 @@ public class Helper {
     public static boolean isNonNativeMode(DialectState dialectState) {
         return "学習".equals(dialectState.mode);
     }
+
 }
