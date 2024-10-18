@@ -6,6 +6,7 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ public class HougenInfoActivity extends Service {
     private WindowManager mWindowManager;
     private View mFloatingView;
     DBHelper dbHelper;
+    ImageView bookmarkButton;
 
 
     @Override
@@ -34,6 +36,7 @@ public class HougenInfoActivity extends Service {
         dbHelper = new DBHelper(this);
 
         showFloatingView();
+        bookmarkButton = mFloatingView.findViewById(R.id.bookmarkButton);
 
         ImageView settingsButton = mFloatingView.findViewById(R.id.settingsButton);
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -52,6 +55,8 @@ public class HougenInfoActivity extends Service {
         });
 
 
+
+
         ImageView closeButton = mFloatingView.findViewById(R.id.closeButton);
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,6 +72,7 @@ public class HougenInfoActivity extends Service {
     private void showFloatingView() {
         if (mFloatingView == null) {
             // Inflate the floating view layout we created
+
             mFloatingView = LayoutInflater.from(this).inflate(R.layout.hougeninfo_activity_layout, null);
 
             // Setup the layout parameters
@@ -132,11 +138,24 @@ public class HougenInfoActivity extends Service {
                 LinearLayout exampleRow = mFloatingView.findViewById(R.id.exampleRow);
                 if (inputExampleTextView.getText().toString().trim().isEmpty()) exampleRow.setVisibility(View.GONE);
             }
+
             // Handle bookmark
-            ImageView bookmarkButton = mFloatingView.findViewById(R.id.bookmarkButton);
+            boolean isBookmarked = dbHelper.isBookmarked(hougen);
+            bookmarkButton.setImageResource(isBookmarked ? R.drawable.baseline_bookmark_border_24 : R.drawable.baseline_bookmark_24);
+            bookmarkButton.setTag(isBookmarked ? R.drawable.baseline_bookmark_24 : R.drawable.baseline_bookmark_border_24);
             bookmarkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    int currentImageResource = (int) bookmarkButton.getTag(); // Get the current tag (image resource)
+
+                    if (currentImageResource == R.drawable.baseline_bookmark_border_24) {
+                        bookmarkButton.setImageResource(R.drawable.baseline_bookmark_24); // Set filled bookmark
+                        bookmarkButton.setTag(R.drawable.baseline_bookmark_24); // Update tag
+                    } else {
+                        bookmarkButton.setImageResource(R.drawable.baseline_bookmark_border_24); // Set border bookmark
+                        bookmarkButton.setTag(R.drawable.baseline_bookmark_border_24); // Update tag
+                    }
+
                     int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(chihou);
                     dbHelper.addWordToBookmarks(hougen, regionIndex);
                 }
