@@ -1,8 +1,10 @@
 package com.example.namapopup;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -46,15 +48,16 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
         public FlashcardViewHolder(@NonNull View itemView) {
             super(itemView);
-            CardView flashcardItem = itemView.findViewById(R.id.flashcard_item);
+            LinearLayout flashcardField = itemView.findViewById(R.id.flashcard_field);
             titleHougen = itemView.findViewById(R.id.tvHougen);
             titleChihou = itemView.findViewById(R.id.tvChihou);
             titleDef = itemView.findViewById(R.id.tvDef);
 
             // Set click listener on the CardView
-            flashcardItem.setOnClickListener(new View.OnClickListener() {
+            flashcardField.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Log.d("haha", "onClick: ");
                     if (titleChihou.getVisibility() == View.GONE) {
                         titleChihou.setVisibility(View.VISIBLE);
                         titleDef.setVisibility(View.VISIBLE);

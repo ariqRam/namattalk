@@ -8,42 +8,50 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="300dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
-        <TextView
-            android:id="@+id/tvHougen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="hougen"
-            android:layout_gravity="center"
-            android:textSize="36sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvDef"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="def"
-            android:visibility="gone"
-            android:layout_gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvChihou"
+        <LinearLayout
+            android:id="@+id/flashcard_field"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="chihou"
-            android:gravity="bottom|end"
-            android:visibility="gone"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:layout_height="300dp"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView
+                android:id="@+id/tvHougen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hougen"
+                android:layout_gravity="center"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvDef"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="def"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvChihou"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="chihou"
+                android:gravity="bottom|end"
+                android:visibility="gone"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </ScrollView>
 
 
-    </LinearLayout>
 
 </androidx.cardview.widget.CardView>
