@@ -74,6 +74,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity
                 break;
             case "settings":
                 intent = new Intent(this, SettingsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 break;
             case "bookmark":
                 intent = new Intent(this, BookmarkActivity.class);
