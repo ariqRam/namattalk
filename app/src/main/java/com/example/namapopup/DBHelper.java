@@ -457,14 +457,14 @@ public class DBHelper extends SQLiteOpenHelper {
             return false;
         }
     }
-    public List<GlobalVariable.Flashcard> getBookmarks(int regionIndex) {
-        List<GlobalVariable.Flashcard> foundWords = new ArrayList<>();
+    public List<GlobalVariable.HougenInformation> getBookmarks(int regionIndex) {
+        List<GlobalVariable.HougenInformation> foundWords = new ArrayList<>();
         SQLiteDatabase db = getDatabase();
         String TABLE_NAME = Constants.CHIHOUS[regionIndex];
 
         Cursor cursor = db.query(
                 TABLE_NAME,
-                new String[]{"hougen"},
+                new String[]{"hougen", "def", "example", "pos"},
                 "bookmark = 1",
                 null,
                 null,
@@ -474,8 +474,11 @@ public class DBHelper extends SQLiteOpenHelper {
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                String title = cursor.getString(0);
-                foundWords.add(new GlobalVariable.Flashcard(title));
+                String hougen = cursor.getString(cursor.getColumnIndexOrThrow("hougen"));
+                String def = cursor.getString(cursor.getColumnIndexOrThrow("def"));
+                String example = cursor.getString(cursor.getColumnIndexOrThrow("example"));
+                String pos = cursor.getString(cursor.getColumnIndexOrThrow("pos"));
+                foundWords.add(new GlobalVariable.HougenInformation(hougen, "", "", "", Constants.CHIHOUS_JP[regionIndex], "", "", def, example, new ArrayList<>(), pos));
             } while (cursor.moveToNext());
             cursor.close();
         }
@@ -483,8 +486,8 @@ public class DBHelper extends SQLiteOpenHelper {
         return foundWords;
     }
 
-    public List<List<GlobalVariable.Flashcard>> getAllBookmarks () {
-        List<List<GlobalVariable.Flashcard>> allBookmarks = new ArrayList<>();
+    public List<List<GlobalVariable.HougenInformation>> getAllBookmarks () {
+        List<List<GlobalVariable.HougenInformation>> allBookmarks = new ArrayList<>();
         for (int i = 0; i < Constants.CHIHOUS.length; i++) {
             allBookmarks.add(getBookmarks(i));
         }

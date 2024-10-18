@@ -10,15 +10,36 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="200dp"
         android:orientation="vertical"
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/tvTitle"
+            android:id="@+id/tvHougen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Title"
+            android:text="hougen"
+            android:layout_gravity="center"
+            android:textSize="36sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvDef"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="def"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvChihou"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="chihou"
+            android:gravity="bottom|end"
+            android:visibility="gone"
             android:textSize="24sp"
             android:textStyle="bold" />
 

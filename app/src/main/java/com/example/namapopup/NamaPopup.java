@@ -452,7 +452,7 @@ public class NamaPopup extends AccessibilityService {
 
         params.gravity = Gravity.TOP | Gravity.LEFT;
         params.x = 50;
-        params.y = 300;
+        params.y = 433;
         floatingButton.setClickable(true);
 
         // Enable dragging

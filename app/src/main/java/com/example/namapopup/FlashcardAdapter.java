@@ -6,15 +6,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.FlashcardViewHolder> {
 
-    private List<GlobalVariable.Flashcard> Flashcards;
+    private List<GlobalVariable.HougenInformation> Flashcards;
 
-    public FlashcardAdapter(List<GlobalVariable.Flashcard> Flashcards) {
+    public FlashcardAdapter(List<GlobalVariable.HougenInformation> Flashcards) {
         this.Flashcards = Flashcards;
     }
 
@@ -27,8 +28,10 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
     @Override
     public void onBindViewHolder(@NonNull FlashcardViewHolder holder, int position) {
-        GlobalVariable.Flashcard Flashcard = Flashcards.get(position);
-        holder.titleTextView.setText(Flashcard.getTitle());
+        GlobalVariable.HougenInformation flashcard = Flashcards.get(position);
+        holder.titleHougen.setText(flashcard.hougen);
+        holder.titleChihou.setText(flashcard.chihou);
+        holder.titleDef.setText("意味: " + flashcard.def);
     }
 
     @Override
@@ -37,11 +40,30 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
     }
 
     public static class FlashcardViewHolder extends RecyclerView.ViewHolder {
-        TextView titleTextView;
+        TextView titleHougen;
+        TextView titleChihou;
+        TextView titleDef;
 
         public FlashcardViewHolder(@NonNull View itemView) {
             super(itemView);
-            titleTextView = itemView.findViewById(R.id.tvTitle);
+            CardView flashcardItem = itemView.findViewById(R.id.flashcard_item);
+            titleHougen = itemView.findViewById(R.id.tvHougen);
+            titleChihou = itemView.findViewById(R.id.tvChihou);
+            titleDef = itemView.findViewById(R.id.tvDef);
+
+            // Set click listener on the CardView
+            flashcardItem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (titleChihou.getVisibility() == View.GONE) {
+                        titleChihou.setVisibility(View.VISIBLE);
+                        titleDef.setVisibility(View.VISIBLE);
+                    } else {
+                        titleChihou.setVisibility(View.GONE);
+                        titleDef.setVisibility(View.GONE);
+                    }
+                }
+            });
         }
     }
 }
