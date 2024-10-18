@@ -79,7 +79,6 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
                 GlobalVariable.HougenInformation flashcard = currentFlashcard;
                 @Override
                 public boolean onLongClick(View view) {
-                    Log.d("haha", "onLongClick: ");
                     launchShousaiActivity(currentFlashcard);
                     // Return true to indicate the event was handled
                     return true;
