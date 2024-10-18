@@ -56,6 +56,9 @@ public abstract class BaseDrawerActivity extends AppCompatActivity
         } else if (id == R.id.settings) {
             Log.d("onNavigationItemSelected", "launched dictionary screen");
             switchScreen("settings");
+        } else if (id == R.id.bookmark) {
+            Log.d("onNavigationItemSelected", "launched dictionary screen");
+            switchScreen("bookmark");
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
@@ -71,6 +74,9 @@ public abstract class BaseDrawerActivity extends AppCompatActivity
                 break;
             case "settings":
                 intent = new Intent(this, SettingsActivity.class);
+                break;
+            case "bookmark":
+                intent = new Intent(this, BookmarkActivity.class);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid screen type: " + screenType);

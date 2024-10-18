@@ -40,6 +40,16 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".BookmarkActivity"
+            android:label="ブックマーク"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
 
 
         <service android:name=".HougenInfoActivity"

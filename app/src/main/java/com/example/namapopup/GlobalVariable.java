@@ -38,4 +38,18 @@ public class GlobalVariable {
     }
 
     public static HashMap<String, List<String>> verbMap;
+
+    public static class Flashcard {
+        private String title;
+
+        public Flashcard(String title) {
+            this.title = title;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+    }
+
 }

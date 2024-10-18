@@ -26,7 +26,7 @@ import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "hogen.db";
+    private static final String DATABASE_NAME = "hougen_1018.db";
     private static final int DATABASE_VERSION = 6;
     private final Context context;
     private SQLiteDatabase db;
