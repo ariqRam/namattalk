@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import java.util.ArrayList;
@@ -38,5 +39,9 @@ public class BookmarkActivity extends BaseDrawerActivity {
         // Set horizontal layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         bookmarkRecyclerView.setLayoutManager(layoutManager);
+
+        // Attach a SnapHelper to enable one-by-one paging scroll
+        LinearSnapHelper snapHelper = new LinearSnapHelper();
+        snapHelper.attachToRecyclerView(bookmarkRecyclerView);
     }
 }
