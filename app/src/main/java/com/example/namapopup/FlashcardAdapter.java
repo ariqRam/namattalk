@@ -34,7 +34,7 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
     @Override
     public void onBindViewHolder(@NonNull FlashcardViewHolder holder, int position) {
-        currentFlashcard = flashcards.get(position);
+        holder.currentFlashcard = flashcards.get(position);
         GlobalVariable.HougenInformation flashcard = flashcards.get(position); // [i]
         holder.titleHougen.setText(flashcard.hougen);
         holder.titleChihou.setText(flashcard.chihou);
@@ -50,6 +50,7 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
         TextView titleHougen;
         TextView titleChihou;
         TextView titleDef;
+        GlobalVariable.HougenInformation currentFlashcard;
 
         public FlashcardViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -57,7 +58,6 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
             titleHougen = itemView.findViewById(R.id.tvHougen);
             titleChihou = itemView.findViewById(R.id.tvChihou);
             titleDef = itemView.findViewById(R.id.tvDef);
-            currentFlashcard = null;
 
             // Set click listener on the CardView
             flashcardField.setOnClickListener(new View.OnClickListener() {
