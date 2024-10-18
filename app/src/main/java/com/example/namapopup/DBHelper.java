@@ -490,4 +490,27 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         return allBookmarks;
     }
+
+    public boolean isBookmarked(String word) {
+        SQLiteDatabase db = getDatabase();
+        String TABLE_NAME = Constants.CHIHOUS[0];
+
+        Cursor cursor = db.query(
+                TABLE_NAME,
+                new String[]{"hougen"},
+                "bookmark = 1 AND hougen = ?",
+                new String[]{word},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            cursor.close();
+            return true;
+        } else {
+            cursor.close();
+            return false;
+        }
+    }
 }

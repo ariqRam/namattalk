@@ -66,12 +66,25 @@ public class DictionaryInfoActivity extends AppCompatActivity {
 
             LinearLayout exampleRow = findViewById(R.id.exampleRow);
             if (inputExampleTextView.getText().toString().trim().isEmpty()) exampleRow.setVisibility(View.GONE);
+            boolean isBookmarked = dbHelper.isBookmarked(hougen);
+
             // Handle bookmark
             ImageView bookmarkButton = findViewById(R.id.bookmarkButton);
+            bookmarkButton.setImageResource(isBookmarked ? R.drawable.baseline_bookmark_border_24 : R.drawable.baseline_bookmark_24);
+            bookmarkButton.setTag(isBookmarked ? R.drawable.baseline_bookmark_24 : R.drawable.baseline_bookmark_border_24);
             bookmarkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    v.
+                    int currentImageResource = (int) bookmarkButton.getTag(); // Get the current tag (image resource)
+
+                    if (currentImageResource == R.drawable.baseline_bookmark_border_24) {
+                        bookmarkButton.setImageResource(R.drawable.baseline_bookmark_24); // Set filled bookmark
+                        bookmarkButton.setTag(R.drawable.baseline_bookmark_24); // Update tag
+                    } else {
+                        bookmarkButton.setImageResource(R.drawable.baseline_bookmark_border_24); // Set border bookmark
+                        bookmarkButton.setTag(R.drawable.baseline_bookmark_border_24); // Update tag
+                    }
+
                     int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(chihou);
                     dbHelper.addWordToBookmarks(hougen, regionIndex);
                 }
