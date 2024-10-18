@@ -2,7 +2,6 @@ package com.example.namapopup;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -66,7 +65,8 @@ public class DictionaryInfoActivity extends AppCompatActivity {
 
             LinearLayout exampleRow = findViewById(R.id.exampleRow);
             if (inputExampleTextView.getText().toString().trim().isEmpty()) exampleRow.setVisibility(View.GONE);
-            boolean isBookmarked = dbHelper.isBookmarked(hougen);
+                    int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(chihou);
+            boolean isBookmarked = dbHelper.isBookmarked(hougen, regionIndex);
 
             // Handle bookmark
             ImageView bookmarkButton = findViewById(R.id.bookmarkButton);
@@ -76,7 +76,6 @@ public class DictionaryInfoActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     int currentImageResource = (int) bookmarkButton.getTag(); // Get the current tag (image resource)
-                    int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(chihou);
 
                     if (currentImageResource == R.drawable.baseline_bookmark_border_24) {
                         bookmarkButton.setImageResource(R.drawable.baseline_bookmark_24); // Set filled bookmark

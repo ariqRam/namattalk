@@ -1,20 +1,14 @@
 package com.example.namapopup;
 
-import static android.content.Context.MODE_PRIVATE;
-
 import static com.example.namapopup.Helper.getDialectState;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
-import androidx.compose.material3.AlertDialogDefaults;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -494,9 +488,9 @@ public class DBHelper extends SQLiteOpenHelper {
         return allBookmarks;
     }
 
-    public boolean isBookmarked(String word) {
+    public boolean isBookmarked(String word, int regionIndex) {
         SQLiteDatabase db = getDatabase();
-        String TABLE_NAME = Constants.CHIHOUS[0];
+        String TABLE_NAME = Constants.CHIHOUS[regionIndex];
 
         Cursor cursor = db.query(
                 TABLE_NAME,

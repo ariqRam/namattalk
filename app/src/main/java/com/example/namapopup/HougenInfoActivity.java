@@ -140,14 +140,15 @@ public class HougenInfoActivity extends Service {
             }
 
             // Handle bookmark
-            boolean isBookmarked = dbHelper.isBookmarked(hougen);
+            int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(chihou); // []
+            boolean isBookmarked = dbHelper.isBookmarked(hougen, regionIndex);
+            Log.d("TOYANMA", "isBookmarked: " + isBookmarked);
             bookmarkButton.setImageResource(isBookmarked ? R.drawable.baseline_bookmark_24 : R.drawable.baseline_bookmark_border_24);
             bookmarkButton.setTag(isBookmarked ? R.drawable.baseline_bookmark_24 : R.drawable.baseline_bookmark_border_24);
             bookmarkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int currentImageResource = (int) bookmarkButton.getTag(); // Get the current tag (image resource)
-                    int regionIndex = Arrays.asList(Constants.CHIHOUS_JP).indexOf(chihou);
 
                     if (currentImageResource == R.drawable.baseline_bookmark_border_24) {
                         bookmarkButton.setImageResource(R.drawable.baseline_bookmark_24); // Set filled bookmark
@@ -170,7 +171,14 @@ public class HougenInfoActivity extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mFloatingView != null) mWindowManager.removeView(mFloatingView);
+        if (mFloatingView != null && mFloatingView.isAttachedToWindow()) {
+            try {
+                mWindowManager.removeView(mFloatingView);
+            } catch (IllegalArgumentException e) {
+                // This exception occurs if the view is not attached to the window
+                e.printStackTrace();
+            }
+        }
     }
 }
 
