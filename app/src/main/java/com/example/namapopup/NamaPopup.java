@@ -5,6 +5,7 @@ import static com.example.namapopup.Helper.isNonNativeMode;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -192,8 +193,14 @@ public class NamaPopup extends AccessibilityService {
                             String candidate = (candidateColumnIndex != -1) ? cursor.getString(candidateColumnIndex) : "";
                             String def = cursor.getString(defColumnIndex);
                             String pos = cursor.getString(posColumnIndex);
-                            String triggers = (triggerColumnIndex != -1) && isNonNativeMode(dialectState) ? cursor.getString(triggerColumnIndex) : "";
-                            String[] splitTriggers = triggers.split(Constants.SEPARATOR);
+                            String triggers = (triggerColumnIndex != -1) ? cursor.getString(triggerColumnIndex) : "";
+                            String[] splitTriggers;
+                            if (triggers != null) {
+                                splitTriggers = triggers.split(Constants.SEPARATOR);
+                            } else {
+                                // Handle the case when triggers is null
+                                splitTriggers = new String[0]; // Empty array or some default behavior
+                            }
                             String[] splitYomikata = yomikata.split(Constants.SEPARATOR);
 
                             GlobalVariable.HougenInformation hougenInformation = new GlobalVariable.HougenInformation("", "", "", "", "", "", "", "", "", new ArrayList<>(), "");
@@ -213,7 +220,7 @@ public class NamaPopup extends AccessibilityService {
                                 Log.d(TAG, "Conjugated hougen: " + candidate + " in form of: " + VerbConjugator.getVerbForm(selectedText) + " to " + conjugatedCandidate);
 
                                 // Add to character positions, update relevant information
-                                updateHougenInformation(cursor, i, conjugatedCandidate, hougenInformation, characterPositions);
+                                updateHougenInformation(cursor, i, conjugatedCandidate, hougenInformation, characterPositions, splitTriggers);
                                 // After scanning the entire substring from startIndex
                                 addCurrentResultToSearchResults(hougenInformation);
                                 addCharacterPositions(hougenInformation.characterPositions, conjugatedCandidate, startIndex);
@@ -280,6 +287,11 @@ public class NamaPopup extends AccessibilityService {
         indicator = (currentResultIndex + 1) + "/" + searchResults.size();
         if (searchResults.size() == 1) pageIndicatorView.setVisibility(View.GONE);
         else pageIndicatorView.setText(indicator);
+        // Set the chihou text
+        int chihouIdx = Arrays.asList(Constants.CHIHOUS_JP).indexOf(currentHougenInformation.chihou);
+        DialectState dialectState = getDialectState(this, Constants.CHIHOUS[chihouIdx]);
+        if ("母語".equals(dialectState.mode)) chihouTextView.setText(currentHougenInformation.trigger);
+        else chihouTextView.setText(currentHougenInformation.chihou);
     }
 
     private void updateFloatingButtonText() {
@@ -298,7 +310,9 @@ public class NamaPopup extends AccessibilityService {
                     setOverlayIdle();
                 }
 
-                chihouTextView.setText(currentHougenInformation.chihou);
+
+                Log.d(TAG, "chihouTextView: " + chihouTextView.getText());
+
 
                 updateIndicator();
 
@@ -317,7 +331,7 @@ public class NamaPopup extends AccessibilityService {
     }
 
     // Function to update the hougenInformation based on the current selected item and region index
-    private void updateHougenInformation(Cursor cursor, int regionIndex, String candidate, GlobalVariable.HougenInformation hougenInformation, List<CharacterPosition> characterPositions) {
+    private void updateHougenInformation(Cursor cursor, int regionIndex, String candidate, GlobalVariable.HougenInformation hougenInformation, List<CharacterPosition> characterPositions, String[] splitTriggers) {
         int defColumnIndex = cursor.getColumnIndex("def");
         int hougenColumnIndex = cursor.getColumnIndex("hougen");
         int yomikataColumnIndex = cursor.getColumnIndex("yomikata");
@@ -325,6 +339,7 @@ public class NamaPopup extends AccessibilityService {
         int posColumnIndex = cursor.getColumnIndex("pos");
 
         hougenInformation.hougen = cursor.getString(hougenColumnIndex);
+        hougenInformation.trigger = splitTriggers[0];
         hougenInformation.yomikata = cursor.getString(yomikataColumnIndex);
         hougenInformation.candidate = candidate;
         hougenInformation.chihou = Constants.CHIHOUS_JP[regionIndex];// Region from the cursor
